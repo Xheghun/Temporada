@@ -19,3 +19,5 @@ Screenshots and UI hierarchy XML are under [language-and-accessibility/](languag
 ## Limits
 
 TalkBack spoken announcements/focus traversal, iOS, Android 9/2 GB performance, device reboot, fresh native install and all eight end-to-end assessment scenarios: NOT RUN in this change. Fresh English defaults are verified against actual new SQLite storage and i18n tests; the native inspection verifies an existing installation’s language persistence. Dynamic translation keys are covered through parity/status/error tests; the static call-site audit checks literal/conditional keys only. Existing v3 Spanish settings are intentionally preserved because their origin cannot be inferred. Recording B capture remains unconfirmed. Hosted CI and human review are recorded separately.
+
+PR: https://github.com/Xheghun/Temporada/pull/10. Emulator font scaling restored to 1.0 after inspection; the temporary preview was discarded through Back.
