@@ -1,6 +1,6 @@
 # Verification plan
 
-Current state: scaffold-only configuration/flag/boundary checks and Android startup have executed; see docs/evidence/scaffold-progress.md. Every worker-domain test and manual worker scenario remains NOT RUN. Planning validation is separate from app correctness.
+Current state: scoped worker-domain tests and native checks are recorded under docs/evidence. These do not establish whole-app acceptance; complete assessment scenarios remain owned by offline-integration. Planning validation is separate from executed behavior.
 
 Automated: Jest/Expo + RNTL; pure engine clock/RNG/transport fakes; isolated real SQLite repository integration through an appropriate Node adapter or instrumented Expo harness. Do not claim fake reconstruction proves native persistence. Backend tests start actual service/storage for replay/restart; use temporary files and deterministic failure controls.
 
@@ -18,7 +18,7 @@ Also verify simultaneous triggers, 401 reauth, unauthorized worker 403, changed 
 
 Quality scripts to CREATE then execute: npm run typecheck, lint, format:check, test:ci, arch:check. Expo compatibility/config validation after installation. CI must execute scripts; workflow existence alone is not CI success. Inspect sensitive logging and final diff.
 
-Manual scenarios (all NOT RUN): 1 Spanish→English Ana; 2 Ana offline terms+passport, kill/reopen offline, reconnect, one effect each/passport pending review; 3 DS-160 dropped response one record; 4 offline v2 versus published v3 explicit reconfirmation; 5 forced 413 localized retake/unrelated progress; 6 random 500 responsiveness/backoff/eventual delivery; 7 Carla correction/new passport→Bruno isolation; 8 expired token queues preserved/relogin resumes.
+Manual scenarios (all NOT RUN): 1 English→Spanish Ana (user amendment to M9); 2 Ana offline terms+passport, kill/reopen offline, reconnect, one effect each/passport pending review; 3 DS-160 dropped response one record; 4 offline v2 versus published v3 explicit reconfirmation; 5 forced 413 localized retake/unrelated progress; 6 random 500 responsiveness/backoff/eventual delivery; 7 Carla correction/new passport→Bruno isolation; 8 expired token queues preserved/relogin resumes.
 
 For EACH create a record with environment (SDK/API/device/build/commit), steps, expected, actual, status, logs/screenshots, limitations. Collect SQLite action rows and server receipt/business counts with redacted tokens; fictional data only. Execute scenarios 2/3/4 on actual emulator, plus all eight before claiming full completion. Large text/360px, image byte measurement and backend reachability mandatory checks. ADB access currently blocked; do not mark ready.
 

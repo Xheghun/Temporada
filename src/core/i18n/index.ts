@@ -5,8 +5,8 @@ import en from './en.json';
 const i18n = createInstance();
 void i18n.use(initReactI18next).init({
   resources: { es: { translation: es }, en: { translation: en } },
-  lng: 'es',
-  fallbackLng: 'es',
+  lng: 'en',
+  fallbackLng: 'en',
   interpolation: { escapeValue: false },
   initAsync: false,
 });

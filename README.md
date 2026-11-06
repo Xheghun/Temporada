@@ -1,6 +1,6 @@
 # Seasonal worker mobile application
 
-An Expo/TypeScript offline-first worker application under staged development. The mobile app currently has a minimal Spanish welcome route, design tokens, strict tooling, CI/build definitions and a fail-closed feature-flag interface. The supporting mock API is implemented separately; mobile authentication, assignment/terms/document screens, durable local data and synchronization are not implemented.
+An Expo/TypeScript offline-first worker app with phone sign-in, shared-phone worker selection, versioned terms, document capture and durable synchronization. English is the first-launch default, with a saved English/Spanish choice. Feature-level Android evidence is available; full integration acceptance and recordings remain incomplete.
 
 ## Local setup
 
@@ -54,11 +54,11 @@ Mock API evidence is in [mock-api verification](docs/evidence/mock-api.md). Root
 
 ### Persistent local intent
 
-Worker-scoped SQLite repositories now cache assignments and atomically record terms/document intent with stable action IDs. Run `npm run test:persistence` for 15 file-backed tests. See [persistence contracts](docs/persistence.md) and [Android restart evidence](docs/evidence/persistent-outbox.md). Network sync and worker capture screens remain separate changes.
+Worker-scoped SQLite repositories now cache assignments and atomically record terms/document intent with stable action IDs. Run `npm run test:persistence` for file-backed tests. See [persistence contracts](docs/persistence.md) and [Android restart evidence](docs/evidence/persistent-outbox.md). Network sync and worker capture screens remain separate changes.
 
 ### Synchronization engine
 
-The worker-scoped engine now delivers durable intent, persists retries, handles stale terms and merges replay acknowledgments without regressing newer staff decisions. See [runtime contracts](docs/synchronization.md) and [executed sync evidence](docs/evidence/offline-sync.md). Run `npm run test:persistence` for the file-backed core and real-HTTP integration tests. Authentication/UI wiring and capture remain separate changes.
+The worker-scoped engine now delivers durable intent, persists retries, handles stale terms and merges replay acknowledgments without regressing newer staff decisions. See [runtime contracts](docs/synchronization.md) and [executed sync evidence](docs/evidence/offline-sync.md). Run `npm run test:persistence` for the file-backed core and real-HTTP integration tests. Authentication and capture now use this engine; their verification records describe the executed scope.
 
 ### Worker authentication
 

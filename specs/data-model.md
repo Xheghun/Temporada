@@ -26,4 +26,4 @@ Implemented in persistent-outbox: migrations v1, foreign keys, parameterized wor
 
 Offline-sync adds v2 refresh retry metadata without deleting v1 rows. Delivery outcomes and review updates commit atomically; explicit failed-action replacement commits supersession with new intent. Permanent refresh errors stay flagged but paused until explicit resolution. See docs/synchronization.md and docs/evidence/offline-sync.md.
 
-SDD-012 implemented schema v3: singleton `app_settings(id=1, language IN ('es','en'))`, default Spanish. This app-wide preference contains no worker data. Migration and repeat reopen preserve queued intent. Home's `readView` reads worker-scoped assignment, outbox and refresh state in a single transaction.
+SDD-012 implemented schema v3: singleton `app_settings(id=1, language IN ('es','en'))`, new profiles/upgrades without a preference now seed English (SDD-015 user amendment); existing v3 values are not rewritten. This app-wide preference contains no worker data. Migration and repeat reopen preserve queued intent. Home's `readView` reads worker-scoped assignment, outbox and refresh state in a single transaction.

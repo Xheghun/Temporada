@@ -49,6 +49,8 @@ export function CaptureContent({
           {state.preview ? (
             <>
               <Image
+                accessible
+                accessibilityRole="image"
                 source={{ uri: state.preview.uri }}
                 recyclingKey={state.preview.uri}
                 cachePolicy="none"

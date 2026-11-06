@@ -13,7 +13,7 @@ Source: user-supplied master task, 2026-11-06. Original assessment not present; 
 | M6 | Confirm displayed terms version only; stale terms require explicit reconfirmation | P0 |
 | M7 | Backend catalog, guided preview, actual compressed size <1,500,000 bytes, durable files | P0 |
 | M8 | Correction reason and immutable new submission/action | P0 |
-| M9 | Spanish default, English toggle, every app-owned string localized | P1 |
+| M9 | English default, English/Spanish toggle with saved choice, every app-owned string localized | P1 |
 | M10 | Authorized selected worker partitions local data, views, files and queues | P0 |
 | R-AUTH | Phone OTP 123456, invalid 401, secure token, conditional worker picker | P1 |
 | R-HOME | Cached identity, assignment, terms, timeline, connectivity and pending count | P1 |
@@ -35,3 +35,5 @@ Discrepancies/assumptions: supplied budgets sum to five hours, not four; decimal
 Clarifications: stale terms are resolved for ordering without supersession; old upload replay receipts resolve delivery without overwriting newer same-submission review revisions. Prepare Recording B before coding and capture during implementation; final editing/evidence checks remain late. Mobile is the focus, with a minimal supporting mock; original assessment comparison remains pending.
 
 Delivery clarification: scaffold includes linting (interpreting “LinkedIn” in context), GitHub Actions validation/build pipeline configuration, EAS profiles and quality/PR conventions from the start. Every feature has a separate branch/PR based on reviewed main; no single final application PR. Human review waits do not reset the coding ledger.
+
+M9 amendment (2026-11-06): user explicitly changed the initial language from Spanish to English. Existing saved Spanish choices remain valid. This deliberate deviation is recorded; historical assessment/provenance documents are retained.

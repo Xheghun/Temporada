@@ -105,3 +105,11 @@ New production capture requires a fail-closed feature flag. Native packages/perm
 ### SDD-014 review: corrupt capture journals
 
 Journal metadata is advisory to cleanup; it cannot gate durable upload recovery. Malformed JSON or invalid schema is moved, unchanged, to the owning worker’s private quarantine. No file URI is inferred from partial metadata. Recovery continues through valid journals and does database-aware file checks/removal even if journal IO fails; the IO failure is reported after that pass. Unknown cache copies remain untouched rather than risking another worker’s bytes. Regression coverage includes repeated recovery, retained pending uploads, valid neighboring journals and orphan cleanup.
+
+## SDD-015: language and accessible controls
+
+The user explicitly amended M9 to English-first on 2026-11-06; Spanish remains available from Home. Fresh settings use English, and startup restores an existing Spanish preference. Existing v3 settings are not rewritten: older installations do not distinguish an initial Spanish seed from a deliberate choice, so preservation is safer than guessing. No schema bump or data reset is needed.
+
+The shared button retains readable pressed-state contrast, announces busy/disabled state, and hides the redundant spinner from accessibility services. Errors expose localized hints and polite alerts; current statuses announce updates. The language switch is near the top of Home. Existing scroll views, scalable text and minimum 56dp controls accommodate wrapping. No new dependency or independent feature framework was introduced.
+
+Dictionary parity, interpolation, literal call-site keys, bilingual document states/errors, configured contrast pairs and real SQLite preference recovery are tested. The initial key audit incorrectly rejected plural base keys; it was corrected to recognize their one/other forms. Native evidence and unverified accessibility areas are recorded in docs/evidence/language-and-accessibility.md. Recording B remains unconfirmed; no footage or human review is claimed.
