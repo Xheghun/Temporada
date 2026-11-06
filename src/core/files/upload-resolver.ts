@@ -54,8 +54,8 @@ export const uploadResolver: UploadResolver = {
         CryptoDigestAlgorithm.SHA256,
         new Uint8Array(bytes),
       );
-      const sha256 = Array.from(new Uint8Array(hashed), (b) =>
-        b.toString(16).padStart(2, '0'),
+      const sha256 = Array.from(new Uint8Array(hashed), (byte) =>
+        byte.toString(16).padStart(2, '0'),
       ).join('');
       if (sha256 !== action.payload.sha256.toLowerCase())
         throw new TransportError(422, 'local_file_changed');

@@ -7,6 +7,7 @@ import type {
   LocalSubmission,
   OutboxAction,
   WorkerPersistence,
+  WorkerViewData,
 } from '../../offline/domain/types.ts';
 
 type ActionRow = Omit<OutboxAction, 'payload'> & { payloadJson: string };
@@ -23,17 +24,17 @@ const actionColumns = `sequence,
   last_error_code AS lastErrorCode,
   created_at AS createdAt,
   updated_at AS updatedAt`;
-const submissionColumns = `s.submission_id AS submissionId,
-  s.document_type AS documentType,
-  COALESCE(s.client_action_id, s.server_client_action_id) AS clientActionId,
-  s.server_submission_id AS serverSubmissionId,
-  s.server_status AS serverStatus,
-  s.correction_reason AS correctionReason,
-  s.server_revision AS serverRevision,
-  s.server_created_at AS serverCreatedAt,
-  s.created_at AS createdAt,
-  s.replaces_submission_id AS replacesSubmissionId,
-  a.status AS deliveryStatus`;
+const submissionColumns = `submission.submission_id AS submissionId,
+  submission.document_type AS documentType,
+  COALESCE(submission.client_action_id, submission.server_client_action_id) AS clientActionId,
+  submission.server_submission_id AS serverSubmissionId,
+  submission.server_status AS serverStatus,
+  submission.correction_reason AS correctionReason,
+  submission.server_revision AS serverRevision,
+  submission.server_created_at AS serverCreatedAt,
+  submission.created_at AS createdAt,
+  submission.replaces_submission_id AS replacesSubmissionId,
+  outboxAction.status AS deliveryStatus`;
 const decodeActionRow = (row: ActionRow): OutboxAction => {
   const { payloadJson, ...metadata } = row;
   return { ...metadata, payload: decodeActionPayload(payloadJson, metadata) };
@@ -49,29 +50,29 @@ const assertNonNegativeInteger = (value: number): void => {
 
 /** A captured worker ID is required for every query; no selected-worker global is consulted. M10. */
 export class WorkerRepository implements WorkerPersistence {
-  private readonly db: Database;
+  private readonly database: Database;
   private readonly workerId: string;
   private readonly clock: { uuid: () => string; now: () => number };
   constructor(
-    db: Database,
+    database: Database,
     workerId: string,
     clock: { uuid: () => string; now: () => number },
   ) {
     assertNonEmptyString(workerId);
-    this.db = db;
+    this.database = database;
     this.workerId = workerId;
     this.clock = clock;
   }
 
   async ensureWorkerIdentity(displayName: string): Promise<void> {
     assertNonEmptyString(displayName);
-    await this.db.transaction(async (tx) => {
-      await tx.run(
+    await this.database.transaction(async (transaction) => {
+      await transaction.run(
         `INSERT INTO workers(worker_id,display_name,updated_at) VALUES(?,?,?)
         ON CONFLICT(worker_id) DO UPDATE SET display_name=excluded.display_name`,
         [this.workerId, displayName, this.clock.now()],
       );
-      await tx.run(
+      await transaction.run(
         'INSERT OR IGNORE INTO refresh_state(worker_id,assignment_refresh_needed) VALUES(?,1)',
         [this.workerId],
       );
@@ -81,20 +82,21 @@ export class WorkerRepository implements WorkerPersistence {
     this.validateAssignment(snapshot);
     const now = this.clock.now();
     assertNonNegativeInteger(now);
-    return this.db.transaction(async (tx) => {
-      const existing = await tx.first<{ revision: number }>(
+    return this.database.transaction(async (transaction) => {
+      const existing = await transaction.first<{ revision: number }>(
         'SELECT server_revision AS revision FROM assignments WHERE worker_id=?',
         [this.workerId],
       );
       if (existing && existing.revision > snapshot.serverRevision) return false;
-      await this.cacheAssignmentRecords(tx, snapshot, now);
-      await this.cacheCatalog(tx, snapshot.requiredDocuments, now);
+      await this.cacheAssignmentRecords(transaction, snapshot, now);
+      await this.cacheCatalog(transaction, snapshot.requiredDocuments, now);
       for (const submission of snapshot.documentSubmissions) {
-        await this.mergeSubmission(tx, submission, now);
+        await this.mergeSubmission(transaction, submission, now);
       }
-      await tx.run('INSERT OR IGNORE INTO refresh_state(worker_id) VALUES(?)', [
-        this.workerId,
-      ]);
+      await transaction.run(
+        'INSERT OR IGNORE INTO refresh_state(worker_id) VALUES(?)',
+        [this.workerId],
+      );
       return true;
     });
   }
@@ -116,13 +118,16 @@ export class WorkerRepository implements WorkerPersistence {
     )
       throw new Error('invalid_terms_status');
     const types = new Set<string>();
-    for (const doc of snapshot.requiredDocuments) {
-      assertNonEmptyString(doc.documentType);
-      assertNonEmptyString(doc.label.es);
-      assertNonEmptyString(doc.label.en);
-      if (types.has(doc.documentType) || typeof doc.required !== 'boolean')
+    for (const document of snapshot.requiredDocuments) {
+      assertNonEmptyString(document.documentType);
+      assertNonEmptyString(document.label.es);
+      assertNonEmptyString(document.label.en);
+      if (
+        types.has(document.documentType) ||
+        typeof document.required !== 'boolean'
+      )
         throw new Error('invalid_catalog');
-      types.add(doc.documentType);
+      types.add(document.documentType);
     }
     for (const submission of snapshot.documentSubmissions) {
       assertNonEmptyString(submission.submissionId);
@@ -146,11 +151,11 @@ export class WorkerRepository implements WorkerPersistence {
   }
 
   private async cacheAssignmentRecords(
-    tx: SqlExecutor,
+    transaction: SqlExecutor,
     snapshot: AssignmentSnapshot,
     now: number,
   ): Promise<void> {
-    await tx.run(
+    await transaction.run(
       `INSERT INTO workers(worker_id,
           display_name,
           updated_at)
@@ -160,7 +165,7 @@ export class WorkerRepository implements WorkerPersistence {
           updated_at=excluded.updated_at`,
       [this.workerId, snapshot.worker.displayName, now],
     );
-    await tx.run(
+    await transaction.run(
       `INSERT INTO terms(worker_id,
           terms_version_id,
           content_json,
@@ -182,8 +187,8 @@ export class WorkerRepository implements WorkerPersistence {
         now,
       ],
     );
-    const a = snapshot.assignment;
-    await tx.run(
+    const assignment = snapshot.assignment;
+    await transaction.run(
       `INSERT INTO assignments(worker_id,
           order_id,
           employer,
@@ -205,11 +210,11 @@ export class WorkerRepository implements WorkerPersistence {
           cached_at=excluded.cached_at`,
       [
         this.workerId,
-        a.orderId,
-        a.employer,
-        a.worksite,
-        a.seasonStart,
-        a.seasonEnd,
+        assignment.orderId,
+        assignment.employer,
+        assignment.worksite,
+        assignment.seasonStart,
+        assignment.seasonEnd,
         snapshot.terms.termsVersionId,
         snapshot.serverRevision,
         now,
@@ -218,15 +223,16 @@ export class WorkerRepository implements WorkerPersistence {
   }
 
   private async cacheCatalog(
-    tx: SqlExecutor,
+    transaction: SqlExecutor,
     catalog: AssignmentSnapshot['requiredDocuments'],
     now: number,
   ): Promise<void> {
-    await tx.run('UPDATE document_catalog SET active=0 WHERE worker_id=?', [
-      this.workerId,
-    ]);
-    for (const doc of catalog) {
-      await tx.run(
+    await transaction.run(
+      'UPDATE document_catalog SET active=0 WHERE worker_id=?',
+      [this.workerId],
+    );
+    for (const document of catalog) {
+      await transaction.run(
         `INSERT INTO document_catalog(worker_id,
           document_type,
           content_json,
@@ -239,40 +245,40 @@ export class WorkerRepository implements WorkerPersistence {
           active=1`,
         [
           this.workerId,
-          doc.documentType,
-          JSON.stringify({ es: doc.label.es, en: doc.label.en }),
-          doc.required ? 1 : 0,
+          document.documentType,
+          JSON.stringify({ es: document.label.es, en: document.label.en }),
+          document.required ? 1 : 0,
         ],
       );
-      await tx.run(
+      await transaction.run(
         `INSERT OR IGNORE INTO documents(worker_id,
           document_type,
           latest_local_action_id,
           latest_server_submission_id,
           updated_at)
         VALUES (?,?,NULL,NULL,?)`,
-        [this.workerId, doc.documentType, now],
+        [this.workerId, document.documentType, now],
       );
     }
   }
 
   private async mergeSubmission(
-    tx: SqlExecutor,
+    transaction: SqlExecutor,
     incoming: AssignmentSnapshot['documentSubmissions'][number],
     now: number,
   ): Promise<void> {
     if (
-      !(await tx.first(
+      !(await transaction.first(
         'SELECT 1 FROM document_catalog WHERE worker_id=? AND document_type=?',
         [this.workerId, incoming.documentType],
       ))
     )
       throw new Error('unknown_historical_document_type');
-    const previous = await tx.first<LocalSubmission>(
+    const previous = await transaction.first<LocalSubmission>(
       `SELECT ${submissionColumns}
-        FROM document_submissions s
-        LEFT JOIN outbox_actions a ON a.worker_id=s.worker_id AND a.client_action_id=s.client_action_id
-        WHERE s.worker_id=? AND (s.server_submission_id=? OR s.client_action_id=?)`,
+        FROM document_submissions AS submission
+        LEFT JOIN outbox_actions AS outboxAction ON outboxAction.worker_id=submission.worker_id AND outboxAction.client_action_id=submission.client_action_id
+        WHERE submission.worker_id=? AND (submission.server_submission_id=? OR submission.client_action_id=?)`,
       [this.workerId, incoming.submissionId, incoming.clientActionId],
     );
     if (
@@ -301,7 +307,7 @@ export class WorkerRepository implements WorkerPersistence {
       }
     }
     if (previous) {
-      await tx.run(
+      await transaction.run(
         `UPDATE document_submissions
         SET server_submission_id=?,
           server_client_action_id=?,
@@ -322,7 +328,7 @@ export class WorkerRepository implements WorkerPersistence {
         ],
       );
     } else {
-      await tx.run(
+      await transaction.run(
         `INSERT INTO document_submissions(worker_id,
           submission_id,
           document_type,
@@ -352,16 +358,16 @@ export class WorkerRepository implements WorkerPersistence {
         ],
       );
     }
-    await this.updateServerProjection(tx, incoming.documentType, now);
+    await this.updateServerProjection(transaction, incoming.documentType, now);
   }
 
   private async updateServerProjection(
-    tx: SqlExecutor,
+    transaction: SqlExecutor,
     documentType: string,
     now: number,
   ): Promise<void> {
     // A server snapshot never clears a newer local intent pointer. M2/M4/M8.
-    await tx.run(
+    await transaction.run(
       `UPDATE documents
         SET latest_server_submission_id=(SELECT server_submission_id
         FROM document_submissions
@@ -375,15 +381,50 @@ export class WorkerRepository implements WorkerPersistence {
   }
 
   async getAssignment(): Promise<AssignmentSnapshot | null> {
-    return this.db.transaction(async (tx) => {
-      const worker = await tx.first<AssignmentSnapshot['worker']>(
-        'SELECT worker_id AS workerId,display_name AS displayName FROM workers WHERE worker_id=?',
+    return this.database.transaction((transaction) =>
+      this.readAssignment(transaction),
+    );
+  }
+  async readView(): Promise<WorkerViewData> {
+    return this.database.transaction(async (transaction) => {
+      const assignment = await this.readAssignment(transaction);
+      const actions = (
+        await transaction.all<ActionRow>(
+          `SELECT ${actionColumns} FROM outbox_actions WHERE worker_id=? ORDER BY sequence`,
+          [this.workerId],
+        )
+      ).map(decodeActionRow);
+      const cache = await transaction.first<{ cachedAt: number }>(
+        'SELECT cached_at AS cachedAt FROM assignments WHERE worker_id=?',
         [this.workerId],
       );
-      const row = await tx.first<
-        AssignmentSnapshot['assignment'] & { version: string; revision: number }
-      >(
-        `SELECT order_id AS orderId,
+      const refresh = await transaction.first<{
+        needed: number;
+        error: string | null;
+      }>(
+        `SELECT (assignment_refresh_needed OR terms_refresh_needed) AS needed,last_error_code AS error FROM refresh_state WHERE worker_id=?`,
+        [this.workerId],
+      );
+      return {
+        assignment,
+        actions,
+        cachedAt: cache?.cachedAt ?? null,
+        refreshNeeded: !!refresh?.needed,
+        refreshError: refresh?.error ?? null,
+      };
+    });
+  }
+  private async readAssignment(
+    transaction: SqlExecutor,
+  ): Promise<AssignmentSnapshot | null> {
+    const worker = await transaction.first<AssignmentSnapshot['worker']>(
+      'SELECT worker_id AS workerId,display_name AS displayName FROM workers WHERE worker_id=?',
+      [this.workerId],
+    );
+    const row = await transaction.first<
+      AssignmentSnapshot['assignment'] & { version: string; revision: number }
+    >(
+      `SELECT order_id AS orderId,
           employer,
           worksite,
           season_start AS seasonStart,
@@ -392,92 +433,91 @@ export class WorkerRepository implements WorkerPersistence {
           server_revision AS revision
         FROM assignments
         WHERE worker_id=?`,
-        [this.workerId],
-      );
-      if (!worker || !row) return null;
-      const terms = await tx.first<{
-        content: string;
-        status: AssignmentSnapshot['terms']['serverAcceptanceStatus'];
-      }>(
-        `SELECT content_json AS content,
+      [this.workerId],
+    );
+    if (!worker || !row) return null;
+    const terms = await transaction.first<{
+      content: string;
+      status: AssignmentSnapshot['terms']['serverAcceptanceStatus'];
+    }>(
+      `SELECT content_json AS content,
           server_acceptance_status AS status
         FROM terms
         WHERE worker_id=? AND terms_version_id=?`,
-        [this.workerId, row.version],
-      );
-      if (!terms) throw new Error('missing_cached_terms');
-      const catalog = await tx.all<{
-        documentType: string;
-        required: number;
-        label: string;
-      }>(
-        `SELECT document_type AS documentType,
+      [this.workerId, row.version],
+    );
+    if (!terms) throw new Error('missing_cached_terms');
+    const catalog = await transaction.all<{
+      documentType: string;
+      required: number;
+      label: string;
+    }>(
+      `SELECT document_type AS documentType,
           required,
           content_json AS label
         FROM document_catalog
         WHERE worker_id=? AND active=1
         ORDER BY document_type`,
-        [this.workerId],
-      );
-      const submissions = await tx.all<LocalSubmission>(
-        `SELECT ${submissionColumns}
-        FROM document_submissions s
-        LEFT JOIN outbox_actions a ON a.worker_id=s.worker_id AND a.client_action_id=s.client_action_id
-        WHERE s.worker_id=?
-        ORDER BY s.created_at,
-          s.submission_id`,
-        [this.workerId],
-      );
-      const { version, revision, ...assignment } = row;
-      return {
-        worker,
-        assignment,
-        terms: {
-          termsVersionId: version,
-          summary: decodeLocalizedText(terms.content),
-          serverAcceptanceStatus: terms.status,
-        },
-        requiredDocuments: catalog.map((d) => ({
-          documentType: d.documentType,
-          required: Boolean(d.required),
-          label: decodeLocalizedText(d.label),
+      [this.workerId],
+    );
+    const submissions = await transaction.all<LocalSubmission>(
+      `SELECT ${submissionColumns}
+        FROM document_submissions AS submission
+        LEFT JOIN outbox_actions AS outboxAction ON outboxAction.worker_id=submission.worker_id AND outboxAction.client_action_id=submission.client_action_id
+        WHERE submission.worker_id=?
+        ORDER BY submission.created_at,
+          submission.submission_id`,
+      [this.workerId],
+    );
+    const { version, revision, ...assignment } = row;
+    return {
+      worker,
+      assignment,
+      terms: {
+        termsVersionId: version,
+        summary: decodeLocalizedText(terms.content),
+        serverAcceptanceStatus: terms.status,
+      },
+      requiredDocuments: catalog.map((catalogDocument) => ({
+        documentType: catalogDocument.documentType,
+        required: Boolean(catalogDocument.required),
+        label: decodeLocalizedText(catalogDocument.label),
+      })),
+      documentSubmissions: submissions
+        .filter(
+          (submission) =>
+            submission.serverSubmissionId !== null &&
+            submission.serverStatus !== null &&
+            submission.serverRevision !== null,
+        )
+        .map((submission) => ({
+          submissionId: submission.serverSubmissionId!,
+          clientActionId: submission.clientActionId!,
+          documentType: submission.documentType,
+          status: submission.serverStatus!,
+          correctionReason: submission.correctionReason,
+          serverRevision: submission.serverRevision!,
+          createdAt: submission.serverCreatedAt ?? submission.createdAt,
+          replacesSubmissionId: submission.replacesSubmissionId,
         })),
-        documentSubmissions: submissions
-          .filter(
-            (s) =>
-              s.serverSubmissionId !== null &&
-              s.serverStatus !== null &&
-              s.serverRevision !== null,
-          )
-          .map((s) => ({
-            submissionId: s.serverSubmissionId!,
-            clientActionId: s.clientActionId!,
-            documentType: s.documentType,
-            status: s.serverStatus!,
-            correctionReason: s.correctionReason,
-            serverRevision: s.serverRevision!,
-            createdAt: s.serverCreatedAt ?? s.createdAt,
-            replacesSubmissionId: s.replacesSubmissionId,
-          })),
-        serverRevision: revision,
-      };
-    });
+      serverRevision: revision,
+    };
   }
 
   async listSubmissions(): Promise<LocalSubmission[]> {
-    return this.db.all<LocalSubmission>(
+    return this.database.all<LocalSubmission>(
       `SELECT ${submissionColumns}
-        FROM document_submissions s
-        LEFT JOIN outbox_actions a ON a.worker_id=s.worker_id AND a.client_action_id=s.client_action_id
-        WHERE s.worker_id=?
-        ORDER BY s.created_at,
-          s.submission_id`,
+        FROM document_submissions AS submission
+        LEFT JOIN outbox_actions AS outboxAction ON outboxAction.worker_id=submission.worker_id AND outboxAction.client_action_id=submission.client_action_id
+        WHERE submission.worker_id=?
+        ORDER BY submission.created_at,
+          submission.submission_id`,
       [this.workerId],
     );
   }
   async listActions(): Promise<OutboxAction[]> {
     return (
-      await this.db.all<ActionRow>(
+      await this.database.all<ActionRow>(
         `SELECT ${actionColumns} FROM outbox_actions WHERE worker_id=? ORDER BY sequence`,
         [this.workerId],
       )
@@ -486,7 +526,7 @@ export class WorkerRepository implements WorkerPersistence {
   async eligibleActions(now: number): Promise<OutboxAction[]> {
     assertNonNegativeInteger(now);
     return (
-      await this.db.all<ActionRow>(
+      await this.database.all<ActionRow>(
         `SELECT ${actionColumns}
         FROM outbox_actions
         WHERE worker_id=? AND status IN ('queued',
@@ -496,7 +536,7 @@ export class WorkerRepository implements WorkerPersistence {
       )
     ).map(decodeActionRow);
   }
-  private newAction(
+  private createQueuedAction(
     payload: ActionPayload,
     fileUri: string | null,
     now: number,
@@ -517,23 +557,23 @@ export class WorkerRepository implements WorkerPersistence {
       updatedAt: now,
     };
   }
-  private identity(): { id: string; now: number } {
-    const id = this.clock.uuid();
+  private createActionIdentity(): { id: string; now: number } {
+    const actionId = this.clock.uuid();
     const now = this.clock.now();
     assertNonNegativeInteger(now);
     if (
       !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-        id,
+        actionId,
       )
     )
       throw new Error('invalid_action_id');
-    return { id, now };
+    return { id: actionId, now };
   }
   private async insertAction(
-    tx: SqlExecutor,
+    transaction: SqlExecutor,
     action: OutboxAction,
   ): Promise<void> {
-    await tx.run(
+    await transaction.run(
       `INSERT INTO outbox_actions(id,
           worker_id,
           client_action_id,
@@ -562,7 +602,7 @@ export class WorkerRepository implements WorkerPersistence {
         action.updatedAt,
       ],
     );
-    const stored = await tx.first<{ sequence: number }>(
+    const stored = await transaction.first<{ sequence: number }>(
       'SELECT sequence FROM outbox_actions WHERE worker_id=? AND client_action_id=?',
       [this.workerId, action.clientActionId],
     );
@@ -574,20 +614,20 @@ export class WorkerRepository implements WorkerPersistence {
     supersedesActionId?: string,
   ): Promise<OutboxAction> {
     assertNonEmptyString(termsVersionId);
-    const { id, now } = this.identity();
-    const action = this.newAction(
+    const { id: actionId, now } = this.createActionIdentity();
+    const action = this.createQueuedAction(
       {
         kind: 'terms_acceptance',
         workerId: this.workerId,
-        clientActionId: id,
+        clientActionId: actionId,
         termsVersionId,
       },
       null,
       now,
     );
-    await this.db.transaction(async (tx) => {
+    await this.database.transaction(async (transaction) => {
       if (
-        !(await tx.first(
+        !(await transaction.first(
           'SELECT 1 FROM terms WHERE worker_id=? AND terms_version_id=?',
           [this.workerId, termsVersionId],
         ))
@@ -595,21 +635,21 @@ export class WorkerRepository implements WorkerPersistence {
         throw new Error('terms_not_cached');
       if (
         supersedesActionId &&
-        !(await tx.first(
+        !(await transaction.first(
           "SELECT 1 FROM outbox_actions WHERE worker_id=? AND client_action_id=? AND action_type='terms_acceptance' AND status='failed_permanent'",
           [this.workerId, supersedesActionId],
         ))
       )
         throw new Error('supersession_not_allowed');
-      await this.insertAction(tx, action);
-      await tx.run(
+      await this.insertAction(transaction, action);
+      await transaction.run(
         `INSERT INTO terms_intents(
           worker_id, client_action_id, terms_version_id, created_at
         ) VALUES (?,?,?,?)`,
-        [this.workerId, id, termsVersionId, now],
+        [this.workerId, actionId, termsVersionId, now],
       );
       if (supersedesActionId)
-        await tx.run(
+        await transaction.run(
           "UPDATE outbox_actions SET status='superseded',updated_at=? WHERE worker_id=? AND client_action_id=?",
           [now, this.workerId, supersedesActionId],
         );
@@ -633,23 +673,23 @@ export class WorkerRepository implements WorkerPersistence {
       file.byteSize >= 1_500_000
     )
       throw new Error('invalid_durable_upload');
-    const { id, now } = this.identity();
-    const action = this.newAction(
+    const { id: actionId, now } = this.createActionIdentity();
+    const action = this.createQueuedAction(
       {
         kind: 'document_upload',
         workerId: this.workerId,
-        clientActionId: id,
+        clientActionId: actionId,
         documentType,
-        localSubmissionId: id,
+        localSubmissionId: actionId,
         sha256: file.sha256,
         replacesSubmissionId: replacesSubmissionId ?? null,
       },
       file.uri,
       now,
     );
-    await this.db.transaction(async (tx) => {
+    await this.database.transaction(async (transaction) => {
       if (
-        !(await tx.first(
+        !(await transaction.first(
           'SELECT 1 FROM document_catalog WHERE worker_id=? AND document_type=? AND active=1',
           [this.workerId, documentType],
         ))
@@ -657,7 +697,7 @@ export class WorkerRepository implements WorkerPersistence {
         throw new Error('document_not_in_catalog');
       if (
         replacesSubmissionId &&
-        !(await tx.first(
+        !(await transaction.first(
           `SELECT 1
         FROM document_submissions
         WHERE worker_id=? AND document_type=? AND (submission_id=? OR server_submission_id=?)`,
@@ -671,7 +711,7 @@ export class WorkerRepository implements WorkerPersistence {
       )
         throw new Error('replacement_not_owned');
       if (supersedesActionId) {
-        const predecessor = await tx.first<{ payload: string }>(
+        const predecessor = await transaction.first<{ payload: string }>(
           `SELECT payload_json AS payload FROM outbox_actions
            WHERE worker_id=? AND client_action_id=? AND status='failed_permanent'
              AND action_type='document_upload'`,
@@ -690,8 +730,8 @@ export class WorkerRepository implements WorkerPersistence {
         )
           throw new Error('supersession_resource_mismatch');
       }
-      await this.insertAction(tx, action);
-      await tx.run(
+      await this.insertAction(transaction, action);
+      await transaction.run(
         `INSERT INTO document_submissions(worker_id,
           submission_id,
           document_type,
@@ -702,20 +742,20 @@ export class WorkerRepository implements WorkerPersistence {
         VALUES (?,?,?,?,?,?,?)`,
         [
           this.workerId,
-          id,
+          actionId,
           documentType,
-          id,
-          id,
+          actionId,
+          actionId,
           now,
           replacesSubmissionId ?? null,
         ],
       );
-      await tx.run(
+      await transaction.run(
         'UPDATE documents SET latest_local_action_id=?,updated_at=? WHERE worker_id=? AND document_type=?',
-        [id, now, this.workerId, documentType],
+        [actionId, now, this.workerId, documentType],
       );
       if (supersedesActionId)
-        await tx.run(
+        await transaction.run(
           "UPDATE outbox_actions SET status='superseded',updated_at=? WHERE worker_id=? AND client_action_id=? AND status='failed_permanent'",
           [now, this.workerId, supersedesActionId],
         );
@@ -724,7 +764,7 @@ export class WorkerRepository implements WorkerPersistence {
   }
   async claimAction(clientActionId: string, now: number): Promise<boolean> {
     assertNonNegativeInteger(now);
-    const result = await this.db.run(
+    const result = await this.database.run(
       `UPDATE outbox_actions
         SET status='sending',
           attempt_count=attempt_count+1,
@@ -736,7 +776,7 @@ export class WorkerRepository implements WorkerPersistence {
     return result.changes === 1;
   }
   async recoverSending(): Promise<number> {
-    const result = await this.db.run(
+    const result = await this.database.run(
       "UPDATE outbox_actions SET status='queued',updated_at=? WHERE worker_id=? AND status='sending'",
       [this.clock.now(), this.workerId],
     );

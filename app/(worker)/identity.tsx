@@ -9,34 +9,37 @@ import {
   ErrorNotice,
 } from '@/design-system/components/auth-controls';
 export default function WorkerIdentity() {
-  const { t } = useTranslation(),
+  const { t: translate } = useTranslation(),
     auth = useAuth(),
     state = useAuthSnapshot();
   return (
     <AuthPage>
       <Stack.Screen
-        options={{ title: t('identityTitle'), headerBackVisible: false }}
+        options={{
+          title: translate('identityTitle'),
+          headerBackVisible: false,
+        }}
       />
-      <Body>{t('signedInAs')}</Body>
+      <Body>{translate('signedInAs')}</Body>
       <Heading>{state.selectedWorker?.displayName}</Heading>
-      <Body>{t('sessionReady')}</Body>
+      <Body>{translate('sessionReady')}</Body>
       <ErrorNotice code={state.error} />
       {state.workers.length > 1 ? (
         <Action
           secondary
-          label={t('switchWorker')}
+          label={translate('switchWorker')}
           onPress={() => {
             void auth.perform(() => auth.switchWorker());
           }}
         />
       ) : null}
       <Action
-        label={t('logout')}
+        label={translate('logout')}
         onPress={() => {
           void auth.perform(() => auth.logout());
         }}
       />
-      <Body>{t('logoutHint')}</Body>
+      <Body>{translate('logoutHint')}</Body>
     </AuthPage>
   );
 }

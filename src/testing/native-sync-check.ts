@@ -61,13 +61,13 @@ async function fixture() {
     atob(
       'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aF9sAAAAASUVORK5CYII=',
     ),
-    (c) => c.charCodeAt(0),
+    (character) => character.charCodeAt(0),
   );
   file.create();
   await file.write(bytes);
   const hashed = await digest(CryptoDigestAlgorithm.SHA256, bytes);
-  const sha256 = Array.from(new Uint8Array(hashed), (b) =>
-    b.toString(16).padStart(2, '0'),
+  const sha256 = Array.from(new Uint8Array(hashed), (byte) =>
+    byte.toString(16).padStart(2, '0'),
   ).join('');
   check(
     file.size > 0 &&
@@ -81,16 +81,16 @@ async function fixture() {
 export async function runNativeSyncCheck(mode: string): Promise<string> {
   if (!__DEV__) throw new Error('developer_probe_disabled');
   if (mode === 'reset') {
-    const db = await openDatabaseAsync(databaseName, {
+    const database = await openDatabaseAsync(databaseName, {
       useNewConnection: true,
     });
-    await db.closeAsync();
+    await database.closeAsync();
     await deleteDatabaseAsync(databaseName);
     return 'RESET_PASSED: dedicated sync proof database only; backend must start with fresh dedicated data for v2 scenarios.';
   }
-  const db = await openWorkerDatabase(databaseName);
-  const worker = workerRepository(db, 'ana');
-  const repository = new SyncRepository(db, 'ana', {
+  const database = await openWorkerDatabase(databaseName);
+  const worker = workerRepository(database, 'ana');
+  const repository = new SyncRepository(database, 'ana', {
     uuid: randomUUID,
     now: Date.now,
   });
@@ -99,8 +99,8 @@ export async function runNativeSyncCheck(mode: string): Promise<string> {
   let online = false;
   const errors: string[] = [];
   const engine = new SyncEngine({
-    persistence: (id) => {
-      check(id === 'ana', 'proof_worker_mismatch');
+    persistence: (workerId) => {
+      check(workerId === 'ana', 'proof_worker_mismatch');
       return repository;
     },
     api,
@@ -126,17 +126,17 @@ export async function runNativeSyncCheck(mode: string): Promise<string> {
     check(session, 'proof_session_missing');
     if (mode === 'status')
       return JSON.stringify(
-        (await worker.listActions()).map((a) => ({
-          id: a.id,
-          type: a.actionType,
-          status: a.status,
-          attemptCount: a.attemptCount,
-          code: a.lastErrorCode,
+        (await worker.listActions()).map((action) => ({
+          id: action.id,
+          type: action.actionType,
+          status: action.status,
+          attemptCount: action.attemptCount,
+          code: action.lastErrorCode,
         })),
       );
     if (mode === 'files') {
       const original = (await worker.listActions()).find(
-        (a) => a.payload.kind === 'document_upload',
+        (action) => action.payload.kind === 'document_upload',
       );
       check(
         original && original.payload.kind === 'document_upload',
@@ -205,17 +205,17 @@ export async function runNativeSyncCheck(mode: string): Promise<string> {
     if (mode === 'seed') {
       const existing = await worker.listActions();
       if (existing.length) {
-        const table = await db.first(
+        const table = await database.first(
           "SELECT name FROM sqlite_master WHERE type='table' AND name='probe_actions'",
         );
         check(table, 'proof_incomplete_reset_required');
-        const saved = await db.first<{ value: string }>(
+        const saved = await database.first<{ value: string }>(
           'SELECT value FROM probe_actions LIMIT 1',
         );
         check(
           saved &&
             JSON.stringify(existing) === saved.value &&
-            existing.every((a) => a.status === 'queued'),
+            existing.every((action) => action.status === 'queued'),
           'proof_already_progressed_use_deliver',
         );
         return 'OFFLINE_SEED_PASSED: two durable queued actions already seeded; no duplicate enqueue. Force-stop and reopen mode=deliver.';
@@ -230,17 +230,17 @@ export async function runNativeSyncCheck(mode: string): Promise<string> {
       await engine.start();
       const actions = await worker.listActions();
       check(
-        actions.every((a) => a.status === 'queued'),
+        actions.every((action) => action.status === 'queued'),
         'offline_dispatch_occurred',
       );
-      await db.exec('CREATE TABLE probe_actions(value TEXT NOT NULL)');
-      await db.run('INSERT INTO probe_actions(value) VALUES(?)', [
+      await database.exec('CREATE TABLE probe_actions(value TEXT NOT NULL)');
+      await database.run('INSERT INTO probe_actions(value) VALUES(?)', [
         JSON.stringify(actions),
       ]);
       return 'OFFLINE_SEED_PASSED: two durable queued actions, zero action sends. Force-stop and reopen mode=deliver.';
     }
     if (mode === 'deliver') {
-      const expected = await db.first<{ value: string }>(
+      const expected = await database.first<{ value: string }>(
         'SELECT value FROM probe_actions LIMIT 1',
       );
       check(expected, 'proof_not_seeded');
@@ -249,37 +249,40 @@ export async function runNativeSyncCheck(mode: string): Promise<string> {
       check(
         before.length === actions.length &&
           before.every(
-            (a, i) =>
-              a.id === actions[i]?.id &&
-              JSON.stringify(a.payload) ===
-                JSON.stringify(actions[i]?.payload) &&
-              a.fileUri === actions[i]?.fileUri,
+            (action, index) =>
+              action.id === actions[index]?.id &&
+              JSON.stringify(action.payload) ===
+                JSON.stringify(actions[index]?.payload) &&
+              action.fileUri === actions[index]?.fileUri,
           ),
         'restart_intent_changed',
       );
       online = true;
       await engine.start();
       check(
-        (await worker.listActions()).every((a) => a.status === 'delivered'),
+        (await worker.listActions()).every(
+          (action) => action.status === 'delivered',
+        ),
         'delivery_incomplete:' +
           errors.join(',') +
           ':' +
           (await worker.listActions())
-            .map((a) => a.status + '/' + a.lastErrorCode)
+            .map((action) => action.status + '/' + action.lastErrorCode)
             .join(','),
       );
       check(
         (await worker.listSubmissions()).find(
-          (s) => s.documentType === 'passport',
+          (submission) => submission.documentType === 'passport',
         )?.serverStatus === 'pending_review',
         'review_not_pending',
       );
       const remote = await state();
       check(
         actions.every(
-          (a) =>
-            remote.receipts.filter((r) => r.clientActionId === a.id).length ===
-            1,
+          (action) =>
+            remote.receipts.filter(
+              (receipt) => receipt.clientActionId === action.id,
+            ).length === 1,
         ),
         'duplicate_or_missing_receipt',
       );
@@ -308,16 +311,16 @@ export async function runNativeSyncCheck(mode: string): Promise<string> {
           api.send = transmit;
         }
         check(
-          (await worker.listActions()).find((a) => a.id === action.id)
+          (await worker.listActions()).find((action) => action.id === action.id)
             ?.status === 'retry_wait',
           'drop_did_not_retry:' +
             (await worker.listActions())
-              .map((a) => a.status + '/' + a.lastErrorCode)
+              .map((action) => action.status + '/' + action.lastErrorCode)
               .join(','),
         );
         const remote = await state();
         const committed = remote.documentSubmissions.find(
-          (s) => s.clientActionId === action.id,
+          (submission) => submission.clientActionId === action.id,
         );
         check(committed, 'drop_not_committed');
         await post('/__dev/review', {
@@ -339,7 +342,7 @@ export async function runNativeSyncCheck(mode: string): Promise<string> {
           api.assignment = original;
         }
         const local = (await worker.listSubmissions()).find(
-          (s) => s.clientActionId === action.id,
+          (submission) => submission.clientActionId === action.id,
         );
         check(
           local?.serverStatus === decision &&
@@ -353,7 +356,7 @@ export async function runNativeSyncCheck(mode: string): Promise<string> {
           );
         check(
           (await state()).documentSubmissions.filter(
-            (s) => s.clientActionId === action.id,
+            (submission) => submission.clientActionId === action.id,
           ).length === 1,
           'duplicate_submission',
         );
@@ -366,13 +369,14 @@ export async function runNativeSyncCheck(mode: string): Promise<string> {
         (await worker.getAssignment())?.terms.termsVersionId === 'v2',
         'proof_requires_v2_before_publish',
       );
-      const old = await worker.enqueueTerms('v2');
+      const previousAcceptance = await worker.enqueueTerms('v2');
       await post('/__dev/terms', { version: 'v3' });
       online = true;
       await engine.start();
       check(
-        (await worker.listActions()).find((a) => a.id === old.id)?.status ===
-          'stale',
+        (await worker.listActions()).find(
+          (action) => action.id === previousAcceptance.id,
+        )?.status === 'stale',
         'v2_not_stale',
       );
       const current = await worker.getAssignment();
@@ -385,8 +389,10 @@ export async function runNativeSyncCheck(mode: string): Promise<string> {
       await engine.request();
       const actions = await worker.listActions();
       check(
-        actions.find((a) => a.id === old.id)?.status === 'stale' &&
-          actions.find((a) => a.id === fresh.id)?.status === 'delivered',
+        actions.find((action) => action.id === previousAcceptance.id)
+          ?.status === 'stale' &&
+          actions.find((action) => action.id === fresh.id)?.status ===
+            'delivered',
         'v3_blocked_by_stale',
       );
       return 'STALE_TERMS_PASSED: v2 rejected and retained; v3 displayed unaccepted, then explicit new v3 confirmation delivered.';
@@ -394,6 +400,6 @@ export async function runNativeSyncCheck(mode: string): Promise<string> {
     throw new Error('unknown_proof_mode');
   } finally {
     engine.stop();
-    await db.close();
+    await database.close();
   }
 }

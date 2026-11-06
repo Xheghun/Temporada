@@ -71,3 +71,17 @@ SecureStore holds the token, authorized roster and selected identity together; p
 Session signals are separate from UI/error subscriptions, avoiding synchronization loops when an error banner updates. The runtime creates selected-worker refresh intent before an assignment exists, then connects native lifecycle/network and authorized-session events to the merged engine. Production enablement fails closed through a remote flag; explicit assessment mode is development-only. No Home business view or capture feature was applied. SecureStore adds a native-binary requirement.
 
 Real Node/HTTP tests plus RNTL and Android SecureStore/route checks are recorded in docs/evidence/worker-authentication.md. Actual Fast Refresh/context, Router type generation and async-test API corrections are documented there. No subagents, recordings, credentials or release operations were used.
+
+## SDD-012: cached Home and terms
+
+Home and Terms share an injected application service and an atomic worker-scoped read view; screens do not send raw sync requests. Session generations discard late results. M1/M2/M6 confirmation captures the displayed version, commits first, then signals the engine; stale history never confirms a replacement. Saved feedback is version-specific. The timeline lists only cached facts and does not invent staff decisions (M4). Documents navigation remains visibly unavailable in this scope. Schema v3 persists only the app-wide language preference (M9). A separate remote `worker_home_and_terms` flag defaults closed outside explicit development assessment mode.
+
+Actual AI-assisted corrections included suppressing duplicate pending confirmations and preventing an old saved notice from appearing on new unconfirmed terms. The first native offline attempt raced connectivity and was excluded; a later airplane-mode v3 confirmation survived force-stop/relaunch and synchronized once. See docs/evidence/home-and-terms.md for executed evidence and limitations. No human-recorded session or approval is claimed.
+
+### SDD-012 review: permanent terms failure recovery
+
+The initial Home/Terms service only used ordinary enqueue. That left same-version failures without a recovery button and allowed a new-version action to sit behind a failed predecessor. The UI now explicitly names replacement; its callback captures the failed action ID alongside the displayed version and generation. The service verifies that the failed ID is still the expected one before calling the existing transactional supersession path (M1/M3/M5/M6). A new user confirmation creates a new ID; network retries of that confirmation keep it. Refresh and stale-version history do not trigger supersession. File-backed engine regressions cover both versions, duplicate taps and transactional rollback.
+
+### Naming review
+
+Use purpose-specific names throughout implementation and tests, including `transaction`, `database`, `dependencies`, `httpResponse`, `action`, `submission` and `testContext`. AGENTS.md records this convention; ESLint rejects recurring abbreviated declarations/parameters. Public protocol fields and persisted schemas retain their existing spelling. The review used TypeScript-aware renames plus manual semantic checks, corrected response-name collisions/unintended object keys, and verified all 103 tests and Android Home startup. React Native guidance was consulted; no behavior/state architecture change was required.

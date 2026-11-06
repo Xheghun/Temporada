@@ -14,11 +14,15 @@ import { SyncEngine } from '../sync/sync-engine.ts';
 import { nativeClock, nativeSignals } from '../sync/native-signals.ts';
 import { attachSyncTriggers } from '../sync/sync-triggers.ts';
 import { retryDelay } from '../sync/retry-policy.ts';
+import i18n from '../i18n/index.ts';
+import { AssignmentService } from '../../features/assignment/assignment-service.ts';
 import { isFeatureEnabled } from '../config/feature-flags.ts';
 
-export async function workerAppEnabled(): Promise<boolean> {
+export async function workerAppEnabled(
+  name = 'worker_authentication',
+): Promise<boolean> {
   if (__DEV__ && process.env.EXPO_PUBLIC_ASSESSMENT_MODE === '1') return true;
-  return isFeatureEnabled('worker_authentication', {
+  return isFeatureEnabled(name, {
     async load() {
       const url = process.env.EXPO_PUBLIC_FLAGS_URL;
       if (!url?.startsWith('https://')) return {};
@@ -44,14 +48,19 @@ export async function createWorkerRuntime() {
     (!__DEV__ && !base.startsWith('https://'))
   )
     throw new Error('api_configuration_missing');
-  const db = await openWorkerDatabase();
+  const homeEnabled = await workerAppEnabled('worker_home_and_terms');
+  const database = await openWorkerDatabase();
+  const preference = await database.first<{ language: string }>(
+    'SELECT language FROM app_settings WHERE id=1',
+  );
+  await i18n.changeLanguage(preference?.language === 'en' ? 'en' : 'es');
   const auth = new AuthService(
     createAuthApi(base, expoFetch),
     secureSessionVault,
   );
   const api = createApiTransport(base, uploadResolver, expoFetch);
   const enqueueListeners = new Set<() => void>();
-  const native = nativeSignals(auth.subscribeSession, (listener) => {
+  const syncSignals = nativeSignals(auth.subscribeSession, (listener) => {
     enqueueListeners.add(listener);
     return () => {
       enqueueListeners.delete(listener);
@@ -61,7 +70,7 @@ export async function createWorkerRuntime() {
   const persistence = (workerId: string) => {
     let repository = repositories.get(workerId);
     if (!repository) {
-      repository = new SyncRepository(db, workerId, {
+      repository = new SyncRepository(database, workerId, {
         uuid: randomUUID,
         now: Date.now,
       });
@@ -69,16 +78,47 @@ export async function createWorkerRuntime() {
     }
     return repository;
   };
+  const viewListeners = new Set<(workerId: string) => void>();
   const engine = new SyncEngine({
     persistence,
     api,
     session: auth,
-    connectivity: native.connectivity,
+    connectivity: syncSignals.connectivity,
     clock: nativeClock,
     retryDelay,
     enabled: () => enabled,
     report: (event) => {
-      if (event.type === 'error') auth.reportIssue('sync_unavailable');
+      const workerId = event.workerId;
+      if (workerId) viewListeners.forEach((notify) => notify(workerId));
+      if (event.type === 'error' && event.workerId === auth.current()?.workerId)
+        auth.reportIssue('sync_unavailable');
+    },
+  });
+  const assignment = new AssignmentService({
+    enabled: () => homeEnabled,
+    session: auth,
+    repository: (workerId) => workerRepository(database, workerId),
+    online: syncSignals.connectivity.online,
+    subscribeNetwork: syncSignals.signals.connectivity,
+    subscribeData(listener) {
+      viewListeners.add(listener);
+      return () => {
+        viewListeners.delete(listener);
+      };
+    },
+    notifyEnqueued() {
+      enqueueListeners.forEach((notify) => notify());
+    },
+    async refresh(session) {
+      if (!auth.isCurrent(session)) return;
+      await persistence(session.workerId).requestRefresh();
+      if (auth.isCurrent(session)) await engine.manualRetry();
+    },
+    async setLanguage(language) {
+      await database.run('UPDATE app_settings SET language=? WHERE id=1', [
+        language,
+      ]);
+      await i18n.changeLanguage(language);
     },
   });
   let selectedGeneration = -1;
@@ -88,7 +128,7 @@ export async function createWorkerRuntime() {
       selectedGeneration = session.generation;
       const worker = auth.getSnapshot().selectedWorker;
       if (!worker) return;
-      void workerRepository(db, session.workerId)
+      void workerRepository(database, session.workerId)
         .ensureWorkerIdentity(worker.displayName)
         .then(() => persistence(session.workerId).requestRefresh())
         .then(() => engine.request())
@@ -97,21 +137,23 @@ export async function createWorkerRuntime() {
         });
     }
   });
-  const detach = attachSyncTriggers(engine, native.signals);
+  const detach = attachSyncTriggers(engine, syncSignals.signals);
   await auth.restore();
   return {
     auth,
-    db,
+    assignment,
+    database,
     notifyEnqueued() {
       enqueueListeners.forEach((notify) => notify());
     },
     async dispose() {
       prepareSelection();
+      assignment.dispose();
       detach();
-      native.dispose();
+      syncSignals.dispose();
       await engine.settled();
       await auth.settled();
-      await db.close();
+      await database.close();
     },
   };
 }

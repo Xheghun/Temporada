@@ -46,3 +46,13 @@ Worker-authentication inspection/setup started conservatively 2026-11-06T18:51:0
 Worker-authentication implementation/local verification ended 2026-11-06T19:15:19.428501+00:00: 24.32 minutes, conservatively including inspection/documentation and verification. Recorded cumulative: 107.51 minutes. Exceeded the 20-minute scope target during native/UI verification; cumulative hard stop remains 300. 88 tests and scoped Android auth checks passed; no recording or sibling feature claimed. Publication/CI follow-up follows separately.
 
 Worker-authentication publication/handoff: 2026-11-06T19:15:19.428501+00:00 to 2026-11-06T19:15:51.871211+00:00, 0.54 minutes. Recorded cumulative: 108.05 minutes. PR https://github.com/Xheghun/Temporada/pull/6; hosted CI waiting and human review follow separately.
+
+Home-and-terms inspection/setup conservatively started 2026-11-06T19:26:00+00:00; implementation 2026-11-06T19:29:23.770367+00:00. Prior cumulative 108.05 minutes; target 15 minutes for this scope, hard cumulative stop 300 minutes.
+
+Home-and-terms implementation/local verification ended 2026-11-06T19:45:13.495366+00:00: 19.22 minutes including inspection, evidence and verification. Recorded cumulative: 127.27 minutes. Scope exceeded its 15-minute target during native recovery checks; cumulative remains below 300. 98 tests and Android offline v3 confirmation/force-stop/reconnect passed. Native stale UI and complete accessibility remain unverified; no recording claimed. Publication/CI follow-up recorded separately.
+
+Home-and-terms publication/handoff: 2026-11-06T19:45:13.495366+00:00 to 2026-11-06T19:45:40.882635+00:00, 0.46 minutes. Recorded cumulative: 127.73 minutes. PR https://github.com/Xheghun/Temporada/pull/7; hosted CI waiting and human review follow separately.
+
+Home-and-terms failed-confirmation review follow-up: conservatively 2026-11-06T19:58:00+00:00 to 2026-11-06T20:01:33.792372+00:00, 3.56 minutes. Recorded cumulative: 131.29 minutes. Explicit same-version/new-version replacement, rollback and UI regressions pass; 103 total tests and Android JavaScript export pass. Replacement emulator flow NOT RUN. Hosted CI waiting follows separately.
+
+Implementation-wide naming review: conservatively 2026-11-06T20:08:00+00:00 to 2026-11-06T20:19:15.634092+00:00, 11.26 minutes. Recorded cumulative: 142.55 minutes. TypeScript-aware/manual naming cleanup, 103 tests, quality checks, Android JavaScript export and cold Home launch pass. Existing schema/protocol keys preserved; full native journeys NOT RUN. Hosted CI waiting follows separately.

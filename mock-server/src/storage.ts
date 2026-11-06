@@ -26,19 +26,19 @@ export interface Receipt {
 }
 
 export class Store {
-  readonly db: DatabaseSync;
+  readonly database: DatabaseSync;
   readonly uploads: string;
 
   constructor(directory: string) {
     mkdirSync(directory, { recursive: true, mode: 0o700 });
     this.uploads = join(directory, 'uploads');
     mkdirSync(this.uploads, { recursive: true, mode: 0o700 });
-    this.db = new DatabaseSync(join(directory, 'state.sqlite'));
-    this.db.exec(
+    this.database = new DatabaseSync(join(directory, 'state.sqlite'));
+    this.database.exec(
       'PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA locking_mode=EXCLUSIVE; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000;',
     );
     this.transaction(() => {
-      this.db.exec(`
+      this.database.exec(`
         CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY CHECK(id=1), termsVersion TEXT NOT NULL, revision INTEGER NOT NULL);
         CREATE TABLE IF NOT EXISTS workers (workerId TEXT PRIMARY KEY, displayName TEXT NOT NULL, phoneNumber TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS sessions (tokenHash TEXT PRIMARY KEY, phoneNumber TEXT NOT NULL, expiresAt INTEGER NOT NULL);
@@ -49,14 +49,14 @@ export class Store {
         INSERT OR IGNORE INTO settings VALUES(1,'v2',1);
         PRAGMA user_version=1;
       `);
-      for (const w of workers)
-        this.db
+      for (const worker of workers)
+        this.database
           .prepare('INSERT OR IGNORE INTO workers VALUES(?,?,?)')
-          .run(w.workerId, w.displayName, w.phoneNumber);
-      this.db
+          .run(worker.workerId, worker.displayName, worker.phoneNumber);
+      this.database
         .prepare('INSERT OR IGNORE INTO acceptances VALUES(?,?,?,?)')
         .run('seed-bruno-v2', 'bruno', 'seed-bruno-v2', 'v2');
-      const insert = this.db.prepare(
+      const insert = this.database.prepare(
         'INSERT OR IGNORE INTO submissions VALUES(?,?,?,?,?,?,?,?,?,?)',
       );
       insert.run(
@@ -88,7 +88,7 @@ export class Store {
     // A crash between file creation and DB commit leaves an unreferenced app-owned file.
     const referenced = new Set(
       (
-        this.db
+        this.database
           .prepare(
             'SELECT fileName FROM submissions WHERE fileName IS NOT NULL',
           )
@@ -99,7 +99,7 @@ export class Store {
       if (!referenced.has(name)) unlinkSync(join(this.uploads, name));
     for (const name of referenced)
       if (!existsSync(join(this.uploads, name))) {
-        this.db.close();
+        this.database.close();
         throw new Error(
           'A committed mock upload is missing; restore storage before serving',
         );
@@ -107,19 +107,19 @@ export class Store {
   }
 
   transaction<T>(operation: () => T): T {
-    this.db.exec('BEGIN IMMEDIATE');
+    this.database.exec('BEGIN IMMEDIATE');
     try {
       const result = operation();
-      this.db.exec('COMMIT');
+      this.database.exec('COMMIT');
       return result;
     } catch (error) {
-      this.db.exec('ROLLBACK');
+      this.database.exec('ROLLBACK');
       throw error;
     }
   }
   revision(): number {
     return (
-      this.db
+      this.database
         .prepare(
           'UPDATE settings SET revision=revision+1 WHERE id=1 RETURNING revision',
         )
@@ -127,35 +127,35 @@ export class Store {
     ).revision;
   }
   settings(): { termsVersion: string; revision: number } {
-    return this.db
+    return this.database
       .prepare('SELECT termsVersion,revision FROM settings WHERE id=1')
       .get() as unknown as { termsVersion: string; revision: number };
   }
-  worker(id: string): Worker | undefined {
-    return this.db
+  worker(workerId: string): Worker | undefined {
+    return this.database
       .prepare('SELECT * FROM workers WHERE workerId=?')
-      .get(id) as unknown as Worker | undefined;
+      .get(workerId) as unknown as Worker | undefined;
   }
   phoneWorkers(phone: string): Worker[] {
-    return this.db
+    return this.database
       .prepare('SELECT * FROM workers WHERE phoneNumber=? ORDER BY workerId')
       .all(phone) as unknown as Worker[];
   }
   submissions(workerId: string): Submission[] {
-    return this.db
+    return this.database
       .prepare(
         'SELECT * FROM submissions WHERE workerId=? ORDER BY createdAt,submissionId',
       )
       .all(workerId) as unknown as Submission[];
   }
   receipt(workerId: string, actionId: string): Receipt | undefined {
-    return this.db
+    return this.database
       .prepare(
         'SELECT fingerprint,responseJson FROM receipts WHERE workerId=? AND clientActionId=?',
       )
       .get(workerId, actionId) as unknown as Receipt | undefined;
   }
   close(): void {
-    this.db.close();
+    this.database.close();
   }
 }

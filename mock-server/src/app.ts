@@ -25,35 +25,35 @@ export class ApiError extends Error {
     this.details = details;
   }
 }
-export function object(value: unknown): Record<string, unknown> {
+export function parseRequestObject(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value))
     throw new ApiError(422, 'invalid_request');
   return value as Record<string, unknown>;
 }
-export function string(value: unknown): string {
+export function parseNonEmptyString(value: unknown): string {
   if (typeof value !== 'string' || !value.trim())
     throw new ApiError(422, 'invalid_request');
   return value;
 }
-export const hash = (value: string | Buffer): string =>
+export const sha256 = (value: string | Buffer): string =>
   createHash('sha256').update(value).digest('hex');
-export function phone(value: unknown): string {
-  const normalized = string(value).replace(/[\s()-]/g, '');
+export function normalizePhoneNumber(value: unknown): string {
+  const normalized = parseNonEmptyString(value).replace(/[\s()-]/g, '');
   if (!/^\+[1-9]\d{7,14}$/.test(normalized))
     throw new ApiError(422, 'invalid_phone');
   return normalized;
 }
-export function authorize(store: Store, req: Request): string {
-  const bearer = req.get('authorization')?.match(/^Bearer (\S+)$/)?.[1];
+export function authorizeWorkerRequest(store: Store, request: Request): string {
+  const bearer = request.get('authorization')?.match(/^Bearer (\S+)$/)?.[1];
   const session = bearer
-    ? (store.db
+    ? (store.database
         .prepare('SELECT phoneNumber,expiresAt FROM sessions WHERE tokenHash=?')
-        .get(hash(bearer)) as unknown as
+        .get(sha256(bearer)) as unknown as
         { phoneNumber: string; expiresAt: number } | undefined)
     : undefined;
   if (!session || session.expiresAt <= Date.now())
     throw new ApiError(401, 'session_expired');
-  const workerId = req.get('x-worker-id');
+  const workerId = request.get('x-worker-id');
   if (!workerId || store.worker(workerId)?.phoneNumber !== session.phoneNumber)
     throw new ApiError(403, 'worker_forbidden');
   return workerId;
@@ -63,24 +63,26 @@ export function createAuthApp(store: Store, beforeAssignment?: RequestHandler) {
   const app = express();
   app.disable('x-powered-by');
   app.use(express.json({ limit: '16kb' }));
-  app.get('/health', (_req, res) => {
-    res.json({ status: 'ok', service: 'seasonal-worker-mock' });
+  app.get('/health', (_request, httpResponse) => {
+    httpResponse.json({ status: 'ok', service: 'seasonal-worker-mock' });
   });
-  app.post('/auth/otp/request', (req, res) => {
-    phone(object(req.body as unknown).phoneNumber);
-    res.json({ status: 'otp_requested' });
+  app.post('/auth/otp/request', (request, httpResponse) => {
+    normalizePhoneNumber(
+      parseRequestObject(request.body as unknown).phoneNumber,
+    );
+    httpResponse.json({ status: 'otp_requested' });
   });
-  app.post('/auth/otp/verify', (req, res) => {
-    const body = object(req.body as unknown);
-    const number = phone(body.phoneNumber);
+  app.post('/auth/otp/verify', (request, httpResponse) => {
+    const body = parseRequestObject(request.body as unknown);
+    const number = normalizePhoneNumber(body.phoneNumber);
     if (body.otp !== '123456') throw new ApiError(401, 'invalid_otp');
     const workers = store.phoneWorkers(number);
     if (!workers.length) throw new ApiError(401, 'unknown_phone');
     const token = randomBytes(32).toString('hex');
-    store.db
+    store.database
       .prepare('INSERT INTO sessions VALUES(?,?,?)')
-      .run(hash(token), number, Date.now() + 24 * 60 * 60 * 1000);
-    res.json({
+      .run(sha256(token), number, Date.now() + 24 * 60 * 60 * 1000);
+    httpResponse.json({
       token,
       workers: workers.map(({ workerId, displayName }) => ({
         workerId,
@@ -90,18 +92,18 @@ export function createAuthApp(store: Store, beforeAssignment?: RequestHandler) {
   });
   app.get(
     '/me/assignment',
-    beforeAssignment ?? ((_req, _res, next) => next()),
-    (req, res) => {
-      const workerId = authorize(store, req);
+    beforeAssignment ?? ((_request, _httpResponse, next) => next()),
+    (request, httpResponse) => {
+      const workerId = authorizeWorkerRequest(store, request);
       const current = store.settings();
       const accepted = Boolean(
-        store.db
+        store.database
           .prepare(
             'SELECT 1 FROM acceptances WHERE workerId=? AND termsVersionId=?',
           )
           .get(workerId, current.termsVersion),
       );
-      res.json({
+      httpResponse.json({
         worker: store.worker(workerId),
         assignment,
         terms: {
@@ -122,19 +124,21 @@ export function createAuthApp(store: Store, beforeAssignment?: RequestHandler) {
   );
   return app;
 }
-export const errors: ErrorRequestHandler = (
+export const handleApiError: ErrorRequestHandler = (
   error: unknown,
-  _req: Request,
-  res: Response,
+  _request: Request,
+  httpResponse: Response,
   _next: NextFunction,
 ) => {
   if (error instanceof ApiError) {
-    res.status(error.status).json({ ...error.details, code: error.code });
+    httpResponse
+      .status(error.status)
+      .json({ ...error.details, code: error.code });
     return;
   }
   if (error instanceof SyntaxError) {
-    res.status(400).json({ code: 'invalid_json' });
+    httpResponse.status(400).json({ code: 'invalid_json' });
     return;
   }
-  res.status(500).json({ code: 'internal_error' });
+  httpResponse.status(500).json({ code: 'internal_error' });
 };

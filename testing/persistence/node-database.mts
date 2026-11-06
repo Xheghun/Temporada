@@ -8,27 +8,27 @@ import type {
 import { migrateDatabase } from '../../src/core/database/migrations/index.ts';
 
 export async function openTestDatabase(path: string): Promise<Database> {
-  const native = new DatabaseSync(path);
+  const nativeDatabase = new DatabaseSync(path);
   const executor: SqlExecutor = {
     exec: async (sql) => {
-      native.exec(sql);
+      nativeDatabase.exec(sql);
     },
-    run: async (sql, params = []) => ({
-      changes: Number(native.prepare(sql).run(...params).changes),
+    run: async (sql, parameters = []) => ({
+      changes: Number(nativeDatabase.prepare(sql).run(...parameters).changes),
     }),
-    first: async <T,>(sql: string, params: readonly SqlValue[] = []) =>
-      (native.prepare(sql).get(...params) as T | undefined) ?? null,
-    all: async <T,>(sql: string, params: readonly SqlValue[] = []) =>
-      native.prepare(sql).all(...params) as T[],
+    first: async <T,>(sql: string, parameters: readonly SqlValue[] = []) =>
+      (nativeDatabase.prepare(sql).get(...parameters) as T | undefined) ?? null,
+    all: async <T,>(sql: string, parameters: readonly SqlValue[] = []) =>
+      nativeDatabase.prepare(sql).all(...parameters) as T[],
   };
-  const db = serializeDatabase(executor, async () => {
-    native.close();
+  const database = serializeDatabase(executor, async () => {
+    nativeDatabase.close();
   });
   try {
-    await migrateDatabase(db);
-    return db;
+    await migrateDatabase(database);
+    return database;
   } catch (error) {
-    await db.close();
+    await database.close();
     throw error;
   }
 }

@@ -58,7 +58,7 @@ export function receipt(action: OutboxAction, revision = 2): DeliveryReceipt {
 export async function syncFixture() {
   const directory = mkdtempSync(join(tmpdir(), 'worker-sync-'));
   const path = join(directory, 'local.sqlite');
-  let db = await openTestDatabase(path);
+  let database = await openTestDatabase(path);
   const clock = new FakeClock();
   const identity = { uuid: randomUUID, now: clock.now };
   let session: SyncSession | null = {
@@ -74,12 +74,14 @@ export async function syncFixture() {
       attempts.push(action);
       return { status: 201, receipt: receipt(action) };
     },
-    async assignment(s) {
-      return { ...assignmentFixture(s.workerId), serverRevision: 2 };
+    async assignment(session) {
+      return { ...assignmentFixture(session.workerId), serverRevision: 2 };
     },
   };
-  const worker = (id = 'ana') => new WorkerRepository(db, id, identity);
-  const store = (id = 'ana') => new SyncRepository(db, id, identity);
+  const worker = (workerId = 'ana') =>
+    new WorkerRepository(database, workerId, identity);
+  const store = (workerId = 'ana') =>
+    new SyncRepository(database, workerId, identity);
   await worker().cacheAssignment(assignmentFixture('ana'));
   const engine = () =>
     new SyncEngine({
@@ -91,10 +93,10 @@ export async function syncFixture() {
       enabled: () => true,
       session: {
         current: () => session,
-        invalidate: (old) => {
+        invalidate: (expiredSession) => {
           if (
-            session?.generation === old.generation &&
-            session.workerId === old.workerId
+            session?.generation === expiredSession.generation &&
+            session.workerId === expiredSession.workerId
           )
             session = null;
         },
@@ -104,8 +106,8 @@ export async function syncFixture() {
   return {
     directory,
     path,
-    get db() {
-      return db;
+    get database() {
+      return database;
     },
     clock,
     worker,
@@ -124,8 +126,8 @@ export async function syncFixture() {
       return session;
     },
     async reopen() {
-      await db.close();
-      db = await openTestDatabase(path);
+      await database.close();
+      database = await openTestDatabase(path);
     },
     image(workerId = 'ana') {
       const file = join(directory, `${workerId}-${randomUUID()}.png`);
@@ -148,7 +150,7 @@ export async function syncFixture() {
       });
     },
     async close() {
-      await db.close();
+      await database.close();
       rmSync(directory, { recursive: true, force: true });
     },
   };

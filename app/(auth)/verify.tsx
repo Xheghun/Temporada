@@ -13,7 +13,7 @@ import {
   ErrorNotice,
 } from '@/design-system/components/auth-controls';
 export default function Verify() {
-  const { t } = useTranslation(),
+  const { t: translate } = useTranslation(),
     auth = useAuth(),
     state = useAuthSnapshot();
   const {
@@ -24,23 +24,23 @@ export default function Verify() {
     defaultValues: { otp: '' },
     resolver: zodResolver(otpFormSchema),
   });
-  if (state.phase === 'ready') return <Redirect href="/(worker)/identity" />;
+  if (state.phase === 'ready') return <Redirect href="/(worker)/home" />;
   if (state.phase === 'worker_selection')
     return <Redirect href="/(auth)/select-worker" />;
   if (state.phase !== 'code_sent') return <Redirect href="/(auth)/sign-in" />;
   return (
     <AuthPage>
       <Stack.Screen
-        options={{ title: t('verifyTitle'), headerBackVisible: false }}
+        options={{ title: translate('verifyTitle'), headerBackVisible: false }}
       />
-      <Heading>{t('verifyTitle')}</Heading>
-      <Body>{t('verifyIntro')}</Body>
+      <Heading>{translate('verifyTitle')}</Heading>
+      <Body>{translate('verifyIntro')}</Body>
       <Controller
         control={control}
         name="otp"
         render={({ field: { value, onChange, onBlur } }) => (
           <Field
-            label={t('otp')}
+            label={translate('otp')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -49,14 +49,14 @@ export default function Verify() {
             textContentType="oneTimeCode"
             maxLength={6}
             editable={!state.busy}
-            error={errors.otp ? t('errors.invalid_otp') : undefined}
+            error={errors.otp ? translate('errors.invalid_otp') : undefined}
           />
         )}
       />
-      {__DEV__ ? <Body>{t('mockOtp')}</Body> : null}
+      {__DEV__ ? <Body>{translate('mockOtp')}</Body> : null}
       <ErrorNotice code={state.error} />
       <Action
-        label={t('verify')}
+        label={translate('verify')}
         busy={state.busy}
         onPress={() => {
           void handleSubmit(async ({ otp }) => {
@@ -66,7 +66,7 @@ export default function Verify() {
       />
       <Action
         secondary
-        label={t('backToSignIn')}
+        label={translate('backToSignIn')}
         disabled={state.busy}
         onPress={() => {
           void auth.perform(() => auth.logout());

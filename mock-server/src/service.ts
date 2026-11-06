@@ -13,57 +13,63 @@ import { join } from 'node:path';
 import { Store } from './storage.ts';
 import {
   ApiError,
-  authorize,
+  authorizeWorkerRequest,
   createAuthApp,
-  errors,
-  hash,
-  object,
-  string,
+  handleApiError,
+  sha256,
+  parseRequestObject,
+  parseNonEmptyString,
 } from './app.ts';
 import { Failures } from './failure-injection.ts';
 import { documentCatalog } from './seed.ts';
 
-const actionId = (value: unknown): string => {
-  const id = string(value);
+const parseClientActionId = (value: unknown): string => {
+  const clientActionId = parseNonEmptyString(value);
   if (
     !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-      id,
+      clientActionId,
     )
   )
     throw new ApiError(422, 'invalid_action_id');
-  return id;
+  return clientActionId;
 };
-function replay(
+function sendReplayReceipt(
   store: Store,
   workerId: string,
-  id: string,
+  clientActionId: string,
   fingerprint: string,
-  res: Response,
+  httpResponse: Response,
 ): boolean {
-  const receipt = store.receipt(workerId, id);
-  if (!receipt) return false;
-  if (receipt.fingerprint !== fingerprint)
+  const persistReceipt = store.receipt(workerId, clientActionId);
+  if (!persistReceipt) return false;
+  if (persistReceipt.fingerprint !== fingerprint)
     throw new ApiError(409, 'action_id_conflict');
-  res.status(200).json(JSON.parse(receipt.responseJson) as unknown);
+  httpResponse
+    .status(200)
+    .json(JSON.parse(persistReceipt.responseJson) as unknown);
   return true;
 }
-function receipt(
+function persistReceipt(
   store: Store,
   workerId: string,
-  id: string,
+  clientActionId: string,
   fingerprint: string,
   response: unknown,
 ): void {
-  store.db
+  store.database
     .prepare('INSERT INTO receipts VALUES(?,?,?,?)')
-    .run(workerId, id, fingerprint, JSON.stringify(response));
+    .run(workerId, clientActionId, fingerprint, JSON.stringify(response));
 }
-function reply(res: Response, response: unknown, failures: Failures): void {
+function sendCreatedResponse(
+  httpResponse: Response,
+  response: unknown,
+  failures: Failures,
+): void {
   if (failures.takeDrop()) {
-    res.socket?.destroy();
+    httpResponse.socket?.destroy();
     return;
   }
-  res.status(201).json(response);
+  httpResponse.status(201).json(response);
 }
 function persistFile(directory: string, name: string, buffer: Buffer): void {
   const file = join(directory, name);
@@ -88,7 +94,7 @@ function persistFile(directory: string, name: string, buffer: Buffer): void {
     throw error;
   }
 }
-function validImage(file: Express.Multer.File): boolean {
+function isSupportedImage(file: Express.Multer.File): boolean {
   return (
     (file.mimetype === 'image/jpeg' &&
       file.buffer.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff]))) ||
@@ -108,43 +114,69 @@ export function createMockService(
 ) {
   const store = new Store(directory);
   const failures = new Failures();
-  const app = createAuthApp(store, async (req, _res, next) => {
-    authorize(store, req);
+  const app = createAuthApp(store, async (request, _httpResponse, next) => {
+    authorizeWorkerRequest(store, request);
     await failures.beforeRequest();
     next();
   });
-  const authenticate = (req: Request, _res: Response, next: () => void) => {
-    authorize(store, req);
+  const authenticate = (
+    request: Request,
+    _httpResponse: Response,
+    next: () => void,
+  ) => {
+    authorizeWorkerRequest(store, request);
     next();
   };
-  app.post('/me/terms-acceptances', authenticate, async (req, res) => {
-    const workerId = authorize(store, req);
-    const body = object(req.body as unknown);
-    const id = actionId(body.clientActionId);
-    const version = string(body.termsVersionId);
-    const fingerprint = hash(JSON.stringify(['terms', workerId, version]));
-    if (replay(store, workerId, id, fingerprint, res)) return;
-    await failures.beforeRequest();
-    if (replay(store, workerId, id, fingerprint, res)) return;
-    const response = store.transaction(() => {
-      if (version !== store.settings().termsVersion)
-        throw new ApiError(409, 'stale_terms', {
-          currentTermsVersionId: store.settings().termsVersion,
-        });
-      const response = {
-        acceptanceId: randomUUID(),
-        clientActionId: id,
-        termsVersionId: version,
-        serverRevision: store.revision(),
-      };
-      store.db
-        .prepare('INSERT INTO acceptances VALUES(?,?,?,?)')
-        .run(response.acceptanceId, workerId, id, version);
-      receipt(store, workerId, id, fingerprint, response);
-      return response;
-    });
-    reply(res, response, failures);
-  });
+  app.post(
+    '/me/terms-acceptances',
+    authenticate,
+    async (request, httpResponse) => {
+      const workerId = authorizeWorkerRequest(store, request);
+      const body = parseRequestObject(request.body as unknown);
+      const clientActionId = parseClientActionId(body.clientActionId);
+      const version = parseNonEmptyString(body.termsVersionId);
+      const fingerprint = sha256(JSON.stringify(['terms', workerId, version]));
+      if (
+        sendReplayReceipt(
+          store,
+          workerId,
+          clientActionId,
+          fingerprint,
+          httpResponse,
+        )
+      )
+        return;
+      await failures.beforeRequest();
+      if (
+        sendReplayReceipt(
+          store,
+          workerId,
+          clientActionId,
+          fingerprint,
+          httpResponse,
+        )
+      )
+        return;
+      const response = store.transaction(() => {
+        if (version !== store.settings().termsVersion)
+          throw new ApiError(409, 'stale_terms', {
+            currentTermsVersionId: store.settings().termsVersion,
+          });
+        const response = {
+          acceptanceId: randomUUID(),
+          clientActionId: clientActionId,
+          termsVersionId: version,
+          serverRevision: store.revision(),
+        };
+        store.database
+          .prepare('INSERT INTO acceptances VALUES(?,?,?,?)')
+          .run(response.acceptanceId, workerId, clientActionId, version);
+        persistReceipt(store, workerId, clientActionId, fingerprint, response);
+        return response;
+      });
+      sendCreatedResponse(httpResponse, response, failures);
+    },
+  );
   const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
@@ -155,148 +187,183 @@ export function createMockService(
       parts: 5,
     },
   }).single('image');
-  app.post('/me/documents', authenticate, upload, async (req, res) => {
-    const workerId = authorize(store, req);
-    const body = object(req.body as unknown);
-    const id = actionId(body.clientActionId);
-    const documentType = string(body.documentType);
-    const file = req.file;
-    if (!file) throw new ApiError(422, 'image_required');
-    const replaces =
-      body.replacesSubmissionId === undefined
-        ? null
-        : string(body.replacesSubmissionId);
-    const fingerprint = hash(
-      JSON.stringify([
-        'document',
-        workerId,
-        documentType,
-        replaces,
-        hash(file.buffer),
-      ]),
-    );
-    if (replay(store, workerId, id, fingerprint, res)) return;
-    await failures.beforeRequest();
-    // Another request may have committed while latency yielded. M3 requires replay, not a second effect.
-    if (replay(store, workerId, id, fingerprint, res)) return;
-    if (failures.force413 || file.size >= 1_500_000)
-      throw new ApiError(413, 'upload_too_large');
-    if (!documentCatalog.some((d) => d.documentType === documentType))
-      throw new ApiError(422, 'unknown_document_type');
-    if (!validImage(file)) throw new ApiError(422, 'invalid_image');
-    if (
-      replaces &&
-      !store
-        .submissions(workerId)
-        .some(
-          (s) => s.submissionId === replaces && s.documentType === documentType,
-        )
-    )
-      throw new ApiError(422, 'invalid_replacement');
-    const submissionId = randomUUID();
-    const fileName = `${submissionId}.image`;
-    persistFile(store.uploads, fileName, file.buffer);
-    let response;
-    try {
-      response = store.transaction(() => {
-        const response = {
-          submissionId,
-          clientActionId: id,
+  app.post(
+    '/me/documents',
+    authenticate,
+    upload,
+    async (request, httpResponse) => {
+      const workerId = authorizeWorkerRequest(store, request);
+      const body = parseRequestObject(request.body as unknown);
+      const clientActionId = parseClientActionId(body.clientActionId);
+      const documentType = parseNonEmptyString(body.documentType);
+      const file = request.file;
+      if (!file) throw new ApiError(422, 'image_required');
+      const replaces =
+        body.replacesSubmissionId === undefined
+          ? null
+          : parseNonEmptyString(body.replacesSubmissionId);
+      const fingerprint = sha256(
+        JSON.stringify([
+          'document',
+          workerId,
           documentType,
-          status: 'pending_review',
-          correctionReason: null,
-          serverRevision: store.revision(),
-        };
-        store.db
-          .prepare('INSERT INTO submissions VALUES(?,?,?,?,?,?,?,?,?,?)')
-          .run(
+          replaces,
+          sha256(file.buffer),
+        ]),
+      );
+      if (
+        sendReplayReceipt(
+          store,
+          workerId,
+          clientActionId,
+          fingerprint,
+          httpResponse,
+        )
+      )
+        return;
+      await failures.beforeRequest();
+      // Another request may have committed while latency yielded. M3 requires replay, not a second effect.
+      if (
+        sendReplayReceipt(
+          store,
+          workerId,
+          clientActionId,
+          fingerprint,
+          httpResponse,
+        )
+      )
+        return;
+      if (failures.force413 || file.size >= 1_500_000)
+        throw new ApiError(413, 'upload_too_large');
+      if (
+        !documentCatalog.some(
+          (document) => document.documentType === documentType,
+        )
+      )
+        throw new ApiError(422, 'unknown_document_type');
+      if (!isSupportedImage(file)) throw new ApiError(422, 'invalid_image');
+      if (
+        replaces &&
+        !store
+          .submissions(workerId)
+          .some(
+            (submission) =>
+              submission.submissionId === replaces &&
+              submission.documentType === documentType,
+          )
+      )
+        throw new ApiError(422, 'invalid_replacement');
+      const submissionId = randomUUID();
+      const fileName = `${submissionId}.image`;
+      persistFile(store.uploads, fileName, file.buffer);
+      let response;
+      try {
+        response = store.transaction(() => {
+          const response = {
             submissionId,
-            workerId,
-            id,
+            clientActionId: clientActionId,
             documentType,
-            'pending_review',
-            null,
-            response.serverRevision,
-            fileName,
-            Date.now(),
-            replaces,
+            status: 'pending_review',
+            correctionReason: null,
+            serverRevision: store.revision(),
+          };
+          store.database
+            .prepare('INSERT INTO submissions VALUES(?,?,?,?,?,?,?,?,?,?)')
+            .run(
+              submissionId,
+              workerId,
+              clientActionId,
+              documentType,
+              'pending_review',
+              null,
+              response.serverRevision,
+              fileName,
+              Date.now(),
+              replaces,
+            );
+          persistReceipt(
+            store,
+            workerId,
+            clientActionId,
+            fingerprint,
+            response,
           );
-        receipt(store, workerId, id, fingerprint, response);
-        return response;
-      });
-    } catch (error) {
-      unlinkSync(join(store.uploads, fileName));
-      throw error;
-    }
-    reply(res, response, failures);
-  });
+          return response;
+        });
+      } catch (error) {
+        unlinkSync(join(store.uploads, fileName));
+        throw error;
+      }
+      sendCreatedResponse(httpResponse, response, failures);
+    },
+  );
   // Development controls are absent by default and always absent in production.
   if (options.controlsEnabled && process.env.NODE_ENV !== 'production') {
-    app.use('/__dev', (req, _res, next) => {
+    app.use('/__dev', (request, _httpResponse, next) => {
       if (
         !['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(
-          req.socket.remoteAddress ?? '',
+          request.socket.remoteAddress ?? '',
         )
       )
         throw new ApiError(403, 'local_control_only');
       next();
     });
-    app.post('/__dev/failures', (req, res) => {
-      failures.configure(req.body as unknown);
-      res.json({ status: 'configured' });
+    app.post('/__dev/failures', (request, httpResponse) => {
+      failures.configure(request.body as unknown);
+      httpResponse.json({ status: 'configured' });
     });
-    app.post('/__dev/terms', (req, res) => {
-      if (object(req.body as unknown).version !== 'v3')
+    app.post('/__dev/terms', (request, httpResponse) => {
+      if (parseRequestObject(request.body as unknown).version !== 'v3')
         throw new ApiError(422, 'invalid_terms_version');
       store.transaction(() => {
-        store.db
+        store.database
           .prepare("UPDATE settings SET termsVersion='v3' WHERE id=1")
           .run();
         store.revision();
       });
-      res.json({ termsVersionId: 'v3' });
+      httpResponse.json({ termsVersionId: 'v3' });
     });
-    app.post('/__dev/expire-sessions', (_req, res) => {
-      store.db.prepare('UPDATE sessions SET expiresAt=0').run();
-      res.json({ status: 'expired' });
+    app.post('/__dev/expire-sessions', (_request, httpResponse) => {
+      store.database.prepare('UPDATE sessions SET expiresAt=0').run();
+      httpResponse.json({ status: 'expired' });
     });
-    app.post('/__dev/review', (req, res) => {
-      const body = object(req.body as unknown);
-      const id = string(body.submissionId);
+    app.post('/__dev/review', (request, httpResponse) => {
+      const body = parseRequestObject(request.body as unknown);
+      const submissionId = parseNonEmptyString(body.submissionId);
       const status = body.status;
       if (status !== 'approved' && status !== 'correction_requested')
         throw new ApiError(422, 'invalid_review_status');
       const reason =
         status === 'correction_requested'
-          ? string(body.correctionReason)
+          ? parseNonEmptyString(body.correctionReason)
           : null;
       const response = store.transaction(() => {
         const revision = store.revision();
-        const result = store.db
+        const result = store.database
           .prepare(
             'UPDATE submissions SET status=?,correctionReason=?,serverRevision=? WHERE submissionId=?',
           )
-          .run(status, reason, revision, id);
+          .run(status, reason, revision, submissionId);
         if (!result.changes) throw new ApiError(404, 'submission_not_found');
         return {
-          submissionId: id,
+          submissionId: submissionId,
           status,
           correctionReason: reason,
           serverRevision: revision,
         };
       });
-      res.json(response);
+      httpResponse.json(response);
     });
-    app.get('/__dev/state', (_req, res) => {
-      res.json({
+    app.get('/__dev/state', (_request, httpResponse) => {
+      httpResponse.json({
         terms: store.settings(),
-        receipts: store.db
+        receipts: store.database
           .prepare(
             'SELECT workerId,clientActionId FROM receipts ORDER BY workerId,clientActionId',
           )
           .all(),
-        acceptances: store.db.prepare('SELECT * FROM acceptances').all(),
-        documentSubmissions: store.db
+        acceptances: store.database.prepare('SELECT * FROM acceptances').all(),
+        documentSubmissions: store.database
           .prepare(
             'SELECT submissionId,workerId,clientActionId,documentType,status,correctionReason,serverRevision FROM submissions',
           )
@@ -304,18 +371,18 @@ export function createMockService(
       });
     });
   }
-  app.use((_req, res) => {
-    res.status(404).json({ code: 'not_found' });
+  app.use((_request, httpResponse) => {
+    httpResponse.status(404).json({ code: 'not_found' });
   });
   app.use(
     (
       error: unknown,
-      req: Request,
-      res: Response,
+      request: Request,
+      httpResponse: Response,
       next: (error?: unknown) => void,
     ) => {
       if (error instanceof multer.MulterError) {
-        res.status(error.code === 'LIMIT_FILE_SIZE' ? 413 : 422).json({
+        httpResponse.status(error.code === 'LIMIT_FILE_SIZE' ? 413 : 422).json({
           code:
             error.code === 'LIMIT_FILE_SIZE'
               ? 'upload_too_large'
@@ -323,7 +390,7 @@ export function createMockService(
         });
         return;
       }
-      errors(error, req, res, next);
+      handleApiError(error, request, httpResponse, next);
     },
   );
   return { app, store, failures };

@@ -1,16 +1,16 @@
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import ts from 'typescript';
+import typescript from 'typescript';
 
 export function checkArchitecture(sources) {
   const errors = [];
   const graph = new Map();
   for (const [file, content] of Object.entries(sources)) {
-    const source = ts.createSourceFile(
+    const source = typescript.createSourceFile(
       file,
       content,
-      ts.ScriptTarget.Latest,
+      typescript.ScriptTarget.Latest,
       true,
     );
     const edges = [];
@@ -19,18 +19,19 @@ export function checkArchitecture(sources) {
     function visit(node) {
       let specifier;
       if (
-        (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
+        (typescript.isImportDeclaration(node) ||
+          typescript.isExportDeclaration(node)) &&
         node.moduleSpecifier &&
-        ts.isStringLiteral(node.moduleSpecifier)
+        typescript.isStringLiteral(node.moduleSpecifier)
       )
         specifier = node.moduleSpecifier.text;
-      if (ts.isCallExpression(node)) {
+      if (typescript.isCallExpression(node)) {
         const call = node.expression.getText(source);
         if (
           (call === 'require' ||
-            node.expression.kind === ts.SyntaxKind.ImportKeyword) &&
+            node.expression.kind === typescript.SyntaxKind.ImportKeyword) &&
           node.arguments[0] &&
-          ts.isStringLiteral(node.arguments[0])
+          typescript.isStringLiteral(node.arguments[0])
         )
           specifier = node.arguments[0].text;
         if (
@@ -78,7 +79,7 @@ export function checkArchitecture(sources) {
             errors.push(`${file}: screens cannot import raw transport/sync`);
         }
       }
-      ts.forEachChild(node, visit);
+      typescript.forEachChild(node, visit);
     }
     visit(source);
     graph.set(file, edges);
@@ -101,12 +102,14 @@ export function checkArchitecture(sources) {
 }
 
 function readSources(directory, sources = {}) {
-  if (!fs.existsSync(directory)) return sources;
-  for (const item of fs.readdirSync(directory, { withFileTypes: true })) {
+  if (!fileSystem.existsSync(directory)) return sources;
+  for (const item of fileSystem.readdirSync(directory, {
+    withFileTypes: true,
+  })) {
     const file = `${directory}/${item.name}`;
     if (item.isDirectory()) readSources(file, sources);
     else if (/\.[cm]?[jt]sx?$/.test(file))
-      sources[file] = fs.readFileSync(file, 'utf8');
+      sources[file] = fileSystem.readFileSync(file, 'utf8');
   }
   return sources;
 }

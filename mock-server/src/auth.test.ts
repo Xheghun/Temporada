@@ -5,13 +5,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { once } from 'node:events';
 import { Store } from './storage.ts';
-import { createAuthApp, errors } from './app.ts';
+import { createAuthApp, handleApiError } from './app.ts';
 
 test('OTP, exact seeds, authorized shared phone and persisted sessions', async () => {
-  const dir = mkdtempSync(join(tmpdir(), 'worker-auth-'));
-  let store = new Store(dir);
+  const directory = mkdtempSync(join(tmpdir(), 'worker-auth-'));
+  let store = new Store(directory);
   const app = createAuthApp(store);
-  app.use(errors);
+  app.use(handleApiError);
   const server = app.listen(0, '127.0.0.1');
   await once(server, 'listening');
   const address = server.address();
@@ -83,7 +83,7 @@ test('OTP, exact seeds, authorized shared phone and persisted sessions', async (
     assert.equal(snapshot.terms.serverAcceptanceStatus, 'not_confirmed');
     assert.deepEqual(snapshot.documentSubmissions, []);
     assert.deepEqual(
-      snapshot.requiredDocuments.map((d) => d.documentType),
+      snapshot.requiredDocuments.map((document) => document.documentType),
       ['passport', 'ds160_confirmation', 'signed_contract'],
     );
     assert.equal(
@@ -102,10 +102,10 @@ test('OTP, exact seeds, authorized shared phone and persisted sessions', async (
       })
     ).json()) as { token: string; workers: { displayName: string }[] };
     assert.deepEqual(
-      shared.workers.map((w) => w.displayName),
+      shared.workers.map((worker) => worker.displayName),
       ['Bruno Díaz', 'Carla Díaz'],
     );
-    for (const [id, status] of [
+    for (const [workerId, status] of [
       ['bruno', 'approved'],
       ['carla', 'correction_requested'],
     ]) {
@@ -113,7 +113,7 @@ test('OTP, exact seeds, authorized shared phone and persisted sessions', async (
         await fetch(base + '/me/assignment', {
           headers: {
             authorization: `Bearer ${shared.token}`,
-            'x-worker-id': id!,
+            'x-worker-id': workerId!,
           },
         })
       ).json()) as {
@@ -124,7 +124,7 @@ test('OTP, exact seeds, authorized shared phone and persisted sessions', async (
         }[];
       };
       assert.equal(data.documentSubmissions[0]?.status, status);
-      if (id === 'bruno')
+      if (workerId === 'bruno')
         assert.equal(data.terms.serverAcceptanceStatus, 'accepted');
       else
         assert.equal(
@@ -134,10 +134,10 @@ test('OTP, exact seeds, authorized shared phone and persisted sessions', async (
     }
     await new Promise<void>((resolve) => server.close(() => resolve()));
     store.close();
-    store = new Store(dir);
+    store = new Store(directory);
     assert.equal(store.phoneWorkers('+525510000002').length, 2);
     assert.equal(
-      store.db.prepare('SELECT count(*) AS n FROM sessions').get()?.n,
+      store.database.prepare('SELECT count(*) AS n FROM sessions').get()?.n,
       2,
     );
     assert.equal(store.submissions('carla').length, 1);
@@ -145,6 +145,6 @@ test('OTP, exact seeds, authorized shared phone and persisted sessions', async (
     server.closeAllConnections();
     server.close();
     store.close();
-    rmSync(dir, { recursive: true, force: true });
+    rmSync(directory, { recursive: true, force: true });
   }
 });

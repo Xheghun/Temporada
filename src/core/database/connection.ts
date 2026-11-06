@@ -1,12 +1,17 @@
 export type SqlValue = string | number | null;
 export interface SqlExecutor {
   exec(sql: string): Promise<void>;
-  run(sql: string, params?: readonly SqlValue[]): Promise<{ changes: number }>;
-  first<T>(sql: string, params?: readonly SqlValue[]): Promise<T | null>;
-  all<T>(sql: string, params?: readonly SqlValue[]): Promise<T[]>;
+  run(
+    sql: string,
+    parameters?: readonly SqlValue[],
+  ): Promise<{ changes: number }>;
+  first<T>(sql: string, parameters?: readonly SqlValue[]): Promise<T | null>;
+  all<T>(sql: string, parameters?: readonly SqlValue[]): Promise<T[]>;
 }
 export interface Database extends SqlExecutor {
-  transaction<T>(operation: (tx: SqlExecutor) => Promise<T>): Promise<T>;
+  transaction<T>(
+    operation: (transaction: SqlExecutor) => Promise<T>,
+  ): Promise<T>;
   close(): Promise<void>;
 }
 
@@ -31,12 +36,12 @@ export function serializeDatabase(
   };
   return {
     exec: (sql) => schedule(() => executor.exec(sql)),
-    run: (sql, params) => schedule(() => executor.run(sql, params)),
-    first: <T>(sql: string, params?: readonly SqlValue[]) =>
-      schedule(() => executor.first<T>(sql, params)),
-    all: <T>(sql: string, params?: readonly SqlValue[]) =>
-      schedule(() => executor.all<T>(sql, params)),
-    transaction: <T>(operation: (tx: SqlExecutor) => Promise<T>) =>
+    run: (sql, parameters) => schedule(() => executor.run(sql, parameters)),
+    first: <T>(sql: string, parameters?: readonly SqlValue[]) =>
+      schedule(() => executor.first<T>(sql, parameters)),
+    all: <T>(sql: string, parameters?: readonly SqlValue[]) =>
+      schedule(() => executor.all<T>(sql, parameters)),
+    transaction: <T>(operation: (transaction: SqlExecutor) => Promise<T>) =>
       schedule(async () => {
         await executor.exec('BEGIN IMMEDIATE');
         try {

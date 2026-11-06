@@ -106,12 +106,12 @@ export function Field({
   );
 }
 export function ErrorNotice({ code }: { code: string | null }) {
-  const { t, i18n } = useTranslation();
+  const { t: translate, i18n } = useTranslation();
   if (!code) return null;
   const key = `errors.${code}`;
   return (
     <Text selectable accessibilityRole="alert" style={styles.error}>
-      {t(i18n.exists(key) ? key : 'errors.generic')}
+      {translate(i18n.exists(key) ? key : 'errors.generic')}
     </Text>
   );
 }
