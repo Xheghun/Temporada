@@ -6,8 +6,8 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 
 ## 1. Scoped implementation and verification
 
-- [ ] 1.1 SDD-006 Implement versioned migrations and worker-scoped repositories for assignment/terms/catalog/submissions/outbox; verify schema reapplication, captured-worker queries and isolation against real reopened storage; update data-model/DECISIONS.
-- [ ] 1.2 SDD-007 Implement atomic intent/outbox enqueue, stable UUIDs, sending recovery and immutable submission history; verify offline persisted state and TEST-02 reconstruction from real storage with identical payload/ID; update persistence evidence.
+- [x] 1.1 SDD-006 Implement versioned migrations and worker-scoped repositories for assignment/terms/catalog/submissions/outbox; verify schema reapplication, captured-worker queries and isolation against real reopened storage; update data-model/DECISIONS.
+- [x] 1.2 SDD-007 Implement atomic intent/outbox enqueue, stable UUIDs, sending recovery and immutable submission history; verify offline persisted state and TEST-02 reconstruction from real storage with identical payload/ID; update persistence evidence.
 
 ## 2. PR handoff
 
