@@ -4,6 +4,8 @@ Apply only `offline-sync` on `feature/SDD-008-offline-sync`. Do not apply, imple
 
 Requirements: see referenced task IDs and specs/traceability.md. All boxes proposed/unverified. Read this change’s proposal/design/specs and named root specifications before each task; report objective/files/tests, implement small coherent steps, run relevant checks, inspect diff and update evidence/ledger.
 
+Recording B is assigned to this session by the user. Before coding, remind the user to start screen/audio capture before the task prompt, plan and review. Follow docs/recording-b-checklist.md; do not claim recording has started without confirmation. This note does not authorize applying offline-sync before its prerequisite or a separate explicit apply request.
+
 ## 1. Scoped implementation and verification
 
 - [ ] 1.1 SDD-008 Implement injected engine contracts, single-flight, eligible deterministic ordering/resource dependencies, captured-session checks and lifecycle triggers; verify TEST-01 and concurrent-trigger tests; document ordering and queue semantics.
