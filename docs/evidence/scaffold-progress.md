@@ -43,3 +43,5 @@ Shared npm cache had inaccessible entries; used a temporary cache without changi
 - EAS cloud Android/iOS builds, store release and OTA execution NOT RUN. Workflow configuration alone proves none of these.
 - All worker scenarios, mandatory six sync tests and TEST-03R remain NOT RUN; backend, durable domain storage, sync, auth and documents belong to later changes.
 - Android 9/2 GB behavior, iOS runtime and full bilingual/a11y worker UI are unverified. App identifiers are provisional.
+
+Tracked progress at local handoff: 3/5. SDD-002 and SDD-003 are verified/committed; PR preparation task is complete with explicit remote-base blocker. SDD-001 remains unchecked for human recording schedule; SDD-018 remains unchecked for actual hosted PR. Scaffold commit: 293eef6; planning-only local main baseline: 071f2c3. No main push is authorized or performed.

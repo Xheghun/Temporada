@@ -11,4 +11,6 @@ Recording preparation/capture overhead is outside coding; coding performed on ca
 
 Cumulative recorded coding/setup: 0.38 minutes. Next resume adds to this value; do not reset. Pause begins at 2026-11-06T16:03:15.650588+00:00.
 
-| project-scaffold resume | 2026-11-06T16:11:05.130922+00:00 | in progress | running | SDD-001 resumed with Git access |
+| project-scaffold resume | 2026-11-06T16:11:05.130922+00:00 | 2026-11-06T16:21:32.429207+00:00 | 10.45 | paused at empty-remote main bootstrap and human recording schedule |
+
+Updated cumulative setup/coding: 10.83 minutes (prior 0.38 + resumed 10.45). No sibling implementation started. Local checks passed; hosted PR/CI and human recording schedule remain pending. Review/permission wait starts 2026-11-06T16:21:32.429207+00:00.
