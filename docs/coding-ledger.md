@@ -36,3 +36,5 @@ Offline-sync started 2026-11-06T18:02:28.397476+00:00. Prior recorded cumulative
 Offline-sync initial inspection is conservatively counted from 2026-11-06T18:01:00+00:00 (before the implementation-start entry). Final elapsed total will include this setup interval.
 
 Offline-sync implementation/local verification ended 2026-11-06T18:27:57.278415+00:00: 26.95 minutes including initial inspection. Recorded cumulative: 78.68 minutes. 72 automated tests passed; four native development probes passed with documented injection/fixture limitations. PR publication/CI follow-up follows separately; Recording B remains unconfirmed.
+
+Offline-sync publication/handoff: 2026-11-06T18:27:57.278415+00:00 to 2026-11-06T18:28:35.281044+00:00, 0.63 minutes. Recorded cumulative: 79.31 minutes. PR https://github.com/Xheghun/Temporada/pull/5; subsequent hosted CI waiting is not active coding. Human review/merge pending.
