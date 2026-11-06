@@ -6,7 +6,7 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 
 ## 1. Scoped implementation and verification
 
-- [ ] 1.1 SDD-015 Complete Spanish-first/English resources, Home toggle, a11y and responsive tokens/components; verify key parity and RNTL statuses/errors in both locales plus 360px/large-text Android inspection; document observed limitations.
+- [x] 1.1 SDD-015 Complete English-first/Spanish resources, Home toggle, a11y and responsive tokens/components; verify key parity and RNTL statuses/errors in both locales plus 360px/large-text Android inspection; document observed limitations.
 
 ## 2. PR handoff
 

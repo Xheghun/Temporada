@@ -54,3 +54,5 @@ Home-and-terms SDD-012: cached assignment/timeline/connectivity/counts, exact-ve
 Document-corrections SDD-013: M4/M5/M8/M9/M10 catalog/projection/orchestration and history evidence is in docs/evidence/document-corrections.md. Camera/compression/private-file adapter and whole-worker resubmission journeys remain owned by document-capture/integration.
 
 Document-capture SDD-014: M1/M2/M3/M5/M7/M8/M9/M10 file/capture evidence in docs/evidence/document-capture.md includes native permission recovery, measured gallery/camera compression, actual private-file/SQL inspection after offline force-stop, acknowledgment cleanup and 413 explicit replacement. Reboot/iOS/low-end performance/full scenarios remain unverified.
+
+Language-and-accessibility SDD-015: user-amended M9 English-first defaults, saved preference preservation, bilingual status/error coverage and accessible shared controls are traced in docs/evidence/language-and-accessibility.md. Native 360dp/130% text inspection is distinct from unexecuted TalkBack/iOS acceptance.

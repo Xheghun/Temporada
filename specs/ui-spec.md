@@ -4,7 +4,7 @@ Use colors/type/spacing/radii/border/semantic tokens with Button, Input, Card, S
 
 | Screen | Content and behavior |
 |---|---|
-| Sign in | Spanish phone label, RHF/Zod validation, request OTP, localized actionable network error |
+| Sign in | Localized phone label, RHF/Zod validation, request OTP, localized actionable network error |
 | Verify | Six digits, mock code information in development, loading, retry/error |
 | Worker picker | Authorized names; required for shared number; switch entry reachable from Home |
 | Home | Identity, JO/employer/worksite/season, cached terms, known timeline, network hint, Pending Sync count, attention count, terms/documents, ES/EN, switch worker, sign out |
@@ -12,7 +12,7 @@ Use colors/type/spacing/radii/border/semantic tokens with Button, Input, Card, S
 | Documents | Server catalog with Not submitted/Pending Sync/Pending Review/Approved/Correction Requested; correction text; failed delivery remedy |
 | Capture | Camera/gallery permissions, preview/retake, measured compression, durable-copy progress, queue success and recovery |
 
-Spanish initial default; language preference persisted. Translate every app-owned label/button/status/error/a11y/empty state. Known API codes map to localized messages; server free text such as Carla's reason displayed verbatim. Locale key parity check plus status rendering tests in both languages. Do not call a queued file submitted. Never infer approval from HTTP success. Cache age/refresh failure must be visible without hiding local intent. Switch clears old identity content immediately; late responses filtered by generation.
+English initial default per user amendment; English/Spanish preference persisted without overwriting existing choices. Translate every app-owned label/button/status/error/a11y/empty state. Known API codes map to localized messages; server free text such as Carla's reason displayed verbatim. Locale key parity check plus status rendering tests in both languages. Do not call a queued file submitted. Never infer approval from HTTP success. Cache age/refresh failure must be visible without hiding local intent. Switch clears old identity content immediately; late responses filtered by generation.
 
 Capture permission denied → explain settings/gallery alternative; unavailable camera → selection option. Compression/storage failure → retry/retake without false Pending Sync. 413 → recapture/new action; 422 → actionable correction; 401 → sign in with queue preserved. Terms stale → show new version and an explicit new confirmation button.
 

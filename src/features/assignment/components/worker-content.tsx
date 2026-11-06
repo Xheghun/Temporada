@@ -15,7 +15,7 @@ export function Card({ children }: { children: React.ReactNode }) {
 }
 function Status({ text }: { text: string }) {
   return (
-    <Text selectable style={styles.status}>
+    <Text selectable accessibilityLiveRegion="polite" style={styles.status}>
       {text}
     </Text>
   );
@@ -84,6 +84,11 @@ export function HomeContent({
   return (
     <AuthPage>
       <Heading>{workerName}</Heading>
+      <Action
+        secondary
+        label={translate('home.changeLanguage')}
+        onPress={onLanguage}
+      />
       <Status
         text={translate(
           state.online ? 'home.connectionAvailable' : 'home.offline',
@@ -199,11 +204,7 @@ export function HomeContent({
           onPress={onDocuments ?? onTerms}
         />
       </Card>
-      <Action
-        secondary
-        label={translate('home.changeLanguage')}
-        onPress={onLanguage}
-      />
+
       {shared ? (
         <Action
           secondary
@@ -293,7 +294,11 @@ export function TermsContent({
           action.payload.termsVersionId === assignment.terms.termsVersionId &&
           !['stale', 'failed_permanent'].includes(action.status),
       ) ? (
-        <Text accessibilityRole="alert" style={styles.status}>
+        <Text
+          accessibilityRole="alert"
+          accessibilityLiveRegion="polite"
+          style={styles.status}
+        >
           {translate('terms.saved')}
         </Text>
       ) : null}

@@ -6,7 +6,7 @@ Deliver language and accessible layout completion as an independently reviewable
 
 ## What Changes
 
-- Spanish-first/English completeness, Home toggle verification, localization parity, semantic status cues and narrow/large-text accessibility audit.
+- English-first/Spanish completeness, Home toggle verification, localization parity, semantic status cues and narrow/large-text accessibility audit.
 - Scope exclusions: No deferral of initial Spanish strings from earlier features; no fabricated server free-text translations.
 - Preserve the programme requirements and evidence discipline in specs/requirements.md and specs/programme/design.md.
 

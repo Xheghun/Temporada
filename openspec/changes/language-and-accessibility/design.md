@@ -2,15 +2,17 @@
 
 ## Context
 
-See proposal.md for scope and motivation. The inspected repository contains planning artifacts only; no application or Git repository was present at baseline. SDK compatibility and Android startup are unverified; ADB listener binding was denied. Prerequisite: `document-capture` human-reviewed and merged.
+See proposal.md for scope and motivation. The original baseline contained planning artifacts only. At implementation, document-capture PR #9 is merged; Expo SDK 58, Android startup and the shared localized controls are available. This scope completes the language and accessibility audit without applying sibling changes.
 
 ## Goals / Non-Goals
 
-**Goals:** Spanish-first/English completeness, Home toggle verification, localization parity, semantic status cues and narrow/large-text accessibility audit.
+**Goals:** English-first/Spanish completeness, Home toggle verification, localization parity, semantic status cues and narrow/large-text accessibility audit.
 
 **Non-Goals:** No deferral of initial Spanish strings from earlier features; no fabricated server free-text translations.
 
 ## Decisions
+
+User amendment (2026-11-06): English replaces the original M9 Spanish-first default. Preserve every existing saved language value; seed English only when no language preference exists. This intentional discrepancy takes precedence for this change.
 
 Earlier features ship localized strings; complete cross-screen audit here. Test locale keys and RNTL statuses/errors, inspect actual Android at 360px with large text and record limitations. Use existing design tokens without a UI framework.
 

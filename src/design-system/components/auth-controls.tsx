@@ -58,6 +58,7 @@ export function Action({
 }) {
   return (
     <Pressable
+      accessible
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled: disabled || busy, busy }}
@@ -66,11 +67,20 @@ export function Action({
       style={({ pressed }) => [
         styles.button,
         secondary && styles.secondary,
-        (disabled || busy || pressed) && { opacity: 0.65 },
+        (disabled || busy) && { opacity: 0.65 },
+        pressed &&
+          !disabled &&
+          !busy && {
+            backgroundColor: secondary
+              ? tokens.colors.secondaryPressed
+              : tokens.colors.primaryPressed,
+          },
       ]}
     >
       {busy ? (
         <ActivityIndicator
+          accessible={false}
+          importantForAccessibility="no"
           color={secondary ? tokens.colors.primary : '#FFFFFF'}
         />
       ) : null}
@@ -96,9 +106,19 @@ export function Field({
   return (
     <View style={{ gap: 8 }}>
       <Text style={styles.label}>{label}</Text>
-      <TextInput {...props} accessibilityLabel={label} style={styles.input} />
+      <TextInput
+        {...props}
+        accessibilityLabel={label}
+        accessibilityHint={error ?? props.accessibilityHint}
+        style={styles.input}
+      />
       {error ? (
-        <Text selectable accessibilityRole="alert" style={styles.error}>
+        <Text
+          selectable
+          accessibilityRole="alert"
+          accessibilityLiveRegion="polite"
+          style={styles.error}
+        >
           {error}
         </Text>
       ) : null}
@@ -110,7 +130,12 @@ export function ErrorNotice({ code }: { code: string | null }) {
   if (!code) return null;
   const key = `errors.${code}`;
   return (
-    <Text selectable accessibilityRole="alert" style={styles.error}>
+    <Text
+      selectable
+      accessibilityRole="alert"
+      accessibilityLiveRegion="polite"
+      style={styles.error}
+    >
       {translate(i18n.exists(key) ? key : 'errors.generic')}
     </Text>
   );
@@ -167,5 +192,5 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     textAlign: 'center',
   },
-  error: { color: '#9B2525', fontSize: 17, lineHeight: 25 },
+  error: { color: tokens.colors.error, fontSize: 17, lineHeight: 25 },
 });

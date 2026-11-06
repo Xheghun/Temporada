@@ -62,7 +62,11 @@ export function DocumentsContent({
               document.required ? 'documents.required' : 'documents.optional',
             )}
           </Body>
-          <Text style={styles.status}>
+          <Text
+            selectable
+            accessibilityLiveRegion="polite"
+            style={styles.status}
+          >
             {translate(
               `documents.status.${document.current?.status ?? 'not_submitted'}`,
             )}
