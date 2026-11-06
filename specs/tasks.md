@@ -24,4 +24,4 @@ One cumulative coding ledger targets 240 minutes, with maximum 60-minute critica
 
 Recording B preparation/scheduling belongs to project-scaffold (SDD-001), capture occurs during genuine implementation, final editing/verification belongs to submission-documentation (SDD-021). Coding on camera counts. Human recordings and approvals are never fabricated.
 
-PR descriptions state behavior/problem, requirements, significant decisions, actual check results/Android evidence and risks without duplicating the diff. Record PR/CI/review/merge status separately. Current status: all proposed, zero implementation tasks executed, no PR or merge claimed.
+PR descriptions state behavior/problem, requirements, significant decisions, actual check results/Android evidence and risks without duplicating the diff. Record PR/CI/review/merge status separately. Current status: feature changes through language-and-accessibility have scoped PR evidence and are merged; offline-integration owns the current Android acceptance run. Submission documentation and recordings remain separate.

@@ -1,0 +1,15 @@
+{
+  "baselineMain": "6fd97a3",
+  "preservedNativeBaseline": "integration-baseline",
+  "originalOutbox": { "delivered": 4, "superseded": 1, "unresolved": 0 },
+  "isolatedServerPort": 3005,
+  "proxyPort": 3006,
+  "androidApi": 36,
+  "expoSdk": 58,
+  "device": "Small_Phone",
+  "widthDp": 360,
+  "syntheticOriginalBytes": 6499833,
+  "compressedBytes": 523491,
+  "emulatorDataKeptPrivate": true,
+  "tokensPrinted": false
+}

@@ -46,7 +46,7 @@ Validate runs on pull requests and main. Build is manual, main-only and build-on
 
 ## Verification and limits
 
-See [scaffold evidence](docs/evidence/scaffold-progress.md) for executed commands, Android details, screenshots and outstanding work. Worker tests TEST-01–06, TEST-03R and all eight manual worker scenarios remain NOT RUN. The mock service accepts OTP `123456` for Ana at `+52 55 1000 0001` and Bruno/Carla at `+52 55 1000 0002`. Start it with `MOCK_ENABLE_CONTROLS=1 npm run mock:start`; see [mock API instructions](mock-server/README.md) for the contract, durable state, failure controls and tested limitations. Only fictional records will be used. Recording B is prepared but not recorded; human capture scheduling is tracked in [the checklist](docs/recording-b-checklist.md).
+See [scaffold evidence](docs/evidence/scaffold-progress.md) for executed commands, Android details, screenshots and outstanding work. Worker tests TEST-01–06/TEST-03R and all eight Android manual scenarios have executed evidence in [offline integration](docs/evidence/offline-integration.md), including process/device restart and stable-ID delivery. Release builds, iOS, low-end performance and recordings remain unverified. The mock service accepts OTP `123456` for Ana at `+52 55 1000 0001` and Bruno/Carla at `+52 55 1000 0002`. Start it with `MOCK_ENABLE_CONTROLS=1 npm run mock:start`; see [mock API instructions](mock-server/README.md) for the contract, durable state, failure controls and tested limitations. Only fictional records will be used. Recording B is prepared but not recorded; human capture scheduling is tracked in [the checklist](docs/recording-b-checklist.md).
 
 [AGENTS.md](AGENTS.md) and the root specs define safety invariants and dependency boundaries. A single [coding ledger](docs/coding-ledger.md) spans all changes; target four hours, hard stop five. SDK minimum OS support does not establish acceptable behavior/performance on an Android 9 device with 2 GB RAM; that testing remains pending.
 
@@ -54,7 +54,7 @@ Mock API evidence is in [mock-api verification](docs/evidence/mock-api.md). Root
 
 ### Persistent local intent
 
-Worker-scoped SQLite repositories now cache assignments and atomically record terms/document intent with stable action IDs. Run `npm run test:persistence` for file-backed tests. See [persistence contracts](docs/persistence.md) and [Android restart evidence](docs/evidence/persistent-outbox.md). Network sync and worker capture screens remain separate changes.
+Worker-scoped SQLite repositories now cache assignments and atomically record terms/document intent with stable action IDs. Run `npm run test:persistence` for file-backed tests. See [persistence contracts](docs/persistence.md) and [Android restart evidence](docs/evidence/persistent-outbox.md). Synchronization and capture use these worker-scoped repositories.
 
 ### Synchronization engine
 
@@ -62,11 +62,11 @@ The worker-scoped engine now delivers durable intent, persists retries, handles 
 
 ### Worker authentication
 
-Phone/OTP sign-in, authorized worker selection and SecureStore session restore are now wired to synchronization. See [setup and session behavior](docs/authentication.md) and [verification](docs/evidence/worker-authentication.md). Development mode requires EXPO_PUBLIC_ASSESSMENT_MODE=1; OTP is 123456. Home and version-specific Terms now use the persistent cache/outbox. See [behavior and flags](docs/home-and-terms.md) and [executed evidence](docs/evidence/home-and-terms.md). Document screens remain separate changes.
+Phone/OTP sign-in, authorized worker selection and SecureStore session restore are now wired to synchronization. See [setup and session behavior](docs/authentication.md) and [verification](docs/evidence/worker-authentication.md). Development mode requires EXPO_PUBLIC_ASSESSMENT_MODE=1; OTP is 123456. Home and version-specific Terms now use the persistent cache/outbox. See [behavior and flags](docs/home-and-terms.md) and [executed evidence](docs/evidence/home-and-terms.md). The document screens share these authenticated worker boundaries.
 
 ### Documents and corrections
 
-Home now links to the backend document catalog, review states and correction history. `worker_document_corrections` gates production access. [State/submission contracts](docs/documents.md) and [verification](docs/evidence/document-corrections.md) describe this scope. Camera/compression remain the next change; photo controls are visibly unavailable for now.
+Home now links to the backend document catalog, review states and correction history. `worker_document_corrections` gates production access. [State/submission contracts](docs/documents.md) and [verification](docs/evidence/document-corrections.md) describe this scope. Camera/gallery capture and compression are implemented in the capture layer below.
 
 ### Capture and upload files
 

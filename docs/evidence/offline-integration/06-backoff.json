@@ -1,0 +1,174 @@
+{
+  "actions": [
+    {
+      "worker_id": "ana",
+      "client_action_id": "e2cc2dee-6471-4986-a422-96cb47ab897d",
+      "action_type": "terms_acceptance",
+      "status": "delivered",
+      "attempt_count": 1,
+      "next_attempt_at": 1794006280520,
+      "last_error_code": null,
+      "payload": {
+        "kind": "terms_acceptance",
+        "workerId": "ana",
+        "clientActionId": "e2cc2dee-6471-4986-a422-96cb47ab897d",
+        "termsVersionId": "v2"
+      }
+    },
+    {
+      "worker_id": "ana",
+      "client_action_id": "b87f160e-dc68-4c51-9a94-ca8bcd31fe4e",
+      "action_type": "document_upload",
+      "status": "delivered",
+      "attempt_count": 1,
+      "next_attempt_at": 1794006281933,
+      "last_error_code": null,
+      "payload": {
+        "kind": "document_upload",
+        "workerId": "ana",
+        "clientActionId": "b87f160e-dc68-4c51-9a94-ca8bcd31fe4e",
+        "documentType": "passport",
+        "localSubmissionId": "b87f160e-dc68-4c51-9a94-ca8bcd31fe4e",
+        "sha256": "68e00aef72c8fe7cca9cce85998b6eeb1f8a9e26005f90cdfba0433f960de8f8",
+        "replacesSubmissionId": null
+      },
+      "fileExists": false,
+      "fileBytes": null,
+      "digestMatches": null
+    },
+    {
+      "worker_id": "ana",
+      "client_action_id": "277c9a33-e1a6-42ea-843f-8e5c9aa3668a",
+      "action_type": "document_upload",
+      "status": "delivered",
+      "attempt_count": 2,
+      "next_attempt_at": 1794006320147,
+      "last_error_code": null,
+      "payload": {
+        "kind": "document_upload",
+        "workerId": "ana",
+        "clientActionId": "277c9a33-e1a6-42ea-843f-8e5c9aa3668a",
+        "documentType": "ds160_confirmation",
+        "localSubmissionId": "277c9a33-e1a6-42ea-843f-8e5c9aa3668a",
+        "sha256": "68e00aef72c8fe7cca9cce85998b6eeb1f8a9e26005f90cdfba0433f960de8f8",
+        "replacesSubmissionId": null
+      },
+      "fileExists": false,
+      "fileBytes": null,
+      "digestMatches": null
+    },
+    {
+      "worker_id": "ana",
+      "client_action_id": "e241655b-1446-4bf2-a851-a55e282b963f",
+      "action_type": "document_upload",
+      "status": "superseded",
+      "attempt_count": 1,
+      "next_attempt_at": 1794006351932,
+      "last_error_code": "upload_too_large",
+      "payload": {
+        "kind": "document_upload",
+        "workerId": "ana",
+        "clientActionId": "e241655b-1446-4bf2-a851-a55e282b963f",
+        "documentType": "signed_contract",
+        "localSubmissionId": "e241655b-1446-4bf2-a851-a55e282b963f",
+        "sha256": "68e00aef72c8fe7cca9cce85998b6eeb1f8a9e26005f90cdfba0433f960de8f8",
+        "replacesSubmissionId": null
+      },
+      "fileExists": false,
+      "fileBytes": null,
+      "digestMatches": null
+    },
+    {
+      "worker_id": "ana",
+      "client_action_id": "11d79454-5e2f-4670-beac-f5e31f8f6b7e",
+      "action_type": "document_upload",
+      "status": "delivered",
+      "attempt_count": 1,
+      "next_attempt_at": 1794006399158,
+      "last_error_code": null,
+      "payload": {
+        "kind": "document_upload",
+        "workerId": "ana",
+        "clientActionId": "11d79454-5e2f-4670-beac-f5e31f8f6b7e",
+        "documentType": "passport",
+        "localSubmissionId": "11d79454-5e2f-4670-beac-f5e31f8f6b7e",
+        "sha256": "68e00aef72c8fe7cca9cce85998b6eeb1f8a9e26005f90cdfba0433f960de8f8",
+        "replacesSubmissionId": "8bc8903c-aa54-4bd7-8640-684b0317e21a"
+      },
+      "fileExists": false,
+      "fileBytes": null,
+      "digestMatches": null
+    },
+    {
+      "worker_id": "ana",
+      "client_action_id": "ec488a6e-20ba-49a6-9df9-1a25d9642123",
+      "action_type": "document_upload",
+      "status": "retry_wait",
+      "attempt_count": 2,
+      "next_attempt_at": 1794006454988,
+      "last_error_code": "injected_failure",
+      "payload": {
+        "kind": "document_upload",
+        "workerId": "ana",
+        "clientActionId": "ec488a6e-20ba-49a6-9df9-1a25d9642123",
+        "documentType": "signed_contract",
+        "localSubmissionId": "ec488a6e-20ba-49a6-9df9-1a25d9642123",
+        "sha256": "68e00aef72c8fe7cca9cce85998b6eeb1f8a9e26005f90cdfba0433f960de8f8",
+        "replacesSubmissionId": null
+      },
+      "fileExists": true,
+      "fileBytes": 523491,
+      "digestMatches": true
+    }
+  ],
+  "terms": [
+    {
+      "worker_id": "ana",
+      "client_action_id": "e2cc2dee-6471-4986-a422-96cb47ab897d",
+      "terms_version_id": "v2",
+      "created_at": 1794006146274
+    }
+  ],
+  "documents": [
+    {
+      "worker_id": "ana",
+      "document_type": "passport",
+      "server_submission_id": "8bc8903c-aa54-4bd7-8640-684b0317e21a",
+      "server_status": "correction_requested",
+      "correction_reason": "Foto borrosa, vuelva a tomarla",
+      "server_revision": 5
+    },
+    {
+      "worker_id": "ana",
+      "document_type": "ds160_confirmation",
+      "server_submission_id": "236c746a-5cb6-48d7-b210-6adfb541b3fb",
+      "server_status": "pending_review",
+      "correction_reason": null,
+      "server_revision": 4
+    },
+    {
+      "worker_id": "ana",
+      "document_type": "signed_contract",
+      "server_submission_id": null,
+      "server_status": null,
+      "correction_reason": null,
+      "server_revision": null
+    },
+    {
+      "worker_id": "ana",
+      "document_type": "passport",
+      "server_submission_id": "90befff9-5589-4174-8cad-d36634e58405",
+      "server_status": "pending_review",
+      "correction_reason": null,
+      "server_revision": 6
+    },
+    {
+      "worker_id": "ana",
+      "document_type": "signed_contract",
+      "server_submission_id": null,
+      "server_status": null,
+      "correction_reason": null,
+      "server_revision": null
+    }
+  ]
+}

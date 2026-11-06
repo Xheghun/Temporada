@@ -2,7 +2,7 @@
 
 ## Context
 
-See proposal.md for scope and motivation. The inspected repository contains planning artifacts only; no application or Git repository was present at baseline. SDK compatibility and Android startup are unverified; ADB listener binding was denied. Prerequisite: `language-and-accessibility` human-reviewed and merged.
+See proposal.md for scope and motivation. Original baseline constraints are historical. At apply time language-and-accessibility PR #10 is merged (main 6fd97a3), Android/ADB and Expo SDK 58 are runnable. Integration uses isolated fictional fixtures and preserves the earlier emulator database.
 
 ## Goals / Non-Goals
 

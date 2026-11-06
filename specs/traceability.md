@@ -1,6 +1,6 @@
 # Traceability
 
-Worker requirements remain proposed / NOT VERIFIED. Scaffold-only evidence for R-ANDROID/R-QUALITY/R-GOV is recorded in docs/evidence/scaffold-progress.md (commit 293eef6); whole-app acceptance is incomplete. Populate PR/CI/review evidence when executed; file existence is not behavioral acceptance.
+Feature-local and Android integration verification are recorded in dated docs/evidence files. See offline-integration.md for actual scenario results and limits; production, recordings and submission acceptance remain separate. Scaffold evidence is in docs/evidence/scaffold-progress.md. File existence is not behavioral acceptance.
 
 | Requirement | Capability / change owner | Tasks | Verification |
 |---|---|---|---|
@@ -25,7 +25,7 @@ Worker requirements remain proposed / NOT VERIFIED. Scaffold-only evidence for R
 | R-EVIDENCE | project-scaffold, offline-integration, submission-documentation | SDD-001/016/017/021 | pre-coding Recording B preparation, capture during implementation, final verification; eight manual records; two real recordings or incomplete |
 | R-TIME | all changes; single ledger | SDD-001/017/019 | cumulative ledger; target 240/hard 300 minutes |
 
-Planning artifacts: requirements, architecture, data-model, sync-engine, api-contract, ui-spec, testing, tasks and this matrix exist. No implementation tests passed yet. Original-brief comparison and backend approval are pending; no human sign-off implied.
+Planning artifacts: requirements, architecture, data-model, sync-engine, api-contract, ui-spec, testing, tasks and this matrix exist. Executed implementation tests are recorded in the feature and integration evidence below. Original-brief comparison and real-backend contract approval remain pending; no release sign-off is implied.
 
 ## Exact task ownership
 
@@ -56,3 +56,5 @@ Document-corrections SDD-013: M4/M5/M8/M9/M10 catalog/projection/orchestration a
 Document-capture SDD-014: M1/M2/M3/M5/M7/M8/M9/M10 file/capture evidence in docs/evidence/document-capture.md includes native permission recovery, measured gallery/camera compression, actual private-file/SQL inspection after offline force-stop, acknowledgment cleanup and 413 explicit replacement. Reboot/iOS/low-end performance/full scenarios remain unverified.
 
 Language-and-accessibility SDD-015: user-amended M9 English-first defaults, saved preference preservation, bilingual status/error coverage and accessible shared controls are traced in docs/evidence/language-and-accessibility.md. Native 360dp/130% text inspection is distinct from unexecuted TalkBack/iOS acceptance.
+
+Offline-integration SDD-016/017/019: all eight Android scenarios, actual device reboot, original action/file retention, deduplication, 401/413/422, persisted backoff, stale-v2 → explicit-v3, shared-phone counters and Approved-after-replay are recorded in docs/evidence/offline-integration.md. No product fix was needed. Recordings, iOS/low-end/release-binary behavior and real-backend sign-off remain outside this evidence.

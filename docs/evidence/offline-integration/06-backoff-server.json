@@ -1,0 +1,85 @@
+{
+  "terms": {
+    "termsVersion": "v2",
+    "revision": 6
+  },
+  "receipts": [
+    {
+      "workerId": "ana",
+      "clientActionId": "11d79454-5e2f-4670-beac-f5e31f8f6b7e"
+    },
+    {
+      "workerId": "ana",
+      "clientActionId": "277c9a33-e1a6-42ea-843f-8e5c9aa3668a"
+    },
+    {
+      "workerId": "ana",
+      "clientActionId": "b87f160e-dc68-4c51-9a94-ca8bcd31fe4e"
+    },
+    {
+      "workerId": "ana",
+      "clientActionId": "e2cc2dee-6471-4986-a422-96cb47ab897d"
+    }
+  ],
+  "acceptances": [
+    {
+      "acceptanceId": "seed-bruno-v2",
+      "workerId": "bruno",
+      "clientActionId": "seed-bruno-v2",
+      "termsVersionId": "v2"
+    },
+    {
+      "acceptanceId": "09e348dd-d7d8-4d01-a974-ee351924c516",
+      "workerId": "ana",
+      "clientActionId": "e2cc2dee-6471-4986-a422-96cb47ab897d",
+      "termsVersionId": "v2"
+    }
+  ],
+  "documentSubmissions": [
+    {
+      "submissionId": "seed-bruno-passport",
+      "workerId": "bruno",
+      "clientActionId": "seed-bruno-passport",
+      "documentType": "passport",
+      "status": "approved",
+      "correctionReason": null,
+      "serverRevision": 1
+    },
+    {
+      "submissionId": "seed-carla-passport",
+      "workerId": "carla",
+      "clientActionId": "seed-carla-passport",
+      "documentType": "passport",
+      "status": "correction_requested",
+      "correctionReason": "Foto borrosa, vuelva a tomarla",
+      "serverRevision": 1
+    },
+    {
+      "submissionId": "8bc8903c-aa54-4bd7-8640-684b0317e21a",
+      "workerId": "ana",
+      "clientActionId": "b87f160e-dc68-4c51-9a94-ca8bcd31fe4e",
+      "documentType": "passport",
+      "status": "correction_requested",
+      "correctionReason": "Foto borrosa, vuelva a tomarla",
+      "serverRevision": 5
+    },
+    {
+      "submissionId": "236c746a-5cb6-48d7-b210-6adfb541b3fb",
+      "workerId": "ana",
+      "clientActionId": "277c9a33-e1a6-42ea-843f-8e5c9aa3668a",
+      "documentType": "ds160_confirmation",
+      "status": "pending_review",
+      "correctionReason": null,
+      "serverRevision": 4
+    },
+    {
+      "submissionId": "90befff9-5589-4174-8cad-d36634e58405",
+      "workerId": "ana",
+      "clientActionId": "11d79454-5e2f-4670-beac-f5e31f8f6b7e",
+      "documentType": "passport",
+      "status": "pending_review",
+      "correctionReason": null,
+      "serverRevision": 6
+    }
+  ]
+}
