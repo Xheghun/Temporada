@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": [
+    "./**/*.mts",
+    "../../src/core/database/connection.ts",
+    "../../src/core/database/migrations/index.ts",
+    "../../src/core/database/repositories/**/*.ts",
+    "../../src/core/offline/domain/**/*.ts"
+  ]
+}

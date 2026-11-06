@@ -51,3 +51,7 @@ See [scaffold evidence](docs/evidence/scaffold-progress.md) for executed command
 [AGENTS.md](AGENTS.md) and the root specs define safety invariants and dependency boundaries. A single [coding ledger](docs/coding-ledger.md) spans all changes; target four hours, hard stop five. SDK minimum OS support does not establish acceptable behavior/performance on an Android 9 device with 2 GB RAM; that testing remains pending.
 
 Mock API evidence is in [mock-api verification](docs/evidence/mock-api.md). Root typecheck/test:ci cover both packages; Node backend files use a separate tsconfig and never enter the mobile bundle. The backend uses experimental Node SQLite and refuses production startup.
+
+### Persistent local intent
+
+Worker-scoped SQLite repositories now cache assignments and atomically record terms/document intent with stable action IDs. Run `npm run test:persistence` for 15 file-backed tests. See [persistence contracts](docs/persistence.md) and [Android restart evidence](docs/evidence/persistent-outbox.md). Network sync and worker capture screens remain separate changes.

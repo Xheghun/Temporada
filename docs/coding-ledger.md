@@ -20,3 +20,13 @@ Publication/CI follow-up: 2026-11-06T16:23:47+00:00 to 2026-11-06T16:27:37.90840
 Mock API implementation started 2026-11-06T16:38:00.057537+00:00. Prior recorded total: 14.68 minutes. Budget 20 minutes; cumulative hard stop remains 300 minutes.
 
 Mock-api coding/setup and local verification: 2026-11-06T16:38:00.057537+00:00 to 2026-11-06T16:49:00.028354+00:00, 11.00 minutes. Updated recorded cumulative total 25.68 minutes. Scope implemented, 12 backend tests pass; remaining publication/CI verification tracked separately. No sibling feature started.
+
+Persistent-outbox started 2026-11-06T17:14:43.324231+00:00. Prior recorded cumulative total 25.68 minutes. Budget 35 minutes, cumulative coding hard stop 300 minutes.
+
+Persistent-outbox implementation/local verification ended 2026-11-06T17:33:50.816167+00:00: 19.12 minutes; recorded cumulative 44.80 minutes. 41 automated tests and Android force-stop/relaunch persistence probe passed. Publication/CI follow-up is tracked separately; no recording or sibling implementation claimed.
+
+PR publication and handoff preparation: 2026-11-06T17:33:50.816167+00:00 to 2026-11-06T17:34:40+00:00, 0.82 minutes. Updated recorded cumulative total: 45.62 minutes. PR #4; subsequent hosted CI waiting is not active coding.
+
+User-reported probe correction: 2026-11-06T17:40:20+00:00 to 2026-11-06T17:41:57.136027+00:00, 1.62 minutes (conservatively includes investigation). Recorded cumulative: 47.24 minutes. Repeated-check Android evidence retained without reset/reseed; no sibling change started.
+
+Maintainability review follow-up: 2026-11-06T17:53:00+00:00 to 2026-11-06T17:57:29.655530+00:00, 4.49 minutes (conservative start, includes verification). Recorded cumulative: 51.73 minutes. Scoped repository refactor and JSON validation; 44 tests pass.

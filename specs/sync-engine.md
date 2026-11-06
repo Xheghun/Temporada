@@ -4,7 +4,7 @@ Interfaces: outbox persistence, transactional business repositories, API transpo
 
 Enqueue: validate against captured worker/session and exact displayed version/catalog; assign UUID once; ensure durable bytes; commit immutable local business intent + outbox; notify; request sync. Local success does not wait for HTTP.
 
-Processing: single-flight guard → verify session/worker → load eligible captured-worker actions ordered by created_at/id → respect resource dependencies → atomically claim → recheck authorization → transmit original payload/ID → classify response → transactionally update captured worker rows → emit → release in finally → schedule earliest persistent deadline. On worker switch stop future old-worker dispatch and schedule new worker after settlement; late response never populates another view.
+Processing: single-flight guard → verify session/worker → load eligible captured-worker actions ordered by persisted enqueue sequence → respect resource dependencies → atomically claim → recheck authorization → transmit original payload/ID → classify response → transactionally update captured worker rows → emit → release in finally → schedule earliest persistent deadline. On worker switch stop future old-worker dispatch and schedule new worker after settlement; late response never populates another view.
 
 | Outcome | Persistent response |
 |---|---|

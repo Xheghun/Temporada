@@ -32,3 +32,5 @@ Budget: 50 coding minutes. One cumulative programme ledger targets 240 coding mi
 ## Migration Plan
 
 Branch from current reviewed/merged main (scaffold establishes the initial baseline, preserving existing files). Run applicable checks, prepare the scoped PR and stop. No release, credential handling or merge is authorized by applying this change. Roll back unmerged work through its isolated branch; do not delete durable user data or rewrite shared history.
+
+Persistence interface note: the merged persistent-outbox repository will return actions in database-generated enqueue sequence order, preserving user intent when device timestamps tie or move backwards. UUID remains action identity. This is the deterministic ordering to use in engine selection; do not substitute timestamp/UUID sorting.

@@ -6,16 +6,18 @@
   "dependencies": {
     "expo": "~58.0.23",
     "expo-constants": "~58.0.15",
+    "expo-crypto": "~58.0.7",
     "expo-dev-client": "~58.0.18",
+    "expo-file-system": "~58.0.13",
     "expo-linking": "~58.0.16",
     "expo-router": "~58.0.30",
     "expo-sqlite": "~58.0.15",
     "expo-status-bar": "~58.0.4",
     "react": "19.3.0",
+    "react-dom": "19.3.0",
     "react-native": "0.88.1",
     "react-native-safe-area-context": "~5.11.1",
-    "react-native-screens": "~4.30.1",
-    "react-dom": "19.3.0"
+    "react-native-screens": "~4.30.1"
   },
   "devDependencies": {
     "@types/jest": "30.0.0",
@@ -32,16 +34,17 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "typecheck": "tsc --noEmit && tsc --project mock-server/tsconfig.json",
+    "typecheck": "tsc --noEmit && tsc --project mock-server/tsconfig.json && tsc --project testing/persistence/tsconfig.json",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test:ci": "jest --ci --runInBand && node --test scripts/check-architecture.test.mjs && npm run test:mock",
+    "test:ci": "jest --ci --runInBand && node --test scripts/check-architecture.test.mjs && npm run test:mock && npm run test:persistence",
     "arch:check": "node scripts/check-architecture.mjs",
     "expo:check": "expo install --check",
     "config:check": "expo config --type public",
     "mock:start": "npm start --prefix mock-server",
-    "test:mock": "npm test --prefix mock-server"
+    "test:mock": "npm test --prefix mock-server",
+    "test:persistence": "node --experimental-strip-types --test testing/persistence/*.test.mts"
   },
   "private": true,
   "engines": {
