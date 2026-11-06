@@ -10,10 +10,12 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 
 ## 2. PR handoff
 
-- [ ] 2.1 Prepare only the `home-and-terms` PR on `feature/SDD-012-home-and-terms` with relevant requirement links, executed check results, scoped documentation and explicit limitations; verify changed files remain in scope and record PR URL or remote/reviewer blocker. Stop here without implementing another change.
+- [x] 2.1 Prepare only the `home-and-terms` PR on `feature/SDD-012-home-and-terms` with relevant requirement links, executed check results, scoped documentation and explicit limitations; verify changed files remain in scope and record PR URL or remote/reviewer blocker. Stop here without implementing another change.
 
 ## Workflow follow-up
 
 - Human reviews/merges this PR; record merge and required CI evidence separately from implementation completion.
 - Only after review and a new explicit request may another named change be applied. Never treat completing this checklist as authorization for all siblings.
 - Archive/sync this change only through the appropriate later workflow; preserved programme reference is not an active or completed change.
+
+Scoped handoff: https://github.com/Xheghun/Temporada/pull/7. Implementation/evidence in docs/evidence/home-and-terms.md; human review/merge pending.

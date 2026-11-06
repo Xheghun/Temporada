@@ -50,3 +50,5 @@ Worker-authentication publication/handoff: 2026-11-06T19:15:19.428501+00:00 to 2
 Home-and-terms inspection/setup conservatively started 2026-11-06T19:26:00+00:00; implementation 2026-11-06T19:29:23.770367+00:00. Prior cumulative 108.05 minutes; target 15 minutes for this scope, hard cumulative stop 300 minutes.
 
 Home-and-terms implementation/local verification ended 2026-11-06T19:45:13.495366+00:00: 19.22 minutes including inspection, evidence and verification. Recorded cumulative: 127.27 minutes. Scope exceeded its 15-minute target during native recovery checks; cumulative remains below 300. 98 tests and Android offline v3 confirmation/force-stop/reconnect passed. Native stale UI and complete accessibility remain unverified; no recording claimed. Publication/CI follow-up recorded separately.
+
+Home-and-terms publication/handoff: 2026-11-06T19:45:13.495366+00:00 to 2026-11-06T19:45:40.882635+00:00, 0.46 minutes. Recorded cumulative: 127.73 minutes. PR https://github.com/Xheghun/Temporada/pull/7; hosted CI waiting and human review follow separately.
