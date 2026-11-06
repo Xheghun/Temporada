@@ -547,3 +547,115 @@ test('native probe accepts repeated recovery after reopen but rejects changed in
     await f.close();
   }
 });
+
+test('persisted action JSON is validated before listing or dispatch eligibility without deleting intent', async () => {
+  const f = await fixture();
+  try {
+    const worker = f.worker('ana');
+    await worker.cacheAssignment(assignmentFixture('ana'));
+    const id = randomUUID();
+    const valid = {
+      kind: 'terms_acceptance',
+      workerId: 'ana',
+      clientActionId: id,
+      termsVersionId: 'v2',
+    };
+    const invalid = [
+      '{broken',
+      'null',
+      '[]',
+      JSON.stringify({ ...valid, termsVersionId: 2 }),
+      JSON.stringify({ ...valid, termsVersionId: ' ' }),
+      JSON.stringify({ ...valid, kind: 'unknown' }),
+      JSON.stringify({ ...valid, workerId: 'carla' }),
+      JSON.stringify({ ...valid, clientActionId: randomUUID() }),
+      JSON.stringify({
+        ...valid,
+        kind: 'document_upload',
+        documentType: 'passport',
+        localSubmissionId: id,
+        sha256: 'not-a-digest',
+        replacesSubmissionId: null,
+      }),
+    ];
+    for (const json of invalid) {
+      await f.db.run(
+        `INSERT INTO outbox_actions
+        (id,worker_id,client_action_id,action_type,payload_json,status,next_attempt_at,created_at,updated_at)
+        VALUES (?,?,?,?,?,'queued',0,100,100)`,
+        [
+          id,
+          'ana',
+          id,
+          json.includes('document_upload')
+            ? 'document_upload'
+            : 'terms_acceptance',
+          json,
+        ],
+      );
+      await assert.rejects(
+        worker.listActions(),
+        /invalid_persisted|identity_mismatch/,
+      );
+      await assert.rejects(
+        worker.eligibleActions(100),
+        /invalid_persisted|identity_mismatch/,
+      );
+      assert.equal(
+        (
+          await f.db.first<{ count: number }>(
+            'SELECT COUNT(*) AS count FROM outbox_actions WHERE worker_id=?',
+            ['ana'],
+          )
+        )?.count,
+        1,
+      );
+      await f.db.run(
+        'DELETE FROM outbox_actions WHERE worker_id=? AND client_action_id=?',
+        ['ana', id],
+      );
+    }
+    const terms = await worker.enqueueTerms('v2');
+    const upload = await worker.enqueueDocument('passport', f.image());
+    await f.reopen();
+    assert.deepEqual(
+      (await f.worker('ana').listActions()).map((a) => a.payload),
+      [terms.payload, upload.payload],
+    );
+  } finally {
+    await f.close();
+  }
+});
+
+test('persisted localized summaries and catalog labels reject malformed shapes', async () => {
+  const f = await fixture();
+  try {
+    const worker = f.worker('ana');
+    await worker.cacheAssignment(assignmentFixture('ana'));
+    for (const json of [
+      '{broken',
+      'null',
+      '[]',
+      '{}',
+      '{"es":"texto","en":3}',
+      '{"es":" ","en":"text"}',
+    ]) {
+      await f.db.run('UPDATE terms SET content_json=? WHERE worker_id=?', [
+        json,
+        'ana',
+      ]);
+      await assert.rejects(worker.getAssignment(), /invalid_persisted/);
+    }
+    await worker.cacheAssignment(assignmentFixture('ana'));
+    await f.db.run(
+      'UPDATE document_catalog SET content_json=? WHERE worker_id=? AND document_type=?',
+      ['{"es":"texto"}', 'ana', 'passport'],
+    );
+    await assert.rejects(
+      worker.getAssignment(),
+      /invalid_persisted_localized_text/,
+    );
+  } finally {
+    await f.close();
+  }
+});

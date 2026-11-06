@@ -42,3 +42,5 @@ Expect RECOVERY_PASSED: same two Carla IDs/payloads and saved fixture after proc
 Executed results and native screenshots: [verification evidence](evidence/persistent-outbox.md).
 
 The verify route can be reopened after successful recovery. It permits the probe's own sending-to-queued transition while still comparing immutable intent and retry metadata. Reset/reseed is only necessary to start a new proof.
+
+Repository reads validate persisted action JSON (including row/payload identity agreement) and Spanish/English text shapes before returning data. Malformed records raise explicit errors and remain stored; they are not silently discarded. Assignment caching is split into private validation, cache, history-merge and projection helpers within the same transaction.

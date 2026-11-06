@@ -27,3 +27,7 @@ During development the probe reset initially used an incorrect native path-to-UR
 The user reported `actions_changed_after_process_restart` after handoff. Reproduced on the emulator: the original probe compared all fields to its sending snapshot even though its first run had already recovered sending to queued. The probe now permits only that recovery transition and its updated timestamp; all other action fields remain checked. No production persistence behavior changed. A new real-SQLite test verifies repeated checks after reopen and rejection of changed IDs, payloads, files, retry counts and unexpected status changes.
 
 The existing proof data was retained (no reset/reseed). Hot refresh and another force-stop/relaunch both returned RECOVERY_PASSED. [Repeated recovery screenshot](outbox-repeated-recovery.png), [UI hierarchy](outbox-repeated-recovery.xml).
+
+## Maintainability review follow-up
+
+Assignment caching now delegates to private validation, assignment/terms cache, catalog cache, submission merge and projection helpers. Repository INSERTs name columns explicitly and long SQL is multiline. Persisted payloads and localized JSON are runtime-validated on reads, including worker/action/type consistency. Two new real-SQLite tests cover malformed JSON/shapes, identity mismatches, retained invalid rows and valid round trips. All 44 automated tests passed (18 persistence); typecheck, lint and architecture checks passed. The existing native fixture still displayed RECOVERY_PASSED after the refactor; no reset/reseed was performed.
