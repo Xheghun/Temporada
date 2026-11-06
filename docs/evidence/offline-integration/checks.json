@@ -21,7 +21,7 @@
   ],
   "androidScenariosPassed": [1, 2, 3, 4, 5, 6, 7, 8],
   "applicationLogicModified": false,
-  "hostedCi": "pending PR creation",
+  "hostedCi": "pending on PR #11; inspect GitHub Actions for the current commit",
   "notRun": [
     "iOS",
     "Android 9/2GB performance",
