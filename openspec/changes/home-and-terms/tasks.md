@@ -6,7 +6,7 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 
 ## 1. Scoped implementation and verification
 
-- [ ] 1.1 SDD-012 Implement cached Home/timeline/network/pending/attention counts and exact-version Terms UI through services; verify offline cached startup, local feedback and stale reconfirmation rendering; document actual supported timeline facts.
+- [x] 1.1 SDD-012 Implement cached Home/timeline/network/pending/attention counts and exact-version Terms UI through services; verify offline cached startup, local feedback and stale reconfirmation rendering; document actual supported timeline facts.
 
 ## 2. PR handoff
 

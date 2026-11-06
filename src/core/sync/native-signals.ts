@@ -16,9 +16,9 @@ export function nativeSignals(
   const stop = NetInfo.addEventListener((state) => {
     const next =
       state.isConnected === true && state.isInternetReachable !== false;
-    const restored = next && !online;
+    const changed = next !== online;
     online = next;
-    if (restored) listeners.forEach((notify) => notify());
+    if (changed) listeners.forEach((notify) => notify());
   });
   return {
     connectivity: { online: () => online },

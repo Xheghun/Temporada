@@ -105,3 +105,11 @@ export interface WorkerPersistence {
   claimAction(clientActionId: string, now: number): Promise<boolean>;
   recoverSending(): Promise<number>;
 }
+
+export interface WorkerViewData {
+  assignment: AssignmentSnapshot | null;
+  actions: OutboxAction[];
+  cachedAt: number | null;
+  refreshNeeded: boolean;
+  refreshError: string | null;
+}

@@ -6,7 +6,7 @@ export default function Index() {
     <Redirect
       href={
         state.phase === 'ready'
-          ? '/(worker)/identity'
+          ? '/(worker)/home'
           : state.phase === 'worker_selection'
             ? '/(auth)/select-worker'
             : state.phase === 'code_sent'

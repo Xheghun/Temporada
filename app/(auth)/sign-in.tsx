@@ -24,7 +24,7 @@ export default function SignIn() {
     defaultValues: { phone: '' },
     resolver: zodResolver(phoneFormSchema),
   });
-  if (state.phase === 'ready') return <Redirect href="/(worker)/identity" />;
+  if (state.phase === 'ready') return <Redirect href="/(worker)/home" />;
   if (state.phase === 'worker_selection')
     return <Redirect href="/(auth)/select-worker" />;
   if (state.phase === 'code_sent') return <Redirect href="/(auth)/verify" />;

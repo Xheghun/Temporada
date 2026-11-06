@@ -14,7 +14,7 @@ test('v1 -> v2 migration preserves intent and refresh flags, is repeatable and r
     );
     // Reconstruct the shipped v1 schema by removing only fields introduced by v2.
     await f.db.exec(
-      'ALTER TABLE refresh_state DROP COLUMN attempt_count; ALTER TABLE refresh_state DROP COLUMN next_attempt_at; ALTER TABLE refresh_state DROP COLUMN last_error_code; PRAGMA user_version=1',
+      'ALTER TABLE refresh_state DROP COLUMN attempt_count; ALTER TABLE refresh_state DROP COLUMN next_attempt_at; ALTER TABLE refresh_state DROP COLUMN last_error_code; DROP TABLE app_settings; PRAGMA user_version=1',
     );
     await migrateDatabase(f.db);
     await migrateDatabase(f.db);

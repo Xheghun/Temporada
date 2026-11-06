@@ -20,10 +20,7 @@ export default function RootLayout() {
           name="(auth)/select-worker"
           options={{ title: t('pickTitle'), headerBackVisible: false }}
         />
-        <Stack.Screen
-          name="(worker)"
-          options={{ title: t('identityTitle'), headerBackVisible: false }}
-        />
+        <Stack.Screen name="(worker)" options={{ headerShown: false }} />
       </Stack>
     </AuthProvider>
   );

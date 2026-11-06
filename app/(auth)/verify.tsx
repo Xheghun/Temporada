@@ -24,7 +24,7 @@ export default function Verify() {
     defaultValues: { otp: '' },
     resolver: zodResolver(otpFormSchema),
   });
-  if (state.phase === 'ready') return <Redirect href="/(worker)/identity" />;
+  if (state.phase === 'ready') return <Redirect href="/(worker)/home" />;
   if (state.phase === 'worker_selection')
     return <Redirect href="/(auth)/select-worker" />;
   if (state.phase !== 'code_sent') return <Redirect href="/(auth)/sign-in" />;

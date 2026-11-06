@@ -12,7 +12,7 @@ export default function SelectWorker() {
   const { t } = useTranslation(),
     auth = useAuth(),
     state = useAuthSnapshot();
-  if (state.phase === 'ready') return <Redirect href="/(worker)/identity" />;
+  if (state.phase === 'ready') return <Redirect href="/(worker)/home" />;
   if (state.phase !== 'worker_selection')
     return <Redirect href="/(auth)/sign-in" />;
   return (

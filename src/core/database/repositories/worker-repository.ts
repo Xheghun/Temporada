@@ -7,6 +7,7 @@ import type {
   LocalSubmission,
   OutboxAction,
   WorkerPersistence,
+  WorkerViewData,
 } from '../../offline/domain/types.ts';
 
 type ActionRow = Omit<OutboxAction, 'payload'> & { payloadJson: string };
@@ -375,15 +376,45 @@ export class WorkerRepository implements WorkerPersistence {
   }
 
   async getAssignment(): Promise<AssignmentSnapshot | null> {
+    return this.db.transaction((tx) => this.readAssignment(tx));
+  }
+  async readView(): Promise<WorkerViewData> {
     return this.db.transaction(async (tx) => {
-      const worker = await tx.first<AssignmentSnapshot['worker']>(
-        'SELECT worker_id AS workerId,display_name AS displayName FROM workers WHERE worker_id=?',
+      const assignment = await this.readAssignment(tx);
+      const actions = (
+        await tx.all<ActionRow>(
+          `SELECT ${actionColumns} FROM outbox_actions WHERE worker_id=? ORDER BY sequence`,
+          [this.workerId],
+        )
+      ).map(decodeActionRow);
+      const cache = await tx.first<{ cachedAt: number }>(
+        'SELECT cached_at AS cachedAt FROM assignments WHERE worker_id=?',
         [this.workerId],
       );
-      const row = await tx.first<
-        AssignmentSnapshot['assignment'] & { version: string; revision: number }
-      >(
-        `SELECT order_id AS orderId,
+      const refresh = await tx.first<{ needed: number; error: string | null }>(
+        `SELECT (assignment_refresh_needed OR terms_refresh_needed) AS needed,last_error_code AS error FROM refresh_state WHERE worker_id=?`,
+        [this.workerId],
+      );
+      return {
+        assignment,
+        actions,
+        cachedAt: cache?.cachedAt ?? null,
+        refreshNeeded: !!refresh?.needed,
+        refreshError: refresh?.error ?? null,
+      };
+    });
+  }
+  private async readAssignment(
+    tx: SqlExecutor,
+  ): Promise<AssignmentSnapshot | null> {
+    const worker = await tx.first<AssignmentSnapshot['worker']>(
+      'SELECT worker_id AS workerId,display_name AS displayName FROM workers WHERE worker_id=?',
+      [this.workerId],
+    );
+    const row = await tx.first<
+      AssignmentSnapshot['assignment'] & { version: string; revision: number }
+    >(
+      `SELECT order_id AS orderId,
           employer,
           worksite,
           season_start AS seasonStart,
@@ -392,76 +423,75 @@ export class WorkerRepository implements WorkerPersistence {
           server_revision AS revision
         FROM assignments
         WHERE worker_id=?`,
-        [this.workerId],
-      );
-      if (!worker || !row) return null;
-      const terms = await tx.first<{
-        content: string;
-        status: AssignmentSnapshot['terms']['serverAcceptanceStatus'];
-      }>(
-        `SELECT content_json AS content,
+      [this.workerId],
+    );
+    if (!worker || !row) return null;
+    const terms = await tx.first<{
+      content: string;
+      status: AssignmentSnapshot['terms']['serverAcceptanceStatus'];
+    }>(
+      `SELECT content_json AS content,
           server_acceptance_status AS status
         FROM terms
         WHERE worker_id=? AND terms_version_id=?`,
-        [this.workerId, row.version],
-      );
-      if (!terms) throw new Error('missing_cached_terms');
-      const catalog = await tx.all<{
-        documentType: string;
-        required: number;
-        label: string;
-      }>(
-        `SELECT document_type AS documentType,
+      [this.workerId, row.version],
+    );
+    if (!terms) throw new Error('missing_cached_terms');
+    const catalog = await tx.all<{
+      documentType: string;
+      required: number;
+      label: string;
+    }>(
+      `SELECT document_type AS documentType,
           required,
           content_json AS label
         FROM document_catalog
         WHERE worker_id=? AND active=1
         ORDER BY document_type`,
-        [this.workerId],
-      );
-      const submissions = await tx.all<LocalSubmission>(
-        `SELECT ${submissionColumns}
+      [this.workerId],
+    );
+    const submissions = await tx.all<LocalSubmission>(
+      `SELECT ${submissionColumns}
         FROM document_submissions s
         LEFT JOIN outbox_actions a ON a.worker_id=s.worker_id AND a.client_action_id=s.client_action_id
         WHERE s.worker_id=?
         ORDER BY s.created_at,
           s.submission_id`,
-        [this.workerId],
-      );
-      const { version, revision, ...assignment } = row;
-      return {
-        worker,
-        assignment,
-        terms: {
-          termsVersionId: version,
-          summary: decodeLocalizedText(terms.content),
-          serverAcceptanceStatus: terms.status,
-        },
-        requiredDocuments: catalog.map((d) => ({
-          documentType: d.documentType,
-          required: Boolean(d.required),
-          label: decodeLocalizedText(d.label),
+      [this.workerId],
+    );
+    const { version, revision, ...assignment } = row;
+    return {
+      worker,
+      assignment,
+      terms: {
+        termsVersionId: version,
+        summary: decodeLocalizedText(terms.content),
+        serverAcceptanceStatus: terms.status,
+      },
+      requiredDocuments: catalog.map((d) => ({
+        documentType: d.documentType,
+        required: Boolean(d.required),
+        label: decodeLocalizedText(d.label),
+      })),
+      documentSubmissions: submissions
+        .filter(
+          (s) =>
+            s.serverSubmissionId !== null &&
+            s.serverStatus !== null &&
+            s.serverRevision !== null,
+        )
+        .map((s) => ({
+          submissionId: s.serverSubmissionId!,
+          clientActionId: s.clientActionId!,
+          documentType: s.documentType,
+          status: s.serverStatus!,
+          correctionReason: s.correctionReason,
+          serverRevision: s.serverRevision!,
+          createdAt: s.serverCreatedAt ?? s.createdAt,
+          replacesSubmissionId: s.replacesSubmissionId,
         })),
-        documentSubmissions: submissions
-          .filter(
-            (s) =>
-              s.serverSubmissionId !== null &&
-              s.serverStatus !== null &&
-              s.serverRevision !== null,
-          )
-          .map((s) => ({
-            submissionId: s.serverSubmissionId!,
-            clientActionId: s.clientActionId!,
-            documentType: s.documentType,
-            status: s.serverStatus!,
-            correctionReason: s.correctionReason,
-            serverRevision: s.serverRevision!,
-            createdAt: s.serverCreatedAt ?? s.createdAt,
-            replacesSubmissionId: s.replacesSubmissionId,
-          })),
-        serverRevision: revision,
-      };
-    });
+      serverRevision: revision,
+    };
   }
 
   async listSubmissions(): Promise<LocalSubmission[]> {
