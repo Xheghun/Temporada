@@ -4,7 +4,7 @@ Use the explicitly named change in specs/tasks.md. Scaffold first; a new descrip
 
 Run npm run typecheck, lint, format:check, arch:check, test:ci, expo:check and config:check. Run npx expo-doctor and Android export/startup where applicable. Add tests/docs with the behavior they verify. No fake tests, swallowed errors or claimed unexecuted passes.
 
-PR descriptions lead with the concrete problem/result, reference requirements, explain material decisions/API/schema impact and list actual verification, Android evidence and remaining limitations. Avoid repeating each changed line or conversational history. Use the PR template as a guide, not filler.
+Write PR descriptions directly: what changed, what was tested, and what still needs work. Include tickets, requirements and API/schema decisions when they help review. Avoid generic “Problem and resulting behavior” or “Risks and human review” headings, repeated disclaimers, line-by-line diff narration and conversational history. This is the default, without a separate reminder.
 
 Repository administrator must protect main: require Validate / validate, at least one human approval, dismiss stale approvals, restrict direct pushes and prevent bypass. CI naming checks do not replace these settings. Backend contract integration, security changes, signing credentials and releases need human approval. No automated merge or direct main pushes.
 

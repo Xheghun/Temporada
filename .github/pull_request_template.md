@@ -1,15 +1,13 @@
-## Problem and behavior
+<!-- Start with one sentence explaining the change. Include the ticket ID. -->
 
-<!-- Concrete problem, resulting behavior, ticket and requirement IDs. -->
+### Changes
 
-## Decisions and scope
+<!-- Concrete changes and any decisions the reviewer needs to understand. -->
 
-<!-- Material architecture/API/schema decisions. Explain relevant trade-offs. -->
+### Checks
 
-## Verification
+<!-- Commands actually run and results. Include relevant Android evidence. -->
 
-<!-- Actual commands/results and Android evidence. Label unrun checks NOT RUN. -->
+### Remaining work
 
-## Risks and review
-
-<!-- Remaining limitations, backend contract or security review needed. Human review required; never imply approval. -->
+<!-- Include only if there is outstanding setup, a limitation or required approval. -->

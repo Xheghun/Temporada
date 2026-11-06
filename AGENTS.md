@@ -31,7 +31,7 @@ Only fictional assessment records. Never put tokens, credentials, signing materi
 
 ## Git and PRs
 
-Use chore/, feature/ or fix/ plus ticket ID and a descriptive purpose; never codex/, agents/ or any AI branding. Scaffold branch: chore/SDD-001-project-scaffold. One scoped change/feature per branch and PR, from human-reviewed merged main. No direct main push, auto-merge, invented approval or shared-history rewrite. Stop at scoped PR handoff; human-reviewed merge gates the next explicit apply. PR description states problem/result, requirements, material decisions, actual verification and risks without bloated diff narration. SDD IDs are provisional local work IDs.
+Use chore/, feature/ or fix/ plus ticket ID and a descriptive purpose; never codex/, agents/ or any AI branding. Scaffold branch: chore/SDD-001-project-scaffold. One scoped change/feature per branch and PR, from human-reviewed merged main. No direct main push, auto-merge, invented approval or shared-history rewrite. Stop at scoped PR handoff; human-reviewed merge gates the next explicit apply. PR descriptions must use direct, concrete language: what changed, what was tested, and any remaining work. Include ticket/requirement links and technical decisions only where useful to the reviewer. Avoid generic sections such as “Problem and resulting behavior” or “Risks and human review”, repeated caveats, conversational history, and restating the diff. This is the default for every PR; do not wait for the user to request a rewrite. SDD IDs are provisional local work IDs.
 
 ## Timebox and definition of done
 
