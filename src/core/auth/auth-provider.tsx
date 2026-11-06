@@ -9,7 +9,7 @@ import { AssignmentContext } from '../../features/assignment/hooks/use-assignmen
 import { AuthContext } from './auth-context';
 export { useAuth, useAuthSnapshot } from './auth-context';
 export function AuthProvider({ children }: PropsWithChildren) {
-  const { t } = useTranslation();
+  const { t: translate } = useTranslation();
   const [state, setState] = useState<
     | { kind: 'loading' | 'disabled' }
     | { kind: 'error'; message: 'runtimeError' | 'configurationError' }
@@ -57,10 +57,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
   return (
     <View style={{ flex: 1, justifyContent: 'center', padding: 24, gap: 16 }}>
       {state.kind === 'loading' ? (
-        <ActivityIndicator accessibilityLabel={t('loading')} />
+        <ActivityIndicator accessibilityLabel={translate('loading')} />
       ) : null}
       <Text selectable>
-        {t(
+        {translate(
           state.kind === 'loading'
             ? 'loading'
             : state.kind === 'disabled'

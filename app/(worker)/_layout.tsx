@@ -3,24 +3,27 @@ import { useTranslation } from 'react-i18next';
 import { useAuthSnapshot } from '@/core/auth/auth-provider';
 export default function WorkerLayout() {
   const state = useAuthSnapshot();
-  const { t } = useTranslation();
+  const { t: translate } = useTranslation();
   if (state.phase === 'worker_selection')
     return <Redirect href="/(auth)/select-worker" />;
   return state.phase === 'ready' ? (
     <Stack key={state.generation}>
       <Stack.Screen
         name="home"
-        options={{ title: t('home.title'), headerBackVisible: false }}
+        options={{ title: translate('home.title'), headerBackVisible: false }}
       />
       <Stack.Screen
         name="terms"
         options={{
-          title: t('home.terms'),
+          title: translate('home.terms'),
           headerBackVisible: true,
-          headerBackTitle: t('home.title'),
+          headerBackTitle: translate('home.title'),
         }}
       />
-      <Stack.Screen name="identity" options={{ title: t('identityTitle') }} />
+      <Stack.Screen
+        name="identity"
+        options={{ title: translate('identityTitle') }}
+      />
     </Stack>
   ) : (
     <Redirect href="/(auth)/sign-in" />

@@ -1,4 +1,4 @@
-import { ApiError, object } from './app.ts';
+import { ApiError, parseRequestObject } from './app.ts';
 
 export class Failures {
   latencyMs = 0;
@@ -8,7 +8,7 @@ export class Failures {
   private seed = 1;
 
   configure(value: unknown): void {
-    const body = object(value);
+    const body = parseRequestObject(value);
     const allowed = [
       'latencyMs',
       'serverErrorRate',
@@ -20,15 +20,16 @@ export class Failures {
       if (!allowed.includes(key))
         throw new ApiError(422, 'invalid_failure_control');
     for (const key of ['latencyMs', 'serverErrorRate', 'randomSeed'] as const) {
-      const v = body[key];
+      const value = body[key];
       if (
-        v !== undefined &&
-        (typeof v !== 'number' ||
-          !Number.isFinite(v) ||
-          v < 0 ||
-          (key === 'latencyMs' && v > 10000) ||
-          (key === 'serverErrorRate' && v > 1) ||
-          (key === 'randomSeed' && (!Number.isInteger(v) || v > 0xffffffff)))
+        value !== undefined &&
+        (typeof value !== 'number' ||
+          !Number.isFinite(value) ||
+          value < 0 ||
+          (key === 'latencyMs' && value > 10000) ||
+          (key === 'serverErrorRate' && value > 1) ||
+          (key === 'randomSeed' &&
+            (!Number.isInteger(value) || value > 0xffffffff)))
       )
         throw new ApiError(422, 'invalid_failure_control');
     }

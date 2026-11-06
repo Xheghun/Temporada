@@ -21,3 +21,5 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 Scoped handoff: https://github.com/Xheghun/Temporada/pull/7. Implementation/evidence in docs/evidence/home-and-terms.md; human review/merge pending.
 
 Review follow-up verified: explicit permanent-failure replacement of displayed v2/v3, atomic rollback, duplicate suppression and same-engine delivery. Five new tests; 103 total. Emulator replacement flow NOT RUN; see updated evidence.
+
+User-requested implementation-wide naming review completed on this open PR: repository/sync/auth/UI/backend/test/tooling identifiers clarified; AGENTS naming guidance and lint restriction added. Existing 103 tests and Android Home cold startup pass; no sibling feature implemented.

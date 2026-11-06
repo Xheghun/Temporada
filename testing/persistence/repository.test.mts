@@ -14,18 +14,19 @@ import type { DurableUpload } from '../../src/core/offline/domain/types.ts';
 async function fixture() {
   const directory = mkdtempSync(join(tmpdir(), 'mobile-persistence-'));
   const file = join(directory, 'worker.sqlite');
-  let db = await openTestDatabase(file);
+  let database = await openTestDatabase(file);
   const dependencies = { uuid: randomUUID, now: () => 100 };
   return {
     directory,
     file,
-    get db() {
-      return db;
+    get database() {
+      return database;
     },
-    worker: (id: string) => new WorkerRepository(db, id, dependencies),
+    worker: (workerId: string) =>
+      new WorkerRepository(database, workerId, dependencies),
     async reopen() {
-      await db.close();
-      db = await openTestDatabase(file);
+      await database.close();
+      database = await openTestDatabase(file);
     },
     image(workerId = 'ana'): DurableUpload {
       const name = join(directory, `${workerId}-passport.image`);
@@ -39,59 +40,68 @@ async function fixture() {
       };
     },
     async close() {
-      await db.close();
+      await database.close();
       rmSync(directory, { recursive: true, force: true });
     },
   };
 }
 
 test('versioned migrations can be reapplied without erasing cached worker data', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    await f.worker('ana').cacheAssignment(assignmentFixture('ana'));
-    await migrateDatabase(f.db);
-    await f.reopen();
+    await testContext.worker('ana').cacheAssignment(assignmentFixture('ana'));
+    await migrateDatabase(testContext.database);
+    await testContext.reopen();
     assert.equal(
-      (await f.db.first<{ user_version: number }>('PRAGMA user_version'))
-        ?.user_version,
+      (
+        await testContext.database.first<{ user_version: number }>(
+          'PRAGMA user_version',
+        )
+      )?.user_version,
       3,
     );
     assert.equal(
-      (await f.worker('ana').getAssignment())?.worker.displayName,
+      (await testContext.worker('ana').getAssignment())?.worker.displayName,
       'Ana López',
     );
-    assert.deepEqual(await f.db.all('PRAGMA foreign_key_check'), []);
+    assert.deepEqual(
+      await testContext.database.all('PRAGMA foreign_key_check'),
+      [],
+    );
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('TEST-02: real close/reopen preserves both immutable actions, bytes and interrupted-send recovery', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    let ana = f.worker('ana');
+    let ana = testContext.worker('ana');
     await ana.cacheAssignment(assignmentFixture('ana'));
-    const image = f.image();
+    const image = testContext.image();
     const terms = await ana.enqueueTerms('v2');
     const document = await ana.enqueueDocument('passport', image);
     assert.equal(await ana.claimAction(terms.clientActionId, 100), true);
     const before = await ana.listActions();
     assert.equal(before.length, 2);
-    await f.reopen();
-    ana = f.worker('ana');
+    await testContext.reopen();
+    ana = testContext.worker('ana');
     assert.deepEqual(await ana.listActions(), before);
     assert.equal(await ana.recoverSending(), 1);
     assert.equal(await ana.recoverSending(), 0);
     const recovered = await ana.listActions();
     assert.equal(
-      recovered.find((a) => a.clientActionId === terms.clientActionId)?.status,
+      recovered.find((action) => action.clientActionId === terms.clientActionId)
+        ?.status,
       'queued',
     );
-    for (const old of before) {
-      const current = recovered.find((a) => a.id === old.id);
+    for (const previousAction of before) {
+      const current = recovered.find(
+        (action) => action.id === previousAction.id,
+      );
       assert(current);
-      assert.deepEqual(current.payload, old.payload);
-      assert.equal(current.fileUri, old.fileUri);
+      assert.deepEqual(current.payload, previousAction.payload);
+      assert.equal(current.fileUri, previousAction.fileUri);
     }
     assert.equal(
       readFileSync(new URL(document.fileUri!), 'utf8'),
@@ -104,20 +114,20 @@ test('TEST-02: real close/reopen preserves both immutable actions, bytes and int
     assert.equal((await ana.listSubmissions())[0]?.serverStatus, null);
     assert.equal((await ana.listSubmissions())[0]?.deliveryStatus, 'queued');
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('worker scopes isolate cache, queues, claims and recovery across reopen and identity changes', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    const carla = f.worker('carla');
-    const bruno = f.worker('bruno');
+    const carla = testContext.worker('carla');
+    const bruno = testContext.worker('bruno');
     await carla.cacheAssignment(assignmentFixture('carla'));
     await bruno.cacheAssignment(assignmentFixture('bruno'));
     const upload = await carla.enqueueDocument(
       'passport',
-      f.image('carla'),
+      testContext.image('carla'),
       'seed-carla-passport',
     );
     await carla.claimAction(upload.id, 100);
@@ -130,35 +140,38 @@ test('worker scopes isolate cache, queues, claims and recovery across reopen and
       /worker_mismatch/,
     );
     await assert.rejects(
-      bruno.enqueueDocument('passport', f.image('carla')),
+      bruno.enqueueDocument('passport', testContext.image('carla')),
       /invalid_durable_upload/,
     );
-    await f.reopen();
-    assert.equal((await f.worker('carla').listActions())[0]?.status, 'sending');
-    assert.equal(await f.worker('carla').recoverSending(), 1);
-    assert.deepEqual(await f.worker('bruno').listActions(), []);
+    await testContext.reopen();
+    assert.equal(
+      (await testContext.worker('carla').listActions())[0]?.status,
+      'sending',
+    );
+    assert.equal(await testContext.worker('carla').recoverSending(), 1);
+    assert.deepEqual(await testContext.worker('bruno').listActions(), []);
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('failed outbox insert rolls back business intent and an unrelated enqueue can proceed', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    const ana = f.worker('ana');
+    const ana = testContext.worker('ana');
     await ana.cacheAssignment(assignmentFixture('ana'));
-    await f.db.exec(
+    await testContext.database.exec(
       "CREATE TRIGGER reject_upload BEFORE INSERT ON outbox_actions WHEN NEW.action_type='document_upload' BEGIN SELECT RAISE(ABORT,'test outbox failure'); END;",
     );
     await assert.rejects(
-      ana.enqueueDocument('passport', f.image()),
+      ana.enqueueDocument('passport', testContext.image()),
       /test outbox failure/,
     );
     assert.deepEqual(await ana.listSubmissions(), []);
     assert.deepEqual(await ana.listActions(), []);
     assert.equal(
       (
-        await f.db.first<{ pointer: string | null }>(
+        await testContext.database.first<{ pointer: string | null }>(
           "SELECT latest_local_action_id AS pointer FROM documents WHERE worker_id='ana' AND document_type='passport'",
         )
       )?.pointer,
@@ -166,50 +179,50 @@ test('failed outbox insert rolls back business intent and an unrelated enqueue c
     );
     assert.equal((await ana.enqueueTerms('v2')).status, 'queued');
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('late transaction failure rolls back an already inserted outbox row and submitted intent', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    const ana = f.worker('ana');
+    const ana = testContext.worker('ana');
     await ana.cacheAssignment(assignmentFixture('ana'));
-    await f.db.exec(
+    await testContext.database.exec(
       "CREATE TRIGGER reject_pointer BEFORE UPDATE ON documents BEGIN SELECT RAISE(ABORT,'test projection failure'); END;",
     );
     await assert.rejects(
-      ana.enqueueDocument('passport', f.image()),
+      ana.enqueueDocument('passport', testContext.image()),
       /test projection failure/,
     );
     assert.deepEqual(await ana.listActions(), []);
     assert.deepEqual(await ana.listSubmissions(), []);
-    await f.db.exec(
+    await testContext.database.exec(
       "CREATE TRIGGER reject_terms BEFORE INSERT ON terms_intents BEGIN SELECT RAISE(ABORT,'test terms failure'); END;",
     );
     await assert.rejects(ana.enqueueTerms('v2'), /test terms failure/);
     assert.deepEqual(await ana.listActions(), []);
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('new correction actions preserve historical review while stale snapshots cannot regress it', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    const carla = f.worker('carla');
+    const carla = testContext.worker('carla');
     await carla.cacheAssignment(assignmentFixture('carla'));
-    const a = await carla.enqueueDocument(
+    const firstAction = await carla.enqueueDocument(
       'passport',
-      f.image('carla'),
+      testContext.image('carla'),
       'seed-carla-passport',
     );
-    const b = await carla.enqueueDocument(
+    const secondAction = await carla.enqueueDocument(
       'passport',
-      f.image('carla'),
+      testContext.image('carla'),
       'seed-carla-passport',
     );
-    assert.notEqual(a.id, b.id);
+    assert.notEqual(firstAction.id, secondAction.id);
     assert.equal(
       (await carla.listSubmissions())[0]?.correctionReason,
       'Foto borrosa, vuelva a tomarla',
@@ -226,82 +239,91 @@ test('new correction actions preserve historical review while stale snapshots ca
     );
     assert.equal((await carla.listSubmissions())[0]?.serverStatus, 'approved');
     assert.equal((await carla.listActions()).length, 2);
-    const latest = await f.db.first<{ id: string }>(
+    const latest = await testContext.database.first<{ id: string }>(
       'SELECT latest_local_action_id AS id FROM documents WHERE worker_id=? AND document_type=?',
       ['carla', 'passport'],
     );
-    assert.equal(latest?.id, b.id);
+    assert.equal(latest?.id, secondAction.id);
     snapshot.documentSubmissions[0]!.status = 'correction_requested';
     await assert.rejects(
       carla.cacheAssignment(snapshot),
       /conflicting_review_revision/,
     );
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('immutable action metadata, ownership and relational references are enforced by SQLite', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    const ana = f.worker('ana');
+    const ana = testContext.worker('ana');
     await ana.cacheAssignment(assignmentFixture('ana'));
-    const a = await ana.enqueueTerms('v2');
+    const firstAction = await ana.enqueueTerms('v2');
     await assert.rejects(
-      f.db.run('UPDATE outbox_actions SET payload_json=? WHERE id=?', [
-        '{}',
-        a.id,
-      ]),
+      testContext.database.run(
+        'UPDATE outbox_actions SET payload_json=? WHERE id=?',
+        ['{}', firstAction.id],
+      ),
       /immutable_action/,
     );
-    await f.worker('bruno').cacheAssignment(assignmentFixture('bruno'));
+    await testContext
+      .worker('bruno')
+      .cacheAssignment(assignmentFixture('bruno'));
     await assert.rejects(
-      f.db.run('INSERT INTO terms_intents VALUES(?,?,?,?)', [
+      testContext.database.run('INSERT INTO terms_intents VALUES(?,?,?,?)', [
         'bruno',
-        a.id,
+        firstAction.id,
         'v2',
         100,
       ]),
     );
-    assert.deepEqual(await f.db.all('PRAGMA foreign_key_check'), []);
+    assert.deepEqual(
+      await testContext.database.all('PRAGMA foreign_key_check'),
+      [],
+    );
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('only cached versions/catalog and measured durable worker-owned files can be enqueued', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    const ana = f.worker('ana');
+    const ana = testContext.worker('ana');
     await ana.cacheAssignment(assignmentFixture('ana'));
     await assert.rejects(ana.enqueueTerms('v3'), /terms_not_cached/);
     await assert.rejects(
-      ana.enqueueDocument('unknown', f.image()),
+      ana.enqueueDocument('unknown', testContext.image()),
       /document_not_in_catalog/,
     );
     for (const file of [
-      { ...f.image(), uri: 'file:///cache/image' },
-      { ...f.image(), byteSize: 1_500_000 },
-      { ...f.image(), sha256: 'bad' },
+      { ...testContext.image(), uri: 'file:///cache/image' },
+      { ...testContext.image(), byteSize: 1_500_000 },
+      { ...testContext.image(), sha256: 'bad' },
     ])
       await assert.rejects(
         ana.enqueueDocument('passport', file),
         /invalid_durable_upload/,
       );
     await assert.rejects(
-      ana.enqueueDocument('passport', f.image(), 'another-worker-submission'),
+      ana.enqueueDocument(
+        'passport',
+        testContext.image(),
+        'another-worker-submission',
+      ),
       /replacement_not_owned/,
     );
     assert.deepEqual(await ana.listActions(), []);
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('concurrent claims are exclusive, and readers never see partial transactional writes', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    const ana = f.worker('ana');
+    const ana = testContext.worker('ana');
     await ana.cacheAssignment(assignmentFixture('ana'));
     const action = await ana.enqueueTerms('v2');
     assert.deepEqual(
@@ -312,18 +334,18 @@ test('concurrent claims are exclusive, and readers never see partial transaction
       [true, false],
     );
     let release: () => void = () => {};
-    const gate = new Promise<void>((r) => {
-      release = r;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
     });
     let began: () => void = () => {};
-    const started = new Promise<void>((r) => {
-      began = r;
+    const started = new Promise<void>((resolve) => {
+      began = resolve;
     });
-    const writer = f.db.transaction(async (tx) => {
-      await tx.run('UPDATE workers SET display_name=? WHERE worker_id=?', [
-        'updated',
-        'ana',
-      ]);
+    const writer = testContext.database.transaction(async (transaction) => {
+      await transaction.run(
+        'UPDATE workers SET display_name=? WHERE worker_id=?',
+        ['updated', 'ana'],
+      );
       began();
       await gate;
       throw new Error('rollback');
@@ -335,18 +357,18 @@ test('concurrent claims are exclusive, and readers never see partial transaction
     await failure;
     assert.equal((await reader)?.worker.displayName, 'Ana López');
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('server creation order survives local clock skew and a newer decision on an older submission', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    const carla = f.worker('carla');
+    const carla = testContext.worker('carla');
     await carla.cacheAssignment(assignmentFixture('carla'));
     const upload = await carla.enqueueDocument(
       'passport',
-      f.image('carla'),
+      testContext.image('carla'),
       'seed-carla-passport',
     );
     const snapshot = assignmentFixture('carla');
@@ -368,7 +390,7 @@ test('server creation order survives local clock skew and a newer decision on an
     await carla.cacheAssignment(snapshot);
     assert.equal(
       (
-        await f.db.first<{ id: string }>(
+        await testContext.database.first<{ id: string }>(
           'SELECT latest_server_submission_id AS id FROM documents WHERE worker_id=? AND document_type=?',
           ['carla', 'passport'],
         )
@@ -376,121 +398,130 @@ test('server creation order survives local clock skew and a newer decision on an
       'new-server-passport',
     );
     const local = (await carla.listSubmissions()).find(
-      (s) => s.submissionId === upload.id,
+      (submission) => submission.submissionId === upload.id,
     );
     assert.equal(local?.createdAt, 100);
     assert.equal(local?.serverCreatedAt, 50);
     assert.equal(local?.serverStatus, 'pending_review');
     assert.equal(local?.deliveryStatus, 'queued');
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('duplicate generated ID rejects atomically without replacing the earlier action', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    await f.worker('ana').cacheAssignment(assignmentFixture('ana'));
-    const id = randomUUID();
-    const repo = new WorkerRepository(f.db, 'ana', {
-      uuid: () => id,
+    await testContext.worker('ana').cacheAssignment(assignmentFixture('ana'));
+    const actionId = randomUUID();
+    const repo = new WorkerRepository(testContext.database, 'ana', {
+      uuid: () => actionId,
       now: () => 100,
     });
     const first = await repo.enqueueTerms('v2');
     await assert.rejects(repo.enqueueTerms('v2'));
     assert.deepEqual(await repo.listActions(), [first]);
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('future migration versions are rejected without silently downgrading the database', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    await f.db.exec('PRAGMA user_version=9');
-    await assert.rejects(migrateDatabase(f.db), /unsupported_database_version/);
+    await testContext.database.exec('PRAGMA user_version=9');
+    await assert.rejects(
+      migrateDatabase(testContext.database),
+      /unsupported_database_version/,
+    );
     assert.equal(
-      (await f.db.first<{ user_version: number }>('PRAGMA user_version'))
-        ?.user_version,
+      (
+        await testContext.database.first<{ user_version: number }>(
+          'PRAGMA user_version',
+        )
+      )?.user_version,
       9,
     );
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('enqueue sequence preserves intent order when clocks repeat or move backwards', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    await f.worker('ana').cacheAssignment(assignmentFixture('ana'));
+    await testContext.worker('ana').cacheAssignment(assignmentFixture('ana'));
     let now = 200;
-    const repo = new WorkerRepository(f.db, 'ana', {
+    const repo = new WorkerRepository(testContext.database, 'ana', {
       uuid: randomUUID,
       now: () => now,
     });
-    const a = await repo.enqueueTerms('v2');
-    const b = await repo.enqueueTerms('v2');
+    const firstAction = await repo.enqueueTerms('v2');
+    const secondAction = await repo.enqueueTerms('v2');
     now = 50;
-    const c = await repo.enqueueTerms('v2');
+    const thirdAction = await repo.enqueueTerms('v2');
     assert.deepEqual(
-      (await repo.listActions()).map((x) => x.id),
-      [a.id, b.id, c.id],
+      (await repo.listActions()).map((action) => action.id),
+      [firstAction.id, secondAction.id, thirdAction.id],
     );
-    await f.reopen();
+    await testContext.reopen();
     assert.deepEqual(
-      (await f.worker('ana').eligibleActions(300)).map((x) => x.id),
-      [a.id, b.id, c.id],
+      (await testContext.worker('ana').eligibleActions(300)).map(
+        (action) => action.id,
+      ),
+      [firstAction.id, secondAction.id, thirdAction.id],
     );
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('catalog refresh retains known historical submissions and pending files without allowing new retired types', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    const carla = f.worker('carla');
+    const carla = testContext.worker('carla');
     await carla.cacheAssignment(assignmentFixture('carla'));
     const action = await carla.enqueueDocument(
       'passport',
-      f.image('carla'),
+      testContext.image('carla'),
       'seed-carla-passport',
     );
     const next = assignmentFixture('carla');
     next.serverRevision = 2;
     next.requiredDocuments = next.requiredDocuments.filter(
-      (d) => d.documentType !== 'passport',
+      (document) => document.documentType !== 'passport',
     );
     await carla.cacheAssignment(next);
     assert.equal((await carla.listActions())[0]?.fileUri, action.fileUri);
     assert.equal((await carla.listSubmissions()).length, 2);
     assert.equal(
       (await carla.getAssignment())?.requiredDocuments.some(
-        (d) => d.documentType === 'passport',
+        (document) => document.documentType === 'passport',
       ),
       false,
     );
     await assert.rejects(
-      carla.enqueueDocument('passport', f.image('carla')),
+      carla.enqueueDocument('passport', testContext.image('carla')),
       /document_not_in_catalog/,
     );
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('cached newer terms never substitute the exact version passed to confirmation', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    const ana = f.worker('ana');
+    const ana = testContext.worker('ana');
     await ana.cacheAssignment(assignmentFixture('ana'));
     const next = assignmentFixture('ana');
     next.serverRevision = 2;
     next.terms.termsVersionId = 'v3';
     await ana.cacheAssignment(next);
-    const old = await ana.enqueueTerms('v2');
+    const previousAction = await ana.enqueueTerms('v2');
     assert.equal(
-      old.payload.kind === 'terms_acceptance' && old.payload.termsVersionId,
+      previousAction.payload.kind === 'terms_acceptance' &&
+        previousAction.payload.termsVersionId,
       'v2',
     );
     assert.equal((await ana.getAssignment())?.terms.termsVersionId, 'v3');
@@ -499,28 +530,31 @@ test('cached newer terms never substitute the exact version passed to confirmati
       'not_confirmed',
     );
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('native probe accepts repeated recovery after reopen but rejects changed intent or retry metadata', async () => {
   const { assertRecoverySnapshot } =
     await import('../../src/testing/recovery-snapshot.ts');
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    const worker = f.worker('ana');
+    const worker = testContext.worker('ana');
     await worker.cacheAssignment(assignmentFixture('ana'));
     const action = await worker.enqueueTerms('v2');
     await worker.claimAction(action.id, 100);
     const expected = await worker.listActions();
-    await f.reopen();
+    await testContext.reopen();
     assert.equal(
-      assertRecoverySnapshot(expected, await f.worker('ana').listActions()),
+      assertRecoverySnapshot(
+        expected,
+        await testContext.worker('ana').listActions(),
+      ),
       1,
     );
-    await f.worker('ana').recoverSending();
-    await f.reopen();
-    const recovered = await f.worker('ana').listActions();
+    await testContext.worker('ana').recoverSending();
+    await testContext.reopen();
+    const recovered = await testContext.worker('ana').listActions();
     assert.equal(assertRecoverySnapshot(expected, recovered), 0);
     assert.equal(assertRecoverySnapshot(expected, recovered), 0);
     const first = recovered[0];
@@ -544,20 +578,20 @@ test('native probe accepts repeated recovery after reopen but rejects changed in
       /actions_changed/,
     );
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('persisted action JSON is validated before listing or dispatch eligibility without deleting intent', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    const worker = f.worker('ana');
+    const worker = testContext.worker('ana');
     await worker.cacheAssignment(assignmentFixture('ana'));
-    const id = randomUUID();
+    const actionId = randomUUID();
     const valid = {
       kind: 'terms_acceptance',
       workerId: 'ana',
-      clientActionId: id,
+      clientActionId: actionId,
       termsVersionId: 'v2',
     };
     const invalid = [
@@ -573,20 +607,20 @@ test('persisted action JSON is validated before listing or dispatch eligibility 
         ...valid,
         kind: 'document_upload',
         documentType: 'passport',
-        localSubmissionId: id,
+        localSubmissionId: actionId,
         sha256: 'not-a-digest',
         replacesSubmissionId: null,
       }),
     ];
     for (const json of invalid) {
-      await f.db.run(
+      await testContext.database.run(
         `INSERT INTO outbox_actions
         (id,worker_id,client_action_id,action_type,payload_json,status,next_attempt_at,created_at,updated_at)
         VALUES (?,?,?,?,?,'queued',0,100,100)`,
         [
-          id,
+          actionId,
           'ana',
-          id,
+          actionId,
           json.includes('document_upload')
             ? 'document_upload'
             : 'terms_acceptance',
@@ -603,34 +637,39 @@ test('persisted action JSON is validated before listing or dispatch eligibility 
       );
       assert.equal(
         (
-          await f.db.first<{ count: number }>(
+          await testContext.database.first<{ count: number }>(
             'SELECT COUNT(*) AS count FROM outbox_actions WHERE worker_id=?',
             ['ana'],
           )
         )?.count,
         1,
       );
-      await f.db.run(
+      await testContext.database.run(
         'DELETE FROM outbox_actions WHERE worker_id=? AND client_action_id=?',
-        ['ana', id],
+        ['ana', actionId],
       );
     }
     const terms = await worker.enqueueTerms('v2');
-    const upload = await worker.enqueueDocument('passport', f.image());
-    await f.reopen();
+    const upload = await worker.enqueueDocument(
+      'passport',
+      testContext.image(),
+    );
+    await testContext.reopen();
     assert.deepEqual(
-      (await f.worker('ana').listActions()).map((a) => a.payload),
+      (await testContext.worker('ana').listActions()).map(
+        (action) => action.payload,
+      ),
       [terms.payload, upload.payload],
     );
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('persisted localized summaries and catalog labels reject malformed shapes', async () => {
-  const f = await fixture();
+  const testContext = await fixture();
   try {
-    const worker = f.worker('ana');
+    const worker = testContext.worker('ana');
     await worker.cacheAssignment(assignmentFixture('ana'));
     for (const json of [
       '{broken',
@@ -640,14 +679,14 @@ test('persisted localized summaries and catalog labels reject malformed shapes',
       '{"es":"texto","en":3}',
       '{"es":" ","en":"text"}',
     ]) {
-      await f.db.run('UPDATE terms SET content_json=? WHERE worker_id=?', [
-        json,
-        'ana',
-      ]);
+      await testContext.database.run(
+        'UPDATE terms SET content_json=? WHERE worker_id=?',
+        [json, 'ana'],
+      );
       await assert.rejects(worker.getAssignment(), /invalid_persisted/);
     }
     await worker.cacheAssignment(assignmentFixture('ana'));
-    await f.db.run(
+    await testContext.database.run(
       'UPDATE document_catalog SET content_json=? WHERE worker_id=? AND document_type=?',
       ['{"es":"texto"}', 'ana', 'passport'],
     );
@@ -656,6 +695,6 @@ test('persisted localized summaries and catalog labels reject malformed shapes',
       /invalid_persisted_localized_text/,
     );
   } finally {
-    await f.close();
+    await testContext.close();
   }
 });

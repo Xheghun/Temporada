@@ -51,7 +51,7 @@ async function start(directory: string) {
 test('SIGKILL after committed response drop preserves session, bytes and one replay effect', async () => {
   const directory = mkdtempSync(join(tmpdir(), 'worker-process-'));
   let child = await start(directory);
-  const id = randomUUID();
+  const clientActionId = randomUUID();
   const bytes = Buffer.from(
     'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aF9sAAAAASUVORK5CYII=',
     'base64',
@@ -75,7 +75,7 @@ test('SIGKILL after committed response drop preserves session, bytes and one rep
     };
     const upload = () => {
       const data = new FormData();
-      data.set('clientActionId', id);
+      data.set('clientActionId', clientActionId);
       data.set('documentType', 'passport');
       data.set(
         'image',
@@ -102,10 +102,15 @@ test('SIGKILL after committed response drop preserves session, bytes and one rep
       receipts: { workerId: string }[];
       documentSubmissions: { workerId: string; clientActionId: string }[];
     };
-    assert.equal(state.receipts.filter((r) => r.workerId === 'ana').length, 1);
+    assert.equal(
+      state.receipts.filter((resolve) => resolve.workerId === 'ana').length,
+      1,
+    );
     assert.equal(
       state.documentSubmissions.filter(
-        (r) => r.workerId === 'ana' && r.clientActionId === id,
+        (resolve) =>
+          resolve.workerId === 'ana' &&
+          resolve.clientActionId === clientActionId,
       ).length,
       1,
     );

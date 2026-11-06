@@ -27,7 +27,7 @@ export function CacheState({
   state: AssignmentState;
   onRefresh(): void;
 }) {
-  const { t } = useTranslation();
+  const { t: translate } = useTranslation();
   if (
     state.loading ||
     (!state.data?.assignment &&
@@ -37,16 +37,18 @@ export function CacheState({
   )
     return (
       <Card>
-        <ActivityIndicator accessibilityLabel={t('loading')} />
-        <Body>{t('home.loading')}</Body>
+        <ActivityIndicator accessibilityLabel={translate('loading')} />
+        <Body>{translate('home.loading')}</Body>
       </Card>
     );
   return (
     <Card>
-      <Body>{t(state.online ? 'home.noData' : 'home.noOfflineData')}</Body>
+      <Body>
+        {translate(state.online ? 'home.noData' : 'home.noOfflineData')}
+      </Body>
       <ErrorNotice code={state.error} />
       <Action
-        label={t('home.refresh')}
+        label={translate('home.refresh')}
         busy={state.refreshing}
         onPress={onRefresh}
       />
@@ -72,7 +74,7 @@ export function HomeContent({
   onLogout(): void;
   shared: boolean;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t: translate, i18n } = useTranslation();
   const data = state.data,
     assignment = data?.assignment,
     facts = data ? assignmentFacts(data) : null;
@@ -81,31 +83,40 @@ export function HomeContent({
     <AuthPage>
       <Heading>{workerName}</Heading>
       <Status
-        text={t(state.online ? 'home.connectionAvailable' : 'home.offline')}
+        text={translate(
+          state.online ? 'home.connectionAvailable' : 'home.offline',
+        )}
       />
       {assignment && facts ? (
         <>
           <Card>
-            <Text style={styles.overline}>{t('home.assignment')}</Text>
+            <Text style={styles.overline}>{translate('home.assignment')}</Text>
             <Heading>{assignment.assignment.employer}</Heading>
             <Body>
-              {t('home.order', { id: assignment.assignment.orderId })}
+              {translate('home.order', { id: assignment.assignment.orderId })}
             </Body>
             <Body>{assignment.assignment.worksite}</Body>
             <Body>
-              {t('home.season', {
-                start: date(assignment.assignment.seasonStart, locale),
-                end: date(assignment.assignment.seasonEnd, locale),
+              {translate('home.season', {
+                start: formatSeasonDate(
+                  assignment.assignment.seasonStart,
+                  locale,
+                ),
+                end: formatSeasonDate(assignment.assignment.seasonEnd, locale),
               })}
             </Body>
           </Card>
           <Card>
-            <Text style={styles.section}>{t('home.syncTitle')}</Text>
-            <Status text={t('home.pending', { count: facts.pendingCount })} />
-            <Body>{t('home.attention', { count: facts.attentionCount })}</Body>
+            <Text style={styles.section}>{translate('home.syncTitle')}</Text>
+            <Status
+              text={translate('home.pending', { count: facts.pendingCount })}
+            />
+            <Body>
+              {translate('home.attention', { count: facts.attentionCount })}
+            </Body>
             {data.cachedAt !== null ? (
               <Body>
-                {t('home.cachedAt', {
+                {translate('home.cachedAt', {
                   date: new Intl.DateTimeFormat(locale, {
                     dateStyle: 'medium',
                     timeStyle: 'short',
@@ -115,7 +126,7 @@ export function HomeContent({
             ) : null}
             {data.refreshNeeded ? (
               <Body>
-                {t(
+                {translate(
                   data.refreshError
                     ? 'home.refreshFailed'
                     : 'home.refreshPending',
@@ -125,17 +136,19 @@ export function HomeContent({
             <ErrorNotice code={state.error} />
             <Action
               secondary
-              label={t('home.refresh')}
+              label={translate('home.refresh')}
               busy={state.refreshing}
               onPress={onRefresh}
             />
           </Card>
           <Card>
-            <Text style={styles.section}>{t('home.terms')}</Text>
+            <Text style={styles.section}>{translate('home.terms')}</Text>
             <Body>
-              {t('terms.version', { version: assignment.terms.termsVersionId })}
+              {translate('terms.version', {
+                version: assignment.terms.termsVersionId,
+              })}
             </Body>
-            <Status text={t(`terms.status.${facts.termsStatus}`)} />
+            <Status text={translate(`terms.status.${facts.termsStatus}`)} />
             <Body>
               {
                 assignment.terms.summary[
@@ -143,19 +156,19 @@ export function HomeContent({
                 ]
               }
             </Body>
-            <Action label={t('home.openTerms')} onPress={onTerms} />
+            <Action label={translate('home.openTerms')} onPress={onTerms} />
           </Card>
           <Card>
-            <Text style={styles.section}>{t('home.timeline')}</Text>
-            <Body>{t('home.sessionFact')}</Body>
-            <Body>{t('home.assignmentFact')}</Body>
+            <Text style={styles.section}>{translate('home.timeline')}</Text>
+            <Body>{translate('home.sessionFact')}</Body>
+            <Body>{translate('home.assignmentFact')}</Body>
             <Body>
-              {t('home.termsFact', {
-                status: t(`terms.status.${facts.termsStatus}`),
+              {translate('home.termsFact', {
+                status: translate(`terms.status.${facts.termsStatus}`),
               })}
             </Body>
             <Body>
-              {t('home.catalogFact', {
+              {translate('home.catalogFact', {
                 count: assignment.requiredDocuments.filter(
                   (document) => document.required,
                 ).length,
@@ -167,21 +180,29 @@ export function HomeContent({
         <CacheState state={state} onRefresh={onRefresh} />
       )}
       <Card>
-        <Text style={styles.section}>{t('home.documents')}</Text>
-        <Body>{t('home.documentsUnavailable')}</Body>
+        <Text style={styles.section}>{translate('home.documents')}</Text>
+        <Body>{translate('home.documentsUnavailable')}</Body>
         <Action
           disabled
           secondary
-          label={t('home.documentsSoon')}
+          label={translate('home.documentsSoon')}
           onPress={onTerms}
         />
       </Card>
-      <Action secondary label={t('home.changeLanguage')} onPress={onLanguage} />
+      <Action
+        secondary
+        label={translate('home.changeLanguage')}
+        onPress={onLanguage}
+      />
       {shared ? (
-        <Action secondary label={t('switchWorker')} onPress={onSwitch} />
+        <Action
+          secondary
+          label={translate('switchWorker')}
+          onPress={onSwitch}
+        />
       ) : null}
-      <Action secondary label={t('logout')} onPress={onLogout} />
-      <Body>{t('logoutHint')}</Body>
+      <Action secondary label={translate('logout')} onPress={onLogout} />
+      <Body>{translate('logoutHint')}</Body>
     </AuthPage>
   );
 }
@@ -200,15 +221,19 @@ export function TermsContent({
   onRefresh(): void;
   onHome(): void;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t: translate, i18n } = useTranslation();
   const data = state.data,
     assignment = data?.assignment;
   if (!assignment || !data)
     return (
       <AuthPage>
-        <Heading>{t('home.terms')}</Heading>
+        <Heading>{translate('home.terms')}</Heading>
         <CacheState state={state} onRefresh={onRefresh} />
-        <Action secondary label={t('terms.backHome')} onPress={onHome} />
+        <Action
+          secondary
+          label={translate('terms.backHome')}
+          onPress={onHome}
+        />
       </AuthPage>
     );
   const facts = assignmentFacts(data),
@@ -217,45 +242,53 @@ export function TermsContent({
     ...new Set(
       data.actions
         .filter(
-          (a) => a.status === 'stale' && a.payload.kind === 'terms_acceptance',
+          (action) =>
+            action.status === 'stale' &&
+            action.payload.kind === 'terms_acceptance',
         )
-        .map((a) =>
-          a.payload.kind === 'terms_acceptance' ? a.payload.termsVersionId : '',
+        .map((action) =>
+          action.payload.kind === 'terms_acceptance'
+            ? action.payload.termsVersionId
+            : '',
         ),
     ),
   ];
   return (
     <AuthPage>
-      <Heading>{t('home.terms')}</Heading>
+      <Heading>{translate('home.terms')}</Heading>
       <Body>
-        {t('terms.version', { version: assignment.terms.termsVersionId })}
+        {translate('terms.version', {
+          version: assignment.terms.termsVersionId,
+        })}
       </Body>
-      <Status text={t(`terms.status.${facts.termsStatus}`)} />
+      <Status text={translate(`terms.status.${facts.termsStatus}`)} />
       <Body>{assignment.terms.summary[language]}</Body>
-      {facts.needsReconfirmation ? <Body>{t('terms.reconfirm')}</Body> : null}
+      {facts.needsReconfirmation ? (
+        <Body>{translate('terms.reconfirm')}</Body>
+      ) : null}
       {facts.termsStatus === 'update_required' ? (
-        <Body>{t('terms.updateRequired')}</Body>
+        <Body>{translate('terms.updateRequired')}</Body>
       ) : null}
       {facts.termsStatus === 'pending_sync' ? (
-        <Body>{t('terms.pendingHint')}</Body>
+        <Body>{translate('terms.pendingHint')}</Body>
       ) : null}
       {facts.termsStatus === 'failed' || facts.replacementActionId ? (
-        <Body>{t('terms.failedHint')}</Body>
+        <Body>{translate('terms.failedHint')}</Body>
       ) : null}
       <ErrorNotice code={state.error} />
       {data.actions.some(
-        (a) =>
-          a.id === state.savedActionId &&
-          a.payload.kind === 'terms_acceptance' &&
-          a.payload.termsVersionId === assignment.terms.termsVersionId &&
-          !['stale', 'failed_permanent'].includes(a.status),
+        (action) =>
+          action.id === state.savedActionId &&
+          action.payload.kind === 'terms_acceptance' &&
+          action.payload.termsVersionId === assignment.terms.termsVersionId &&
+          !['stale', 'failed_permanent'].includes(action.status),
       ) ? (
         <Text accessibilityRole="alert" style={styles.status}>
-          {t('terms.saved')}
+          {translate('terms.saved')}
         </Text>
       ) : null}
       <Action
-        label={t(
+        label={translate(
           facts.replacementActionId
             ? 'terms.replaceFailed'
             : facts.needsReconfirmation
@@ -279,24 +312,26 @@ export function TermsContent({
       facts.termsStatus === 'failed' ? (
         <Action
           secondary
-          label={t('home.refresh')}
+          label={translate('home.refresh')}
           busy={state.refreshing}
           onPress={onRefresh}
         />
       ) : null}
       {staleVersions.length ? (
         <Card>
-          <Text style={styles.section}>{t('terms.history')}</Text>
+          <Text style={styles.section}>{translate('terms.history')}</Text>
           {staleVersions.map((version) => (
-            <Body key={version}>{t('terms.staleHistory', { version })}</Body>
+            <Body key={version}>
+              {translate('terms.staleHistory', { version })}
+            </Body>
           ))}
         </Card>
       ) : null}
-      <Action secondary label={t('terms.backHome')} onPress={onHome} />
+      <Action secondary label={translate('terms.backHome')} onPress={onHome} />
     </AuthPage>
   );
 }
-function date(value: string, locale: string) {
+function formatSeasonDate(value: string, locale: string) {
   const parsed = new Date(value + 'T00:00:00Z');
   return Number.isNaN(parsed.valueOf())
     ? value

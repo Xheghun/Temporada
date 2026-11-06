@@ -9,31 +9,36 @@ export async function openWorkerDatabase(
   name = 'worker-cache.sqlite',
 ): Promise<Database> {
   // A private, non-shared handle keeps all transaction statements and reads inside our queue.
-  const native = await openDatabaseAsync(name, { useNewConnection: true });
+  const nativeDatabase = await openDatabaseAsync(name, {
+    useNewConnection: true,
+  });
   const executor: SqlExecutor = {
-    exec: (sql) => native.execAsync(sql),
-    run: async (sql, params = []) => {
-      const result = await native.runAsync(sql, [...params]);
+    exec: (sql) => nativeDatabase.execAsync(sql),
+    run: async (sql, parameters = []) => {
+      const result = await nativeDatabase.runAsync(sql, [...parameters]);
       return { changes: result.changes };
     },
-    first: <T>(sql: string, params = []) =>
-      native.getFirstAsync<T>(sql, params),
-    all: <T>(sql: string, params = []) => native.getAllAsync<T>(sql, params),
+    first: <T>(sql: string, parameters = []) =>
+      nativeDatabase.getFirstAsync<T>(sql, parameters),
+    all: <T>(sql: string, parameters = []) =>
+      nativeDatabase.getAllAsync<T>(sql, parameters),
   };
-  const db = serializeDatabase(executor, () => native.closeAsync());
+  const database = serializeDatabase(executor, () =>
+    nativeDatabase.closeAsync(),
+  );
   try {
-    await migrateDatabase(db);
-    return db;
+    await migrateDatabase(database);
+    return database;
   } catch (error) {
-    await db.close();
+    await database.close();
     throw error;
   }
 }
 export function workerRepository(
-  db: Database,
+  database: Database,
   workerId: string,
 ): WorkerRepository {
-  return new WorkerRepository(db, workerId, {
+  return new WorkerRepository(database, workerId, {
     uuid: randomUUID,
     now: Date.now,
   });

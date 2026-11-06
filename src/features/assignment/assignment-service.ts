@@ -37,32 +37,32 @@ export interface AssignmentState {
 }
 /** UI-facing application service. All async results remain bound to the captured selection. */
 export class AssignmentService {
-  private readonly deps: AssignmentDependencies;
+  private readonly dependencies: AssignmentDependencies;
   private readonly listeners = new Set<() => void>();
   private readonly stops: (() => void)[];
   private readRevision = 0;
   private saving = false;
   private state: AssignmentState;
-  constructor(deps: AssignmentDependencies) {
-    this.deps = deps;
-    this.state = this.empty();
+  constructor(dependencies: AssignmentDependencies) {
+    this.dependencies = dependencies;
+    this.state = this.createEmptyState();
     this.stops = [
-      deps.session.subscribeSession(() => this.select()),
-      deps.subscribeNetwork(() => {
-        this.update({ online: deps.online() });
+      dependencies.session.subscribeSession(() => this.handleSessionChange()),
+      dependencies.subscribeNetwork(() => {
+        this.update({ online: dependencies.online() });
       }),
-      deps.subscribeData((workerId) => {
-        if (workerId === this.deps.session.current()?.workerId)
+      dependencies.subscribeData((workerId) => {
+        if (workerId === this.dependencies.session.current()?.workerId)
           void this.reload();
       }),
     ];
-    this.select();
+    this.handleSessionChange();
   }
   isEnabled(): boolean {
-    return this.deps.enabled();
+    return this.dependencies.enabled();
   }
-  private empty(): AssignmentState {
-    const session = this.deps.session.current();
+  private createEmptyState(): AssignmentState {
+    const session = this.dependencies.session.current();
     return {
       workerId: session?.workerId ?? null,
       generation: session?.generation ?? null,
@@ -70,18 +70,18 @@ export class AssignmentService {
       loading: !!session,
       saving: false,
       refreshing: false,
-      online: this.deps.online(),
+      online: this.dependencies.online(),
       error: null,
       savedActionId: null,
     };
   }
-  private current(session: SyncSession): boolean {
-    const now = this.deps.session.current();
+  private isCurrentSession(session: SyncSession): boolean {
+    const currentSession = this.dependencies.session.current();
     return (
-      !!now &&
-      now.workerId === session.workerId &&
-      now.generation === session.generation &&
-      now.token === session.token
+      !!currentSession &&
+      currentSession.workerId === session.workerId &&
+      currentSession.generation === session.generation &&
+      currentSession.token === session.token
     );
   }
   getSnapshot = (): AssignmentState => this.state;
@@ -95,28 +95,31 @@ export class AssignmentService {
     this.state = { ...this.state, ...patch };
     this.listeners.forEach((notify) => notify());
   }
-  private select() {
+  private handleSessionChange() {
     this.readRevision++;
     this.saving = false;
-    this.state = this.empty();
+    this.state = this.createEmptyState();
     this.listeners.forEach((notify) => notify());
     if (this.state.workerId && this.isEnabled()) void this.reload();
   }
   async reload(): Promise<void> {
-    const session = this.deps.session.current();
+    const session = this.dependencies.session.current();
     if (!session || !this.isEnabled()) return;
     const revision = ++this.readRevision;
     try {
-      const data = await this.deps.repository(session.workerId).readView();
-      if (!this.current(session) || revision !== this.readRevision) return;
+      const data = await this.dependencies
+        .repository(session.workerId)
+        .readView();
+      if (!this.isCurrentSession(session) || revision !== this.readRevision)
+        return;
       this.update({
         data,
         loading: false,
-        online: this.deps.online(),
+        online: this.dependencies.online(),
         error: null,
       });
     } catch {
-      if (this.current(session) && revision === this.readRevision)
+      if (this.isCurrentSession(session) && revision === this.readRevision)
         this.update({ loading: false, error: 'local_data_error' });
     }
   }
@@ -125,7 +128,7 @@ export class AssignmentService {
     generation: number,
     replacesActionId?: string,
   ): Promise<void> {
-    const session = this.deps.session.current();
+    const session = this.dependencies.session.current();
     if (
       !this.isEnabled() ||
       !session ||
@@ -136,57 +139,63 @@ export class AssignmentService {
     this.saving = true;
     this.update({ saving: true, error: null, savedActionId: null });
     try {
-      const reader = this.deps.repository(session.workerId),
-        before = await reader.readView();
-      if (!this.current(session)) return;
+      const reader = this.dependencies.repository(session.workerId),
+        currentView = await reader.readView();
+      if (!this.isCurrentSession(session)) return;
       // M6: the displayed version is never substituted with a newly refreshed version.
-      const sameVersion = before.assignment?.terms.termsVersionId === version;
-      const unresolved = before.actions.some(
-        (a) =>
-          a.payload.kind === 'terms_acceptance' &&
-          a.payload.termsVersionId === version &&
-          ['queued', 'sending', 'retry_wait', 'stale'].includes(a.status),
+      const sameVersion =
+        currentView.assignment?.terms.termsVersionId === version;
+      const unresolved = currentView.actions.some(
+        (action) =>
+          action.payload.kind === 'terms_acceptance' &&
+          action.payload.termsVersionId === version &&
+          ['queued', 'sending', 'retry_wait', 'stale'].includes(action.status),
       );
-      if (unresolved || (sameVersion && !assignmentFacts(before).canConfirm))
+      if (
+        unresolved ||
+        (sameVersion && !assignmentFacts(currentView).canConfirm)
+      )
         return;
       // M5: only an explicit, still-current replacement may resolve a permanent failure.
       // The repository supersedes the failed predecessor and inserts new intent atomically.
-      const failedId = assignmentFacts(before).replacementActionId;
+      const failedId = assignmentFacts(currentView).replacementActionId;
       if ((failedId ?? undefined) !== replacesActionId) {
         await this.reload();
         return;
       }
       const action = await reader.enqueueTerms(version, replacesActionId);
-      if (this.current(session)) {
+      if (this.isCurrentSession(session)) {
         await this.reload();
-        if (this.current(session)) this.update({ savedActionId: action.id });
+        if (this.isCurrentSession(session))
+          this.update({ savedActionId: action.id });
       }
-      this.deps.notifyEnqueued();
+      this.dependencies.notifyEnqueued();
     } catch {
-      if (this.current(session)) this.update({ error: 'save_failed' });
+      if (this.isCurrentSession(session)) this.update({ error: 'save_failed' });
     } finally {
-      if (this.current(session)) {
+      if (this.isCurrentSession(session)) {
         this.saving = false;
         this.update({ saving: false });
       }
     }
   }
   async refresh(): Promise<void> {
-    const session = this.deps.session.current();
+    const session = this.dependencies.session.current();
     if (!session || this.state.refreshing) return;
     this.update({ refreshing: true, error: null });
     try {
-      await this.deps.refresh(session);
-      if (this.current(session)) await this.reload();
+      await this.dependencies.refresh(session);
+      if (this.isCurrentSession(session)) await this.reload();
     } catch {
-      if (this.current(session)) this.update({ error: 'refresh_failed' });
+      if (this.isCurrentSession(session))
+        this.update({ error: 'refresh_failed' });
     } finally {
-      if (this.current(session)) this.update({ refreshing: false });
+      if (this.isCurrentSession(session)) this.update({ refreshing: false });
     }
   }
   async setLanguage(language: 'es' | 'en'): Promise<void> {
     try {
-      await this.deps.setLanguage(language);
+      await this.dependencies.setLanguage(language);
     } catch {
       this.update({ error: 'language_failed' });
     }

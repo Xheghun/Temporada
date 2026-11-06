@@ -21,6 +21,10 @@ Implement only the explicitly requested OpenSpec change; read its proposal/desig
 
 Screens use hooks/services, never raw sync requests. Domain is independent of React/native/database APIs. Repositories and transport implement injected interfaces. Features never import another feature's private implementation. No circular dependencies. Use strict types; no unjustified any, swallowed errors, speculative frameworks or test weakening.
 
+## Naming
+
+Use names that explain the value or operation: `transaction`, `database`, `dependencies`, `request`, `httpResponse`, `action`, `submission`, `workerId` and `testContext`. Avoid opaque abbreviations and single-letter application/test variables. Use camelCase for values/functions, PascalCase for types/components and existing kebab-case filenames. Boolean predicates should read as predicates (`isCurrentSession`, `isSupportedImage`); parsing/validation helpers should state their purpose. Preserve external API fields, persisted schemas, protocol names and library-owned identifiers. Standard domain terms such as API, SQL, URL, UUID, OTP and i18n are acceptable when their role is clear. Read the relevant React Native/Expo skill before each applicable implementation or review task; mention the skill used in the task update.
+
 ## Task workflow and verification
 
 Before each task read its spec; state objective/files/tests, implement the smallest coherent scope, run relevant checks, review diff, update checkbox only when fully verified and report evidence/risks. Run typecheck, lint, format:check, test:ci, arch:check and Expo validation as applicable. Domain tests ship with owning features. All six mandatory sync tests and native Android scenarios remain required before whole-app completion; never substitute mocks for actual persistence/emulator evidence. Keep unexecuted checks NOT RUN.

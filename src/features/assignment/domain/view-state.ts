@@ -9,18 +9,22 @@ const active = (action: OutboxAction) =>
 export function assignmentFacts(data: WorkerViewData) {
   const version = data.assignment?.terms.termsVersionId;
   const terms = data.actions.filter(
-    (a) => a.payload.kind === 'terms_acceptance',
+    (action) => action.payload.kind === 'terms_acceptance',
   );
   const current = terms.filter(
-    (a) =>
-      a.payload.kind === 'terms_acceptance' &&
-      a.payload.termsVersionId === version &&
-      a.status !== 'superseded',
+    (action) =>
+      action.payload.kind === 'terms_acceptance' &&
+      action.payload.termsVersionId === version &&
+      action.status !== 'superseded',
   );
   const latest = current.at(-1);
-  const latestTerms = terms.filter((a) => a.status !== 'superseded').at(-1);
-  const failedPredecessor = terms.find((a) => a.status === 'failed_permanent');
-  const stale = current.some((a) => a.status === 'stale');
+  const latestTerms = terms
+    .filter((action) => action.status !== 'superseded')
+    .at(-1);
+  const failedPredecessor = terms.find(
+    (action) => action.status === 'failed_permanent',
+  );
+  const stale = current.some((action) => action.status === 'stale');
   const status: TermsStatus = stale
     ? 'update_required'
     : latest && active(latest)
@@ -33,11 +37,12 @@ export function assignmentFacts(data: WorkerViewData) {
   return {
     termsStatus: status,
     needsReconfirmation:
-      terms.some((a) => a.status === 'stale') && status === 'unconfirmed',
+      terms.some((action) => action.status === 'stale') &&
+      status === 'unconfirmed',
     pendingCount: data.actions.filter(active).length,
     attentionCount:
-      data.actions.filter((a) => a.status === 'failed_permanent').length +
-      (latestTerms?.status === 'stale' ? 1 : 0),
+      data.actions.filter((action) => action.status === 'failed_permanent')
+        .length + (latestTerms?.status === 'stale' ? 1 : 0),
     replacementActionId: failedPredecessor?.id ?? null,
     canConfirm: !!version && (status === 'unconfirmed' || status === 'failed'),
   };

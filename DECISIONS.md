@@ -81,3 +81,7 @@ Actual AI-assisted corrections included suppressing duplicate pending confirmati
 ### SDD-012 review: permanent terms failure recovery
 
 The initial Home/Terms service only used ordinary enqueue. That left same-version failures without a recovery button and allowed a new-version action to sit behind a failed predecessor. The UI now explicitly names replacement; its callback captures the failed action ID alongside the displayed version and generation. The service verifies that the failed ID is still the expected one before calling the existing transactional supersession path (M1/M3/M5/M6). A new user confirmation creates a new ID; network retries of that confirmation keep it. Refresh and stale-version history do not trigger supersession. File-backed engine regressions cover both versions, duplicate taps and transactional rollback.
+
+### Naming review
+
+Use purpose-specific names throughout implementation and tests, including `transaction`, `database`, `dependencies`, `httpResponse`, `action`, `submission` and `testContext`. AGENTS.md records this convention; ESLint rejects recurring abbreviated declarations/parameters. Public protocol fields and persisted schemas retain their existing spelling. The review used TypeScript-aware renames plus manual semantic checks, corrected response-name collisions/unintended object keys, and verified all 103 tests and Android Home startup. React Native guidance was consulted; no behavior/state architecture change was required.

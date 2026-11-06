@@ -31,10 +31,10 @@ export async function runNativePersistenceCheck(mode: string): Promise<string> {
     if (fixture.exists) fixture.delete();
     return 'RESET_PASSED: only the dedicated proof database and fixture were removed.';
   }
-  const db = await openWorkerDatabase(proofName);
+  const database = await openWorkerDatabase(proofName);
   try {
-    const carla = workerRepository(db, 'carla');
-    const bruno = workerRepository(db, 'bruno');
+    const carla = workerRepository(database, 'carla');
+    const bruno = workerRepository(database, 'bruno');
     const file = new File(Paths.document, 'persistence-proof-passport.image');
     if (mode === 'seed') {
       if ((await carla.listActions()).length)
@@ -57,17 +57,17 @@ export async function runNativePersistenceCheck(mode: string): Promise<string> {
       if (!(await carla.claimAction(terms.id, Date.now())))
         throw new Error('claim_failed');
       const expected = await carla.listActions();
-      await db.exec(
+      await database.exec(
         'CREATE TABLE IF NOT EXISTS probe_expected(value TEXT NOT NULL)',
       );
-      await db.run('INSERT INTO probe_expected VALUES(?)', [
+      await database.run('INSERT INTO probe_expected VALUES(?)', [
         JSON.stringify(expected),
       ]);
       if ((await bruno.listActions()).length) throw new Error('worker_leak');
       return 'SEED_PASSED: 2 durable Carla actions, one sending; Bruno queue empty. Force-stop Expo Go, relaunch with mode=verify.';
     }
     if (mode !== 'verify') throw new Error('mode_must_be_seed_or_verify');
-    const record = await db.first<{ value: string }>(
+    const record = await database.first<{ value: string }>(
       'SELECT value FROM probe_expected LIMIT 1',
     );
     if (!record) throw new Error('proof_not_seeded');
@@ -76,13 +76,14 @@ export async function runNativePersistenceCheck(mode: string): Promise<string> {
     if ((await carla.recoverSending()) !== sending)
       throw new Error('interrupted_action_not_recovered');
     const actual = await carla.listActions();
-    for (const old of expected) {
-      const current = actual.find((a) => a.id === old.id);
+    for (const previousAction of expected) {
+      const current = actual.find((action) => action.id === previousAction.id);
       if (
         !current ||
         current.status !== 'queued' ||
-        current.fileUri !== old.fileUri ||
-        JSON.stringify(current.payload) !== JSON.stringify(old.payload)
+        current.fileUri !== previousAction.fileUri ||
+        JSON.stringify(current.payload) !==
+          JSON.stringify(previousAction.payload)
       )
         throw new Error('intent_lost');
     }
@@ -90,12 +91,12 @@ export async function runNativePersistenceCheck(mode: string): Promise<string> {
       throw new Error('file_or_worker_isolation_failed');
     if (
       (await carla.listSubmissions()).filter(
-        (s) => s.serverStatus === 'correction_requested',
+        (submission) => submission.serverStatus === 'correction_requested',
       ).length !== 1
     )
       throw new Error('history_lost');
     return 'RECOVERY_PASSED: same 2 action IDs/payloads/file after process death; sending recovered; correction history retained; Bruno queue empty.';
   } finally {
-    await db.close();
+    await database.close();
   }
 }

@@ -54,3 +54,5 @@ Home-and-terms implementation/local verification ended 2026-11-06T19:45:13.49536
 Home-and-terms publication/handoff: 2026-11-06T19:45:13.495366+00:00 to 2026-11-06T19:45:40.882635+00:00, 0.46 minutes. Recorded cumulative: 127.73 minutes. PR https://github.com/Xheghun/Temporada/pull/7; hosted CI waiting and human review follow separately.
 
 Home-and-terms failed-confirmation review follow-up: conservatively 2026-11-06T19:58:00+00:00 to 2026-11-06T20:01:33.792372+00:00, 3.56 minutes. Recorded cumulative: 131.29 minutes. Explicit same-version/new-version replacement, rollback and UI regressions pass; 103 total tests and Android JavaScript export pass. Replacement emulator flow NOT RUN. Hosted CI waiting follows separately.
+
+Implementation-wide naming review: conservatively 2026-11-06T20:08:00+00:00 to 2026-11-06T20:19:15.634092+00:00, 11.26 minutes. Recorded cumulative: 142.55 minutes. TypeScript-aware/manual naming cleanup, 103 tests, quality checks, Android JavaScript export and cold Home launch pass. Existing schema/protocol keys preserved; full native journeys NOT RUN. Hosted CI waiting follows separately.

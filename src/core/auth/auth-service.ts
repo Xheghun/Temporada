@@ -49,7 +49,7 @@ export function decodeSession(value: unknown): StoredSession {
     !('selectedWorkerId' in value)
   )
     throw new AuthError('invalid_stored_session');
-  const ids = new Set<string>();
+  const workerIds = new Set<string>();
   const workers = value.workers.map((worker: unknown) => {
     if (
       !worker ||
@@ -57,19 +57,19 @@ export function decodeSession(value: unknown): StoredSession {
       !('workerId' in worker) ||
       typeof worker.workerId !== 'string' ||
       !worker.workerId.trim() ||
-      ids.has(worker.workerId) ||
+      workerIds.has(worker.workerId) ||
       !('displayName' in worker) ||
       typeof worker.displayName !== 'string' ||
       !worker.displayName.trim()
     )
       throw new AuthError('invalid_stored_session');
-    ids.add(worker.workerId);
+    workerIds.add(worker.workerId);
     return { workerId: worker.workerId, displayName: worker.displayName };
   });
   if (
     value.selectedWorkerId !== null &&
     (typeof value.selectedWorkerId !== 'string' ||
-      !ids.has(value.selectedWorkerId))
+      !workerIds.has(value.selectedWorkerId))
   )
     throw new AuthError('invalid_stored_session');
   return {
@@ -133,7 +133,7 @@ export class AuthService implements SessionProvider {
       selectedWorker:
         phase === 'ready'
           ? (workers.find(
-              (w) => w.workerId === this.record?.selectedWorkerId,
+              (worker) => worker.workerId === this.record?.selectedWorkerId,
             ) ?? null)
           : null,
     };
@@ -260,7 +260,7 @@ export class AuthService implements SessionProvider {
   async selectWorker(workerId: string): Promise<void> {
     if (
       !this.record ||
-      !this.record.workers.some((w) => w.workerId === workerId)
+      !this.record.workers.some((worker) => worker.workerId === workerId)
     )
       throw new AuthError('worker_forbidden');
     const record = { ...this.record, selectedWorkerId: workerId },

@@ -27,3 +27,11 @@ Direct native SQLite extraction via `run-as` was unavailable because Expo Go is 
 ## Review follow-up: failed terms replacement
 
 103 automated tests pass (19 Jest, 5 architecture, 12 mock API, 67 file-backed persistence/auth/sync). New regression tests run an engine-produced 422 for v2, then explicitly replace it with displayed v2 or v3 through the application service. The same engine delivers the new action without restart; the old action remains historical/superseded with its original ID and payload. Refresh/ordinary confirmation do not silently replace it, and simultaneous taps create one successor. A trigger-induced failure during supersession rolls back the entire transaction; clearing the fault allows explicit recovery. Two screen tests verify the enabled, explicit replacement callback for each version. Typecheck, lint, formatting, architecture checks, strict OpenSpec validation and Android JavaScript export pass. The replacement flow was not re-executed on the emulator; earlier Android evidence above is unchanged.
+
+## Naming review
+
+Reviewed the implemented mobile code, SQLite repositories, synchronization/authentication, mock backend, architecture tooling and test/development helpers. Replaced opaque local names (`tx`, `db`, `deps`, `req`/`res`, single-letter callbacks and fixture handles), expanded SQL aliases, and named parsing helpers/predicates for their purpose. External fields, persisted schema and library-owned names retain their existing spelling. Added naming guidance to AGENTS.md and an ESLint restriction on recurring abbreviated local variables/parameters.
+
+103 existing tests, type checking, lint, formatting, architecture validation, strict OpenSpec validation and Android JavaScript export pass. Cold-launched Android Home: cached Ana assignment rendered correctly with the persisted English preference. [Screenshot](naming-review/home.png), [hierarchy](naming-review/home.xml). The eight full acceptance journeys were not rerun for this naming refactor.
+
+Used vercel-react-native-skills, including state-subscription guidance, during this review; no state architecture changes were needed. TypeScript-aware renames required correcting HTTP response/payload collisions and two unintended object-key changes before final verification. No new human recording or approval is claimed.

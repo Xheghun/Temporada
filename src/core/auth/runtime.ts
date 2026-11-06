@@ -49,8 +49,8 @@ export async function createWorkerRuntime() {
   )
     throw new Error('api_configuration_missing');
   const homeEnabled = await workerAppEnabled('worker_home_and_terms');
-  const db = await openWorkerDatabase();
-  const preference = await db.first<{ language: string }>(
+  const database = await openWorkerDatabase();
+  const preference = await database.first<{ language: string }>(
     'SELECT language FROM app_settings WHERE id=1',
   );
   await i18n.changeLanguage(preference?.language === 'en' ? 'en' : 'es');
@@ -60,7 +60,7 @@ export async function createWorkerRuntime() {
   );
   const api = createApiTransport(base, uploadResolver, expoFetch);
   const enqueueListeners = new Set<() => void>();
-  const native = nativeSignals(auth.subscribeSession, (listener) => {
+  const syncSignals = nativeSignals(auth.subscribeSession, (listener) => {
     enqueueListeners.add(listener);
     return () => {
       enqueueListeners.delete(listener);
@@ -70,7 +70,7 @@ export async function createWorkerRuntime() {
   const persistence = (workerId: string) => {
     let repository = repositories.get(workerId);
     if (!repository) {
-      repository = new SyncRepository(db, workerId, {
+      repository = new SyncRepository(database, workerId, {
         uuid: randomUUID,
         now: Date.now,
       });
@@ -83,7 +83,7 @@ export async function createWorkerRuntime() {
     persistence,
     api,
     session: auth,
-    connectivity: native.connectivity,
+    connectivity: syncSignals.connectivity,
     clock: nativeClock,
     retryDelay,
     enabled: () => enabled,
@@ -97,9 +97,9 @@ export async function createWorkerRuntime() {
   const assignment = new AssignmentService({
     enabled: () => homeEnabled,
     session: auth,
-    repository: (workerId) => workerRepository(db, workerId),
-    online: native.connectivity.online,
-    subscribeNetwork: native.signals.connectivity,
+    repository: (workerId) => workerRepository(database, workerId),
+    online: syncSignals.connectivity.online,
+    subscribeNetwork: syncSignals.signals.connectivity,
     subscribeData(listener) {
       viewListeners.add(listener);
       return () => {
@@ -115,7 +115,9 @@ export async function createWorkerRuntime() {
       if (auth.isCurrent(session)) await engine.manualRetry();
     },
     async setLanguage(language) {
-      await db.run('UPDATE app_settings SET language=? WHERE id=1', [language]);
+      await database.run('UPDATE app_settings SET language=? WHERE id=1', [
+        language,
+      ]);
       await i18n.changeLanguage(language);
     },
   });
@@ -126,7 +128,7 @@ export async function createWorkerRuntime() {
       selectedGeneration = session.generation;
       const worker = auth.getSnapshot().selectedWorker;
       if (!worker) return;
-      void workerRepository(db, session.workerId)
+      void workerRepository(database, session.workerId)
         .ensureWorkerIdentity(worker.displayName)
         .then(() => persistence(session.workerId).requestRefresh())
         .then(() => engine.request())
@@ -135,12 +137,12 @@ export async function createWorkerRuntime() {
         });
     }
   });
-  const detach = attachSyncTriggers(engine, native.signals);
+  const detach = attachSyncTriggers(engine, syncSignals.signals);
   await auth.restore();
   return {
     auth,
     assignment,
-    db,
+    database,
     notifyEnqueued() {
       enqueueListeners.forEach((notify) => notify());
     },
@@ -148,10 +150,10 @@ export async function createWorkerRuntime() {
       prepareSelection();
       assignment.dispose();
       detach();
-      native.dispose();
+      syncSignals.dispose();
       await engine.settled();
       await auth.settled();
-      await db.close();
+      await database.close();
     },
   };
 }

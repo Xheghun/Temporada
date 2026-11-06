@@ -9,15 +9,20 @@ export function assertRecoverySnapshot(
     throw new Error('actions_changed_after_process_restart');
   let sending = 0;
   for (let index = 0; index < expected.length; index++) {
-    const old = expected[index];
+    const expectedAction = expected[index];
     const actual = current[index];
-    if (!old || !actual)
+    if (!expectedAction || !actual)
       throw new Error('actions_changed_after_process_restart');
-    const recovered = old.status === 'sending' && actual.status === 'queued';
+    const recovered =
+      expectedAction.status === 'sending' && actual.status === 'queued';
     const comparable = recovered
-      ? { ...actual, status: old.status, updatedAt: old.updatedAt }
+      ? {
+          ...actual,
+          status: expectedAction.status,
+          updatedAt: expectedAction.updatedAt,
+        }
       : actual;
-    if (JSON.stringify(comparable) !== JSON.stringify(old))
+    if (JSON.stringify(comparable) !== JSON.stringify(expectedAction))
       throw new Error('actions_changed_after_process_restart');
     if (actual.status === 'sending') sending++;
   }

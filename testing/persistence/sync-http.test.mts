@@ -72,290 +72,312 @@ async function fixture() {
 }
 
 test('TEST-03: engine retries original upload ID after committed disconnect, backend SIGKILL and client reconstruction; one effect', async () => {
-  const f = await fixture();
-  const l = f.local;
-  let engine = l.engine();
+  const testContext = await fixture();
+  const local = testContext.local;
+  let engine = local.engine();
   try {
-    const action = await l
+    const action = await local
       .worker()
-      .enqueueDocument('ds160_confirmation', l.image());
-    await f.post('/__dev/failures', { dropNextResponse: true });
-    l.online = true;
+      .enqueueDocument('ds160_confirmation', local.image());
+    await testContext.post('/__dev/failures', { dropNextResponse: true });
+    local.online = true;
     await engine.start();
-    assert.equal((await l.worker().listActions())[0]?.status, 'retry_wait');
+    assert.equal((await local.worker().listActions())[0]?.status, 'retry_wait');
     assert.equal(
-      (await f.state()).documentSubmissions.filter(
-        (s) => s.clientActionId === action.id,
+      (await testContext.state()).documentSubmissions.filter(
+        (submission) => submission.clientActionId === action.id,
       ).length,
       1,
     );
     engine.stop();
-    await f.restart();
-    await l.reopen();
-    engine = l.engine();
-    l.clock.advance(1100);
+    await testContext.restart();
+    await local.reopen();
+    engine = local.engine();
+    local.clock.advance(1100);
     await engine.start();
-    assert.equal((await l.worker().listActions())[0]?.status, 'delivered');
-    const state = await f.state();
+    assert.equal((await local.worker().listActions())[0]?.status, 'delivered');
+    const state = await testContext.state();
     assert.equal(
-      state.documentSubmissions.filter((s) => s.clientActionId === action.id)
+      state.documentSubmissions.filter(
+        (submission) => submission.clientActionId === action.id,
+      ).length,
+      1,
+    );
+    assert.equal(
+      state.receipts.filter((receipt) => receipt.clientActionId === action.id)
         .length,
       1,
     );
-    assert.equal(
-      state.receipts.filter((r) => r.clientActionId === action.id).length,
-      1,
-    );
     assert.deepEqual(
-      l.attempts.map((a) => a.id),
+      local.attempts.map((action) => action.id),
       [action.id, action.id],
     );
     assert.equal(
-      (await l.worker().listSubmissions())[0]?.serverStatus,
+      (await local.worker().listSubmissions())[0]?.serverStatus,
       'pending_review',
     );
   } finally {
     engine.stop();
-    await f.close();
+    await testContext.close();
   }
 });
 
 for (const decision of ['approved', 'correction_requested'] as const) {
   test(`TEST-03R: ${decision} revision/reason survives refresh before original replay acknowledgment`, async () => {
-    const f = await fixture();
-    const l = f.local;
-    const engine = l.engine();
+    const testContext = await fixture();
+    const local = testContext.local;
+    const engine = local.engine();
     try {
-      const action = await l.worker().enqueueDocument('passport', l.image());
-      await f.post('/__dev/failures', { dropNextResponse: true });
-      l.online = true;
+      const action = await local
+        .worker()
+        .enqueueDocument('passport', local.image());
+      await testContext.post('/__dev/failures', { dropNextResponse: true });
+      local.online = true;
       await engine.start();
-      const committed = (await f.state()).documentSubmissions.find(
-        (s) => s.clientActionId === action.id,
+      const committed = (await testContext.state()).documentSubmissions.find(
+        (submission) => submission.clientActionId === action.id,
       );
       assert.ok(committed);
-      await f.post('/__dev/review', {
+      await testContext.post('/__dev/review', {
         submissionId: committed.submissionId,
         status: decision,
         ...(decision === 'correction_requested'
           ? { correctionReason: 'Foto borrosa, vuelva a tomarla' }
           : {}),
       });
-      assert.ok(l.session);
-      await l.store().cacheRefresh(await l.api.assignment(l.session));
-      const reviewed = (await l.worker().listSubmissions())[0];
+      assert.ok(local.session);
+      await local
+        .store()
+        .cacheRefresh(await local.api.assignment(local.session));
+      const reviewed = (await local.worker().listSubmissions())[0];
       assert.equal(reviewed?.serverStatus, decision);
       // Prevent the post-ack refresh from hiding an incorrect acknowledgment merge.
-      l.api.assignment = async () => {
+      local.api.assignment = async () => {
         throw new TransportError(0, 'test_refresh_unavailable');
       };
-      l.clock.advance(1100);
+      local.clock.advance(1100);
       await engine.request();
-      const after = (await l.worker().listSubmissions())[0];
+      const after = (await local.worker().listSubmissions())[0];
       assert.equal(after?.deliveryStatus, 'delivered');
       assert.equal(after?.serverStatus, reviewed?.serverStatus);
       assert.equal(after?.serverRevision, reviewed?.serverRevision);
       assert.equal(after?.correctionReason, reviewed?.correctionReason);
       assert.equal(
-        (await f.state()).documentSubmissions.filter(
-          (s) => s.clientActionId === action.id,
+        (await testContext.state()).documentSubmissions.filter(
+          (submission) => submission.clientActionId === action.id,
         ).length,
         1,
       );
     } finally {
       engine.stop();
-      await f.close();
+      await testContext.close();
     }
   });
 }
 
 test('TEST-05: stale v2 resolves ordering; failed refresh survives restart; explicit v3 delivers without superseding v2', async () => {
-  const f = await fixture();
-  const l = f.local;
-  let engine = l.engine();
+  const testContext = await fixture();
+  const local = testContext.local;
+  let engine = local.engine();
   try {
-    const old = await l.worker().enqueueTerms('v2');
-    await f.post('/__dev/terms', { version: 'v3' });
-    const assignment = l.api.assignment;
-    l.api.assignment = async () => {
+    const previousAcceptance = await local.worker().enqueueTerms('v2');
+    await testContext.post('/__dev/terms', { version: 'v3' });
+    const assignment = local.api.assignment;
+    local.api.assignment = async () => {
       throw new TransportError(0, 'test_offline_refresh');
     };
-    l.online = true;
+    local.online = true;
     await engine.start();
-    assert.equal((await l.worker().listActions())[0]?.status, 'stale');
+    assert.equal((await local.worker().listActions())[0]?.status, 'stale');
     assert.equal(
-      (await l.worker().getAssignment())?.terms.serverAcceptanceStatus,
+      (await local.worker().getAssignment())?.terms.serverAcceptanceStatus,
       'not_confirmed',
     );
-    assert.equal((await l.store().refreshState()).needed, true);
+    assert.equal((await local.store().refreshState()).needed, true);
     engine.stop();
-    await l.reopen();
-    l.api.assignment = assignment;
-    engine = l.engine();
+    await local.reopen();
+    local.api.assignment = assignment;
+    engine = local.engine();
     await engine.start();
     assert.equal(
-      (await l.worker().getAssignment())?.terms.termsVersionId,
+      (await local.worker().getAssignment())?.terms.termsVersionId,
       'v2',
     );
-    l.clock.advance(1100);
+    local.clock.advance(1100);
     await engine.request();
     assert.equal(
-      (await l.worker().getAssignment())?.terms.termsVersionId,
+      (await local.worker().getAssignment())?.terms.termsVersionId,
       'v3',
     );
     assert.equal(
-      (await l.worker().getAssignment())?.terms.serverAcceptanceStatus,
+      (await local.worker().getAssignment())?.terms.serverAcceptanceStatus,
       'not_confirmed',
     );
     assert.equal(
-      (await f.state()).acceptances.filter((a) => a.workerId === 'ana').length,
+      (await testContext.state()).acceptances.filter(
+        (action) => action.workerId === 'ana',
+      ).length,
       0,
     );
-    const fresh = await l.worker().enqueueTerms('v3');
+    const fresh = await local.worker().enqueueTerms('v3');
     await engine.request();
     assert.deepEqual(
-      (await l.worker().listActions()).map((a) => [a.id, a.status]),
+      (await local.worker().listActions()).map((action) => [
+        action.id,
+        action.status,
+      ]),
       [
-        [old.id, 'stale'],
+        [previousAcceptance.id, 'stale'],
         [fresh.id, 'delivered'],
       ],
     );
     assert.equal(
-      (await l.worker().getAssignment())?.terms.serverAcceptanceStatus,
+      (await local.worker().getAssignment())?.terms.serverAcceptanceStatus,
       'accepted',
     );
     assert.deepEqual(
-      (await f.state()).acceptances
-        .filter((a) => a.workerId === 'ana')
-        .map((a) => a.clientActionId),
+      (await testContext.state()).acceptances
+        .filter((action) => action.workerId === 'ana')
+        .map((action) => action.clientActionId),
       [fresh.id],
     );
   } finally {
     engine.stop();
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('committed v2 replay after publication of v3 resolves v2 only and never accepts v3', async () => {
-  const f = await fixture();
-  const l = f.local;
-  const engine = l.engine();
+  const testContext = await fixture();
+  const local = testContext.local;
+  const engine = local.engine();
   try {
-    const action = await l.worker().enqueueTerms('v2');
-    await f.post('/__dev/failures', { dropNextResponse: true });
-    l.online = true;
+    const action = await local.worker().enqueueTerms('v2');
+    await testContext.post('/__dev/failures', { dropNextResponse: true });
+    local.online = true;
     await engine.start();
-    await f.post('/__dev/terms', { version: 'v3' });
-    l.clock.advance(1100);
+    await testContext.post('/__dev/terms', { version: 'v3' });
+    local.clock.advance(1100);
     await engine.request();
-    assert.equal((await l.worker().listActions())[0]?.status, 'delivered');
-    const current = await l.worker().getAssignment();
+    assert.equal((await local.worker().listActions())[0]?.status, 'delivered');
+    const current = await local.worker().getAssignment();
     assert.equal(current?.terms.termsVersionId, 'v3');
     assert.equal(current?.terms.serverAcceptanceStatus, 'not_confirmed');
     assert.deepEqual(
-      (await f.state()).acceptances
-        .filter((a) => a.workerId === 'ana')
-        .map((a) => a.clientActionId),
+      (await testContext.state()).acceptances
+        .filter((action) => action.workerId === 'ana')
+        .map((action) => action.clientActionId),
       [action.id],
     );
   } finally {
     engine.stop();
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('real expired token preserves queue and resumes with reauthentication, same worker/action', async () => {
-  const f = await fixture();
-  const l = f.local;
-  const engine = l.engine();
+  const testContext = await fixture();
+  const local = testContext.local;
+  const engine = local.engine();
   try {
-    const action = await l.worker().enqueueTerms('v2');
-    await f.post('/__dev/expire-sessions', {});
-    l.online = true;
+    const action = await local.worker().enqueueTerms('v2');
+    await testContext.post('/__dev/expire-sessions', {});
+    local.online = true;
     await engine.start();
-    assert.equal(l.session, null);
-    assert.equal((await l.worker().listActions())[0]?.status, 'queued');
-    await f.login();
+    assert.equal(local.session, null);
+    assert.equal((await local.worker().listActions())[0]?.status, 'queued');
+    await testContext.login();
     await engine.request();
-    assert.equal((await l.worker().listActions())[0]?.status, 'delivered');
+    assert.equal((await local.worker().listActions())[0]?.status, 'delivered');
     assert.deepEqual(
-      (await f.state()).acceptances
-        .filter((a) => a.workerId === 'ana')
-        .map((a) => a.clientActionId),
+      (await testContext.state()).acceptances
+        .filter((action) => action.workerId === 'ana')
+        .map((action) => action.clientActionId),
       [action.id],
     );
   } finally {
     engine.stop();
-    await f.close();
+    await testContext.close();
   }
 });
 
 test('local acknowledgment rollback recovers original claim and same-resource successor on manual retry without restart', async () => {
-  const f = await fixture();
-  const l = f.local;
-  const engine = l.engine();
+  const testContext = await fixture();
+  const local = testContext.local;
+  const engine = local.engine();
   try {
-    const first = await l.worker().enqueueDocument('passport', l.image());
-    const next = await l.worker().enqueueDocument('passport', l.image());
-    await l.db
+    const first = await local
+      .worker()
+      .enqueueDocument('passport', local.image());
+    const next = await local
+      .worker()
+      .enqueueDocument('passport', local.image());
+    await local.database
       .exec(`CREATE TRIGGER fail_local_ack BEFORE UPDATE OF status ON outbox_actions
       WHEN NEW.status='delivered' BEGIN SELECT RAISE(ABORT,'test_local_ack_fault'); END`);
-    l.online = true;
+    local.online = true;
     await engine.start();
-    const failed = await l.worker().listActions();
+    const failed = await local.worker().listActions();
     assert.deepEqual(
-      failed.map((a) => a.status),
+      failed.map((action) => action.status),
       ['queued', 'queued'],
     );
     assert.equal(failed[0]?.id, first.id);
     assert.deepEqual(failed[0]?.payload, first.payload);
     assert.equal(failed[0]?.fileUri, first.fileUri);
-    assert.equal((await l.worker().listSubmissions())[0]?.serverStatus, null);
     assert.equal(
-      l.events.some((e) => e.code === 'sync_storage_or_integrity_error'),
+      (await local.worker().listSubmissions())[0]?.serverStatus,
+      null,
+    );
+    assert.equal(
+      local.events.some(
+        (event) => event.code === 'sync_storage_or_integrity_error',
+      ),
       true,
     );
     assert.equal(
-      (await f.state()).documentSubmissions.filter(
-        (s) => s.clientActionId === first.id,
+      (await testContext.state()).documentSubmissions.filter(
+        (submission) => submission.clientActionId === first.id,
       ).length,
       1,
     );
     assert.equal(
-      (await f.state()).documentSubmissions.filter(
-        (s) => s.clientActionId === next.id,
+      (await testContext.state()).documentSubmissions.filter(
+        (submission) => submission.clientActionId === next.id,
       ).length,
       0,
     );
-    await l.db.exec('DROP TRIGGER fail_local_ack');
+    await local.database.exec('DROP TRIGGER fail_local_ack');
     // Same engine, connection and session; no restart or explicit recoverSending call.
     await engine.manualRetry();
     assert.deepEqual(
-      (await l.worker().listActions()).map((a) => a.status),
+      (await local.worker().listActions()).map((action) => action.status),
       ['delivered', 'delivered'],
     );
     assert.deepEqual(
-      l.attempts.map((a) => a.id),
+      local.attempts.map((action) => action.id),
       [first.id, first.id, next.id],
     );
     assert.deepEqual(
-      l.attempts.slice(0, 2).map((a) => a.payload),
+      local.attempts.slice(0, 2).map((action) => action.payload),
       [first.payload, first.payload],
     );
-    const state = await f.state();
+    const state = await testContext.state();
     for (const action of [first, next]) {
       assert.equal(
-        state.documentSubmissions.filter((s) => s.clientActionId === action.id)
-          .length,
+        state.documentSubmissions.filter(
+          (submission) => submission.clientActionId === action.id,
+        ).length,
         1,
       );
       assert.equal(
-        state.receipts.filter((r) => r.clientActionId === action.id).length,
+        state.receipts.filter((receipt) => receipt.clientActionId === action.id)
+          .length,
         1,
       );
     }
   } finally {
     engine.stop();
-    await f.close();
+    await testContext.close();
   }
 });

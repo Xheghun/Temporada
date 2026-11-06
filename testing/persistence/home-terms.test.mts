@@ -8,7 +8,7 @@ import { assignmentFixture } from '../../src/testing/persistence-fixtures.ts';
 import type { SyncSession } from '../../src/core/sync/types.ts';
 
 async function fixture() {
-  const f = await syncFixture();
+  const syncContext = await syncFixture();
   let selected: SyncSession | null = {
     workerId: 'ana',
     token: 'fictional',
@@ -18,28 +18,28 @@ async function fixture() {
     signals = 0;
   let enabled = true;
   const listeners = new Set<() => void>();
-  const events = new Set<(id: string) => void>();
+  const events = new Set<(workerId: string) => void>();
   let read: (workerId: string) => AssignmentReader = (workerId) =>
-    f.worker(workerId);
+    syncContext.worker(workerId);
   const service = new AssignmentService({
     enabled: () => enabled,
     session: {
       current: () => selected,
       invalidate: () => {},
-      subscribeSession(fn) {
-        listeners.add(fn);
+      subscribeSession(callback) {
+        listeners.add(callback);
         return () => {
-          listeners.delete(fn);
+          listeners.delete(callback);
         };
       },
     },
-    repository: (id) => read(id),
+    repository: (workerId) => read(workerId),
     online: () => online,
     subscribeNetwork: () => () => {},
-    subscribeData(fn) {
-      events.add(fn);
+    subscribeData(callback) {
+      events.add(callback);
       return () => {
-        events.delete(fn);
+        events.delete(callback);
       };
     },
     notifyEnqueued() {
@@ -50,78 +50,94 @@ async function fixture() {
   });
   await service.reload();
   return {
-    f,
+    syncContext,
     service,
     setSession(session: SyncSession | null) {
       selected = session;
-      listeners.forEach((fn) => fn());
+      listeners.forEach((callback) => callback());
     },
-    set reader(value: (id: string) => AssignmentReader) {
+    set reader(value: (workerId: string) => AssignmentReader) {
       read = value;
     },
     set enabled(value: boolean) {
       enabled = value;
     },
-    emit(id: string) {
-      events.forEach((fn) => fn(id));
+    emit(workerId: string) {
+      events.forEach((callback) => callback(workerId));
     },
     get signals() {
       return signals;
     },
     async close() {
       service.dispose();
-      await f.close();
+      await syncContext.close();
     },
   };
 }
 
 test('cached offline Home and confirmation persist immediately, survive reopen, and suppress duplicate pending confirmations', async () => {
-  const x = await fixture();
+  const testContext = await fixture();
   try {
-    assert.equal(x.service.getSnapshot().online, false);
+    assert.equal(testContext.service.getSnapshot().online, false);
     assert.equal(
-      x.service.getSnapshot().data?.assignment?.assignment.orderId,
+      testContext.service.getSnapshot().data?.assignment?.assignment.orderId,
       'JO-2026-0142',
     );
-    await Promise.all([x.service.confirm('v2', 1), x.service.confirm('v2', 1)]);
-    const state = x.service.getSnapshot();
+    await Promise.all([
+      testContext.service.confirm('v2', 1),
+      testContext.service.confirm('v2', 1),
+    ]);
+    const state = testContext.service.getSnapshot();
     assert.ok(state.savedActionId);
     assert.ok(state.data);
     assert.equal(assignmentFacts(state.data).termsStatus, 'pending_sync');
-    assert.equal(x.signals, 1);
-    const original = (await x.f.worker().listActions())[0];
+    assert.equal(testContext.signals, 1);
+    const original = (await testContext.syncContext.worker().listActions())[0];
     assert.ok(original);
-    await x.f.reopen();
-    await x.service.reload();
-    assert.equal((await x.f.worker().listActions())[0]?.id, original.id);
-    await x.service.confirm('v2', 1);
-    assert.equal((await x.f.worker().listActions()).length, 1);
+    await testContext.syncContext.reopen();
+    await testContext.service.reload();
+    assert.equal(
+      (await testContext.syncContext.worker().listActions())[0]?.id,
+      original.id,
+    );
+    await testContext.service.confirm('v2', 1);
+    assert.equal(
+      (await testContext.syncContext.worker().listActions()).length,
+      1,
+    );
   } finally {
-    await x.close();
+    await testContext.close();
   }
 });
 
 test('stale v2 is blocked only while displayed; new v3 stays unaccepted and explicitly queues without superseding v2', async () => {
-  const x = await fixture();
+  const testContext = await fixture();
   try {
-    await x.service.confirm('v2', 1);
-    const old = (await x.f.worker().listActions())[0];
-    assert.ok(old);
-    await x.f.store().claimAction(old.id, 100);
-    await x.f.store().finish(old, { kind: 'stale' }, 100);
-    await x.service.reload();
-    const before = x.service.getSnapshot().data;
+    await testContext.service.confirm('v2', 1);
+    const previousAction = (
+      await testContext.syncContext.worker().listActions()
+    )[0];
+    assert.ok(previousAction);
+    await testContext.syncContext.store().claimAction(previousAction.id, 100);
+    await testContext.syncContext
+      .store()
+      .finish(previousAction, { kind: 'stale' }, 100);
+    await testContext.service.reload();
+    const before = testContext.service.getSnapshot().data;
     assert.ok(before);
     assert.equal(assignmentFacts(before).termsStatus, 'update_required');
     assert.equal(assignmentFacts(before).canConfirm, false);
-    await x.service.confirm('v2', 1);
-    assert.equal((await x.f.worker().listActions()).length, 1);
+    await testContext.service.confirm('v2', 1);
+    assert.equal(
+      (await testContext.syncContext.worker().listActions()).length,
+      1,
+    );
     const snapshot = assignmentFixture('ana');
     snapshot.serverRevision = 3;
     snapshot.terms.termsVersionId = 'v3';
-    await x.f.worker().cacheAssignment(snapshot);
-    await x.service.reload();
-    const fresh = x.service.getSnapshot().data;
+    await testContext.syncContext.worker().cacheAssignment(snapshot);
+    await testContext.service.reload();
+    const fresh = testContext.service.getSnapshot().data;
     assert.ok(fresh);
     assert.equal(assignmentFacts(fresh).needsReconfirmation, true);
     assert.equal(assignmentFacts(fresh).canConfirm, true);
@@ -129,29 +145,31 @@ test('stale v2 is blocked only while displayed; new v3 stays unaccepted and expl
       fresh.assignment?.terms.serverAcceptanceStatus,
       'not_confirmed',
     );
-    await x.service.confirm('v3', 1);
+    await testContext.service.confirm('v3', 1);
     assert.deepEqual(
-      (await x.f.worker().listActions()).map((a) => a.status),
+      (await testContext.syncContext.worker().listActions()).map(
+        (action) => action.status,
+      ),
       ['stale', 'queued'],
     );
-    const after = x.service.getSnapshot().data;
+    const after = testContext.service.getSnapshot().data;
     assert.ok(after);
     assert.equal(assignmentFacts(after).pendingCount, 1);
     assert.equal(assignmentFacts(after).attentionCount, 0);
   } finally {
-    await x.close();
+    await testContext.close();
   }
 });
 
 test('background v3 refresh never substitutes the v2 version actually displayed by the confirmation callback', async () => {
-  const x = await fixture();
+  const testContext = await fixture();
   try {
     const snapshot = assignmentFixture('ana');
     snapshot.terms.termsVersionId = 'v3';
     snapshot.serverRevision = 3;
-    await x.f.worker().cacheAssignment(snapshot);
-    await x.service.confirm('v2', 1);
-    const action = (await x.f.worker().listActions())[0];
+    await testContext.syncContext.worker().cacheAssignment(snapshot);
+    await testContext.service.confirm('v2', 1);
+    const action = (await testContext.syncContext.worker().listActions())[0];
     assert.ok(action);
     assert.equal(
       action.payload.kind === 'terms_acceptance' &&
@@ -159,125 +177,152 @@ test('background v3 refresh never substitutes the v2 version actually displayed 
       'v2',
     );
   } finally {
-    await x.close();
+    await testContext.close();
   }
 });
 
 test('worker switch clears cached views immediately and delayed old reads never reappear', async () => {
-  const x = await fixture();
+  const testContext = await fixture();
   try {
-    await x.f.worker('bruno').cacheAssignment(assignmentFixture('bruno'));
+    await testContext.syncContext
+      .worker('bruno')
+      .cacheAssignment(assignmentFixture('bruno'));
     let release!: (
       value: Awaited<ReturnType<AssignmentReader['readView']>>,
     ) => void;
-    const old = await x.f.worker().readView();
-    x.reader = (id) =>
-      id === 'ana'
+    const previousView = await testContext.syncContext.worker().readView();
+    testContext.reader = (workerId) =>
+      workerId === 'ana'
         ? {
             readView: () =>
-              new Promise((r) => {
-                release = r;
+              new Promise((resolve) => {
+                release = resolve;
               }),
-            enqueueTerms: (v) => x.f.worker().enqueueTerms(v),
+            enqueueTerms: (version) =>
+              testContext.syncContext.worker().enqueueTerms(version),
           }
-        : x.f.worker(id);
-    const pending = x.service.reload();
-    x.setSession({
+        : testContext.syncContext.worker(workerId);
+    const pending = testContext.service.reload();
+    testContext.setSession({
       workerId: 'bruno',
       token: 'shared-fictional',
       generation: 2,
     });
-    assert.equal(x.service.getSnapshot().data, null);
-    assert.equal(x.service.getSnapshot().workerId, 'bruno');
-    release(old);
+    assert.equal(testContext.service.getSnapshot().data, null);
+    assert.equal(testContext.service.getSnapshot().workerId, 'bruno');
+    release(previousView);
     await pending;
-    await x.service.reload();
+    await testContext.service.reload();
     assert.equal(
-      x.service.getSnapshot().data?.assignment?.worker.workerId,
+      testContext.service.getSnapshot().data?.assignment?.worker.workerId,
       'bruno',
     );
-    await x.service.confirm('v2', 1);
-    assert.equal((await x.f.worker('bruno').listActions()).length, 0);
+    await testContext.service.confirm('v2', 1);
+    assert.equal(
+      (await testContext.syncContext.worker('bruno').listActions()).length,
+      0,
+    );
   } finally {
-    await x.close();
+    await testContext.close();
   }
 });
 
 test('failed local enqueue surfaces an error and never claims saved intent; disabled feature performs no enqueue', async () => {
-  const x = await fixture();
+  const testContext = await fixture();
   try {
-    await x.f.db.exec(
+    await testContext.syncContext.database.exec(
       "CREATE TRIGGER reject_terms BEFORE INSERT ON terms_intents BEGIN SELECT RAISE(ABORT,'test_enqueue_failure'); END",
     );
-    await x.service.confirm('v2', 1);
-    assert.equal(x.service.getSnapshot().error, 'save_failed');
-    assert.equal(x.service.getSnapshot().savedActionId, null);
-    assert.equal((await x.f.worker().listActions()).length, 0);
-    assert.equal(x.signals, 0);
-    await x.f.db.exec('DROP TRIGGER reject_terms');
-    x.enabled = false;
-    await x.service.confirm('v2', 1);
-    assert.equal((await x.f.worker().listActions()).length, 0);
+    await testContext.service.confirm('v2', 1);
+    assert.equal(testContext.service.getSnapshot().error, 'save_failed');
+    assert.equal(testContext.service.getSnapshot().savedActionId, null);
+    assert.equal(
+      (await testContext.syncContext.worker().listActions()).length,
+      0,
+    );
+    assert.equal(testContext.signals, 0);
+    await testContext.syncContext.database.exec('DROP TRIGGER reject_terms');
+    testContext.enabled = false;
+    await testContext.service.confirm('v2', 1);
+    assert.equal(
+      (await testContext.syncContext.worker().listActions()).length,
+      0,
+    );
   } finally {
-    await x.close();
+    await testContext.close();
   }
 });
 
 test('language preference survives v2 upgrade/reopen and repeat migrations without deleting queued intent', async () => {
-  const x = await fixture();
+  const testContext = await fixture();
   try {
-    const action = await x.f.worker().enqueueTerms('v2');
-    await x.f.db.exec('DROP TABLE app_settings; PRAGMA user_version=2');
-    await x.f.reopen();
-    await x.f.db.run("UPDATE app_settings SET language='en' WHERE id=1");
-    await x.f.reopen();
+    const action = await testContext.syncContext.worker().enqueueTerms('v2');
+    await testContext.syncContext.database.exec(
+      'DROP TABLE app_settings; PRAGMA user_version=2',
+    );
+    await testContext.syncContext.reopen();
+    await testContext.syncContext.database.run(
+      "UPDATE app_settings SET language='en' WHERE id=1",
+    );
+    await testContext.syncContext.reopen();
     assert.equal(
       (
-        await x.f.db.first<{ language: string }>(
+        await testContext.syncContext.database.first<{ language: string }>(
           'SELECT language FROM app_settings WHERE id=1',
         )
       )?.language,
       'en',
     );
-    assert.equal((await x.f.worker().listActions())[0]?.id, action.id);
+    assert.equal(
+      (await testContext.syncContext.worker().listActions())[0]?.id,
+      action.id,
+    );
   } finally {
-    await x.close();
+    await testContext.close();
   }
 });
 
 for (const version of ['v2', 'v3']) {
   test(`explicit replacement of failed v2 with displayed ${version} commits a new ID and delivers without restart`, async () => {
-    const x = await fixture();
-    const engine = x.f.engine();
+    const testContext = await fixture();
+    const engine = testContext.syncContext.engine();
     try {
-      await x.service.confirm('v2', 1);
-      const original = (await x.f.worker().listActions())[0]!;
-      x.f.online = true;
-      const send = x.f.api.send;
-      x.f.api.send = async () => ({ status: 422, code: 'validation_failed' });
+      await testContext.service.confirm('v2', 1);
+      const original = (
+        await testContext.syncContext.worker().listActions()
+      )[0]!;
+      testContext.syncContext.online = true;
+      const send = testContext.syncContext.api.send;
+      testContext.syncContext.api.send = async () => ({
+        status: 422,
+        code: 'validation_failed',
+      });
       await engine.request();
       assert.equal(
-        (await x.f.worker().listActions())[0]?.status,
+        (await testContext.syncContext.worker().listActions())[0]?.status,
         'failed_permanent',
       );
-      x.f.api.send = send;
+      testContext.syncContext.api.send = send;
       const snapshot = assignmentFixture('ana');
       snapshot.terms.termsVersionId = version;
       snapshot.serverRevision = 3;
-      await x.f.worker().cacheAssignment(snapshot);
-      await x.service.reload();
-      const view = x.service.getSnapshot().data!;
+      await testContext.syncContext.worker().cacheAssignment(snapshot);
+      await testContext.service.reload();
+      const view = testContext.service.getSnapshot().data!;
       assert.equal(assignmentFacts(view).canConfirm, true);
       assert.equal(assignmentFacts(view).replacementActionId, original.id);
       // Ordinary confirmation/refresh cannot silently replace a permanent failure.
-      await x.service.refresh();
-      await x.service.confirm(version, 1);
-      assert.equal((await x.f.worker().listActions()).length, 1);
+      await testContext.service.refresh();
+      await testContext.service.confirm(version, 1);
+      assert.equal(
+        (await testContext.syncContext.worker().listActions()).length,
+        1,
+      );
       await Promise.all([
-        x.service.confirm(version, 1, original.id),
-        x.service.confirm(version, 1, original.id),
+        testContext.service.confirm(version, 1, original.id),
+        testContext.service.confirm(version, 1, original.id),
       ]);
-      const actions = await x.f.worker().listActions();
+      const actions = await testContext.syncContext.worker().listActions();
       assert.equal(actions.length, 2);
       assert.equal(actions[0]?.status, 'superseded');
       assert.equal(
@@ -294,48 +339,65 @@ for (const version of ['v2', 'v3']) {
       );
       await engine.request();
       assert.deepEqual(
-        x.f.attempts.map((a) => a.id),
+        testContext.syncContext.attempts.map((action) => action.id),
         [replacement.id],
       );
-      assert.equal((await x.f.worker().listActions())[1]?.status, 'delivered');
       assert.equal(
-        (await x.f.worker().getAssignment())?.terms.serverAcceptanceStatus,
+        (await testContext.syncContext.worker().listActions())[1]?.status,
+        'delivered',
+      );
+      assert.equal(
+        (await testContext.syncContext.worker().getAssignment())?.terms
+          .serverAcceptanceStatus,
         'accepted',
       );
     } finally {
       engine.stop();
-      await x.close();
+      await testContext.close();
     }
   });
 }
 
 test('replacement enqueue failure rolls back supersession and preserves failed intent for a later explicit retry', async () => {
-  const x = await fixture();
+  const testContext = await fixture();
   try {
-    await x.service.confirm('v2', 1);
-    const old = (await x.f.worker().listActions())[0]!;
-    await x.f.store().claimAction(old.id, 100);
-    await x.f
+    await testContext.service.confirm('v2', 1);
+    const previousAction = (
+      await testContext.syncContext.worker().listActions()
+    )[0]!;
+    await testContext.syncContext.store().claimAction(previousAction.id, 100);
+    await testContext.syncContext
       .store()
-      .finish(old, { kind: 'failed', code: 'validation_failed' }, 100);
-    await x.service.reload();
-    await x.f.db.exec(
+      .finish(
+        previousAction,
+        { kind: 'failed', code: 'validation_failed' },
+        100,
+      );
+    await testContext.service.reload();
+    await testContext.syncContext.database.exec(
       "CREATE TRIGGER reject_replacement BEFORE UPDATE OF status ON outbox_actions WHEN NEW.status='superseded' BEGIN SELECT RAISE(ABORT,'test_replacement_failure'); END",
     );
-    await x.service.confirm('v2', 1, old.id);
-    assert.equal(x.service.getSnapshot().error, 'save_failed');
-    assert.equal(x.service.getSnapshot().savedActionId, null);
+    await testContext.service.confirm('v2', 1, previousAction.id);
+    assert.equal(testContext.service.getSnapshot().error, 'save_failed');
+    assert.equal(testContext.service.getSnapshot().savedActionId, null);
     assert.deepEqual(
-      (await x.f.worker().listActions()).map((a) => [a.id, a.status]),
-      [[old.id, 'failed_permanent']],
+      (await testContext.syncContext.worker().listActions()).map((action) => [
+        action.id,
+        action.status,
+      ]),
+      [[previousAction.id, 'failed_permanent']],
     );
-    await x.f.db.exec('DROP TRIGGER reject_replacement');
-    await x.service.confirm('v2', 1, old.id);
+    await testContext.syncContext.database.exec(
+      'DROP TRIGGER reject_replacement',
+    );
+    await testContext.service.confirm('v2', 1, previousAction.id);
     assert.deepEqual(
-      (await x.f.worker().listActions()).map((a) => a.status),
+      (await testContext.syncContext.worker().listActions()).map(
+        (action) => action.status,
+      ),
       ['superseded', 'queued'],
     );
   } finally {
-    await x.close();
+    await testContext.close();
   }
 });

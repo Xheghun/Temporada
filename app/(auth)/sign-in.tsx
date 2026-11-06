@@ -13,7 +13,7 @@ import {
   ErrorNotice,
 } from '@/design-system/components/auth-controls';
 export default function SignIn() {
-  const { t } = useTranslation(),
+  const { t: translate } = useTranslation(),
     auth = useAuth(),
     state = useAuthSnapshot();
   const {
@@ -31,16 +31,16 @@ export default function SignIn() {
   return (
     <AuthPage>
       <Stack.Screen
-        options={{ title: t('signIn'), headerBackVisible: false }}
+        options={{ title: translate('signIn'), headerBackVisible: false }}
       />
-      <Heading>{t('welcome')}</Heading>
-      <Body>{t('intro')}</Body>
+      <Heading>{translate('welcome')}</Heading>
+      <Body>{translate('intro')}</Body>
       <Controller
         control={control}
         name="phone"
         render={({ field: { value, onChange, onBlur } }) => (
           <Field
-            label={t('phone')}
+            label={translate('phone')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -50,14 +50,14 @@ export default function SignIn() {
             autoCapitalize="none"
             placeholder="+52 55 1000 0001"
             editable={!state.busy}
-            error={errors.phone ? t('errors.invalid_phone') : undefined}
+            error={errors.phone ? translate('errors.invalid_phone') : undefined}
           />
         )}
       />
-      <Body>{t('phoneHint')}</Body>
+      <Body>{translate('phoneHint')}</Body>
       <ErrorNotice code={state.error} />
       <Action
-        label={t('requestCode')}
+        label={translate('requestCode')}
         busy={state.busy}
         onPress={() => {
           void handleSubmit(async ({ phone }) => {
