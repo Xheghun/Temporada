@@ -289,3 +289,73 @@ test('real expired token preserves queue and resumes with reauthentication, same
     await f.close();
   }
 });
+
+test('local acknowledgment rollback recovers original claim and same-resource successor on manual retry without restart', async () => {
+  const f = await fixture();
+  const l = f.local;
+  const engine = l.engine();
+  try {
+    const first = await l.worker().enqueueDocument('passport', l.image());
+    const next = await l.worker().enqueueDocument('passport', l.image());
+    await l.db
+      .exec(`CREATE TRIGGER fail_local_ack BEFORE UPDATE OF status ON outbox_actions
+      WHEN NEW.status='delivered' BEGIN SELECT RAISE(ABORT,'test_local_ack_fault'); END`);
+    l.online = true;
+    await engine.start();
+    const failed = await l.worker().listActions();
+    assert.deepEqual(
+      failed.map((a) => a.status),
+      ['queued', 'queued'],
+    );
+    assert.equal(failed[0]?.id, first.id);
+    assert.deepEqual(failed[0]?.payload, first.payload);
+    assert.equal(failed[0]?.fileUri, first.fileUri);
+    assert.equal((await l.worker().listSubmissions())[0]?.serverStatus, null);
+    assert.equal(
+      l.events.some((e) => e.code === 'sync_storage_or_integrity_error'),
+      true,
+    );
+    assert.equal(
+      (await f.state()).documentSubmissions.filter(
+        (s) => s.clientActionId === first.id,
+      ).length,
+      1,
+    );
+    assert.equal(
+      (await f.state()).documentSubmissions.filter(
+        (s) => s.clientActionId === next.id,
+      ).length,
+      0,
+    );
+    await l.db.exec('DROP TRIGGER fail_local_ack');
+    // Same engine, connection and session; no restart or explicit recoverSending call.
+    await engine.manualRetry();
+    assert.deepEqual(
+      (await l.worker().listActions()).map((a) => a.status),
+      ['delivered', 'delivered'],
+    );
+    assert.deepEqual(
+      l.attempts.map((a) => a.id),
+      [first.id, first.id, next.id],
+    );
+    assert.deepEqual(
+      l.attempts.slice(0, 2).map((a) => a.payload),
+      [first.payload, first.payload],
+    );
+    const state = await f.state();
+    for (const action of [first, next]) {
+      assert.equal(
+        state.documentSubmissions.filter((s) => s.clientActionId === action.id)
+          .length,
+        1,
+      );
+      assert.equal(
+        state.receipts.filter((r) => r.clientActionId === action.id).length,
+        1,
+      );
+    }
+  } finally {
+    engine.stop();
+    await f.close();
+  }
+});

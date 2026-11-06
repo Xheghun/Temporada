@@ -55,6 +55,7 @@ export class SyncEngine {
   private cancelWake: (() => void) | null = null;
   private stopped = false;
   private readonly recovered = new Set<string>();
+  private readonly pendingReleases = new Map<string, Set<string>>();
   constructor(deps: SyncDependencies) {
     this.deps = deps;
   }
@@ -108,6 +109,7 @@ export class SyncEngine {
         const session = this.deps.session.current();
         if (!session || !this.current(session)) continue;
         const store = this.deps.persistence(session.workerId);
+        await this.releasePendingClaims(session.workerId, store);
         // M2: interrupted-send recovery is local and must also run at offline startup.
         if (!this.recovered.has(session.workerId)) {
           await store.recoverSending();
@@ -124,6 +126,54 @@ export class SyncEngine {
         type: 'error',
         code: 'sync_storage_or_integrity_error',
       });
+    }
+  }
+  private async releasePendingClaims(
+    workerId: string,
+    store: SyncPersistence,
+  ): Promise<void> {
+    const ids = this.pendingReleases.get(workerId);
+    if (!ids) return;
+    for (const id of ids) {
+      await store.releaseClaim(id, this.deps.clock.now());
+      ids.delete(id);
+    }
+    this.pendingReleases.delete(workerId);
+  }
+  private async recoverFailedClaim(
+    store: SyncPersistence,
+    action: OutboxAction,
+    error: unknown,
+  ): Promise<never> {
+    let ids = this.pendingReleases.get(action.workerId);
+    if (!ids) {
+      ids = new Set();
+      this.pendingReleases.set(action.workerId, ids);
+    }
+    ids.add(action.clientActionId);
+    try {
+      // The network attempt has settled under the process-wide guard. Conditional recovery
+      // cannot rewind a completion that committed before an ambiguous driver error. M2/M3.
+      await this.releasePendingClaims(action.workerId, store);
+    } catch (recoveryError) {
+      // Keep the targeted ID for the next trigger if storage is still unavailable.
+      // Process death remains covered by durable startup sending recovery.
+      throw new AggregateError(
+        [error, recoveryError],
+        'local_completion_and_recovery_failed',
+      );
+    }
+    throw error;
+  }
+  private async finishClaim(
+    store: SyncPersistence,
+    action: OutboxAction,
+    outcome: ActionOutcome,
+  ): Promise<void> {
+    try {
+      await store.finish(action, outcome, this.deps.clock.now());
+    } catch (error) {
+      await this.recoverFailedClaim(store, action, error);
     }
   }
   private pause(session: SyncSession, status: number): void {
@@ -203,21 +253,22 @@ export class SyncEngine {
       )
         continue;
       if (!this.current(session)) {
-        await store.finish(
-          action,
-          { kind: 'paused', code: 'session_changed' },
-          this.deps.clock.now(),
-        );
+        await this.finishClaim(store, action, {
+          kind: 'paused',
+          code: 'session_changed',
+        });
         break;
       }
       let outcome: ActionOutcome;
+      let authStatus: number | undefined;
       try {
         const result = await this.deps.api.send(session, action);
         if ('receipt' in result)
           outcome = { kind: 'delivered', receipt: result.receipt };
-        else if (result.status === 401 || result.status === 403)
+        else if (result.status === 401 || result.status === 403) {
+          authStatus = result.status;
           outcome = { kind: 'paused', code: result.code };
-        else if (
+        } else if (
           result.status === 409 &&
           result.code === 'stale_terms' &&
           action.actionType === 'terms_acceptance'
@@ -236,39 +287,32 @@ export class SyncEngine {
               this.deps.retryDelay(action.attemptCount + 1),
           };
         else outcome = { kind: 'failed', code: result.code };
-        await store.finish(action, outcome, this.deps.clock.now());
-        if (
-          !('receipt' in result) &&
-          (result.status === 401 || result.status === 403)
-        ) {
-          if (this.current(session)) this.pause(session, result.status);
-          break;
-        }
       } catch (error) {
-        // Only transport exceptions are classified here; repository failures must escape.
-        if (!(error instanceof TransportError)) throw error;
+        if (!(error instanceof TransportError))
+          return this.recoverFailedClaim(store, action, error);
         if (error.status === 401 || error.status === 403) {
-          await store.finish(
-            action,
-            { kind: 'paused', code: error.code },
-            this.deps.clock.now(),
-          );
-          if (this.current(session)) this.pause(session, error.status);
-          break;
-        }
-        outcome =
-          error.status > 0 &&
-          error.status < 500 &&
-          ![408, 429].includes(error.status)
-            ? { kind: 'failed', code: error.code }
-            : {
-                kind: 'retry',
-                code: error.code,
-                at:
-                  this.deps.clock.now() +
-                  this.deps.retryDelay(action.attemptCount + 1),
-              };
-        await store.finish(action, outcome, this.deps.clock.now());
+          authStatus = error.status;
+          outcome = { kind: 'paused', code: error.code };
+        } else
+          outcome =
+            error.status > 0 &&
+            error.status < 500 &&
+            ![408, 429].includes(error.status)
+              ? { kind: 'failed', code: error.code }
+              : {
+                  kind: 'retry',
+                  code: error.code,
+                  at:
+                    this.deps.clock.now() +
+                    this.deps.retryDelay(action.attemptCount + 1),
+                };
+      }
+      // Persistence errors are not transport failures. Release the specific claim and stop
+      // this pass, allowing a later explicit trigger to replay the original action safely.
+      await this.finishClaim(store, action, outcome);
+      if (authStatus !== undefined) {
+        if (this.current(session)) this.pause(session, authStatus);
+        break;
       }
       this.deps.report({ workerId: session.workerId, type: 'changed' });
       if (this.current(session)) await this.refresh(session, store);

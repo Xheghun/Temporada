@@ -468,3 +468,46 @@ test('offline startup recovers interrupted sending locally before any network op
     await f.close();
   }
 });
+
+test('completion and claim-release write faults preserve targeted recovery until manual retry after storage clears', async () => {
+  const f = await syncFixture();
+  const engine = f.engine();
+  try {
+    const first = await f.worker().enqueueTerms('v2');
+    const next = await f.worker().enqueueTerms('v2');
+    await f.db
+      .exec(`CREATE TRIGGER fail_completion BEFORE UPDATE OF status ON outbox_actions
+      WHEN NEW.status='delivered' BEGIN SELECT RAISE(ABORT,'test_completion_fault'); END;
+      CREATE TRIGGER fail_release BEFORE UPDATE OF status ON outbox_actions
+      WHEN OLD.status='sending' AND NEW.status='queued' BEGIN SELECT RAISE(ABORT,'test_release_fault'); END;`);
+    f.online = true;
+    await engine.start();
+    assert.deepEqual(
+      (await f.worker().listActions()).map((a) => a.status),
+      ['sending', 'queued'],
+    );
+    assert.deepEqual(
+      f.attempts.map((a) => a.id),
+      [first.id],
+    );
+    await engine.manualRetry();
+    assert.deepEqual(
+      f.attempts.map((a) => a.id),
+      [first.id],
+    );
+    assert.equal(f.clock.callbacks.size, 0);
+    await f.db.exec('DROP TRIGGER fail_completion; DROP TRIGGER fail_release');
+    await engine.manualRetry();
+    assert.deepEqual(
+      (await f.worker().listActions()).map((a) => a.status),
+      ['delivered', 'delivered'],
+    );
+    assert.deepEqual(
+      f.attempts.map((a) => a.id),
+      [first.id, first.id, next.id],
+    );
+  } finally {
+    engine.stop();
+    await f.close();
+  }
+});

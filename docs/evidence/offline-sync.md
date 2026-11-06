@@ -39,3 +39,11 @@ Native caveats: offline connectivity was injected, not airplane mode. Login/assi
 No real worker data, tokens, credentials, human review/approval or recordings appear in these artifacts.
 
 Final local checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run arch:check`, `npm run test:ci` (72 tests: 9 mobile, 5 architecture, 12 mock, 46 persistence/sync), Expo dependency/config validation, Expo Doctor 20/20, Android JavaScript export and strict OpenSpec validation passed. Hosted CI is recorded separately at PR handoff.
+
+## P1 review follow-up: failed local completion
+
+Reproduced the reviewer report with a real SQLite trigger rejecting the delivered update after the real HTTP backend committed an upload. Before the fix, the engine-level regression failed with sending/queued instead of queued/queued.
+
+The engine now releases only the claimed worker/action after a failed completion transaction. The same engine, database connection and session then recover through manualRetry after the trigger is removed: the first upload replays its original ID/payload/file, its same-resource successor delivers, and the backend contains exactly one receipt/submission per ID. No restart or explicit startup recovery is used.
+
+Two further tests cover failure of both completion and release writes (no extra send while storage is faulty, successful targeted recovery once clear), and worker/action-scoped release that cannot rewind an already delivered action. All 75 tests pass (49 persistence/sync); typecheck, lint and architecture checks passed. This follow-up fault scenario was NOT RUN on Android; the executed regression uses real file-backed SQLite and HTTP. Prior Android development-probe evidence remains separately recorded above.

@@ -73,6 +73,8 @@ export interface SyncPersistence {
   listActions(): Promise<OutboxAction[]>;
   claimAction(id: string, now: number): Promise<boolean>;
   recoverSending(): Promise<number>;
+  /** Release only this worker/action if it is still sending; completed states remain untouched. */
+  releaseClaim(id: string, now: number): Promise<void>;
   finish(
     action: OutboxAction,
     outcome: ActionOutcome,

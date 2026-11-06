@@ -23,3 +23,7 @@ Recording B is assigned to this session by the user. Before coding, remind the u
 - Archive/sync this change only through the appropriate later workflow; preserved programme reference is not an active or completed change.
 
 Handoff: https://github.com/Xheghun/Temporada/pull/5. Local evidence: docs/evidence/offline-sync.md. Hosted CI and human review/merge remain separate gates. No sibling implementation or recording is claimed.
+
+## Review follow-up
+
+- [x] 3.1 SDD-009 Recover the targeted sending claim after a failed local completion transaction; verify same-engine manual retry, original-ID backend replay, successor progress, recovery-write failure and worker-scoped conditional release.

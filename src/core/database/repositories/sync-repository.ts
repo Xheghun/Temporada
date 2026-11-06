@@ -34,6 +34,13 @@ export class SyncRepository implements SyncPersistence {
   recoverSending() {
     return this.worker.recoverSending();
   }
+  async releaseClaim(id: string, now: number): Promise<void> {
+    await this.db.run(
+      `UPDATE outbox_actions SET status='queued',updated_at=?,last_error_code='local_completion_failed'
+       WHERE worker_id=? AND client_action_id=? AND status='sending'`,
+      [now, this.workerId, id],
+    );
+  }
   async finish(
     action: OutboxAction,
     outcome: ActionOutcome,

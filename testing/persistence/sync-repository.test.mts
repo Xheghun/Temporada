@@ -222,3 +222,35 @@ test('stale intent never creates acceptance or erases an earlier acknowledged hi
     await f.close();
   }
 });
+
+test('claim release is worker/action scoped and never rewinds a committed completion', async () => {
+  const f = await syncFixture();
+  try {
+    const first = await f.worker().enqueueTerms('v2');
+    const next = await f.worker().enqueueTerms('v2');
+    await f.store().claimAction(first.id, 100);
+    await f.store().claimAction(next.id, 100);
+    await f.store('carla').releaseClaim(first.id, 101);
+    assert.deepEqual(
+      (await f.worker().listActions()).map((a) => a.status),
+      ['sending', 'sending'],
+    );
+    await f.store().releaseClaim(first.id, 101);
+    assert.deepEqual(
+      (await f.worker().listActions()).map((a) => a.status),
+      ['queued', 'sending'],
+    );
+    assert.equal((await f.worker().listActions())[0]?.attemptCount, 1);
+    assert.deepEqual(
+      (await f.worker().listActions())[0]?.payload,
+      first.payload,
+    );
+    await f
+      .store()
+      .finish(next, { kind: 'delivered', receipt: receipt(next) }, 101);
+    await f.store().releaseClaim(next.id, 102);
+    assert.equal((await f.worker().listActions())[1]?.status, 'delivered');
+  } finally {
+    await f.close();
+  }
+});
