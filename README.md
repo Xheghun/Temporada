@@ -59,3 +59,7 @@ Worker-scoped SQLite repositories now cache assignments and atomically record te
 ### Synchronization engine
 
 The worker-scoped engine now delivers durable intent, persists retries, handles stale terms and merges replay acknowledgments without regressing newer staff decisions. See [runtime contracts](docs/synchronization.md) and [executed sync evidence](docs/evidence/offline-sync.md). Run `npm run test:persistence` for the file-backed core and real-HTTP integration tests. Authentication/UI wiring and capture remain separate changes.
+
+### Worker authentication
+
+Phone/OTP sign-in, authorized worker selection and SecureStore session restore are now wired to synchronization. See [setup and session behavior](docs/authentication.md) and [verification](docs/evidence/worker-authentication.md). Development mode requires EXPO_PUBLIC_ASSESSMENT_MODE=1; OTP is 123456. The current worker route displays identity controls; Home business content is the next scoped feature.

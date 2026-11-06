@@ -63,6 +63,20 @@ export class WorkerRepository implements WorkerPersistence {
     this.clock = clock;
   }
 
+  async ensureWorkerIdentity(displayName: string): Promise<void> {
+    assertNonEmptyString(displayName);
+    await this.db.transaction(async (tx) => {
+      await tx.run(
+        `INSERT INTO workers(worker_id,display_name,updated_at) VALUES(?,?,?)
+        ON CONFLICT(worker_id) DO UPDATE SET display_name=excluded.display_name`,
+        [this.workerId, displayName, this.clock.now()],
+      );
+      await tx.run(
+        'INSERT OR IGNORE INTO refresh_state(worker_id,assignment_refresh_needed) VALUES(?,1)',
+        [this.workerId],
+      );
+    });
+  }
   async cacheAssignment(snapshot: AssignmentSnapshot): Promise<boolean> {
     this.validateAssignment(snapshot);
     const now = this.clock.now();
