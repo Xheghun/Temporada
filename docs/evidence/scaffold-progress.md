@@ -37,11 +37,11 @@ Shared npm cache had inaccessible entries; used a temporary cache without changi
 
 ## Remaining gates and limitations
 
-- Xheghun/Temporada is confirmed empty, with no default branch. Origin is configured. No branch has been pushed, no hosted PR exists and hosted CI has NOT RUN. A reviewable local scaffold commit and PR body are prepared; one-time main bootstrap requires explicit authorization because normal workflow forbids direct main pushes.
+- User explicitly authorized the one-time repository bootstrap: main contains planning-only baseline 071f2c3. Scaffold branch is pushed and PR https://github.com/Xheghun/Temporada/pull/1 is open. GitHub Actions Validate started; result pending at this update. No merge or release performed.
 - SDD-001 remains partial: Recording B checklist is prepared, but human capture schedule is unconfirmed. Proposal is later offline-sync; actual human recording is required, never fabricated.
-- SDD-018 remains partial until the real scaffold PR exists. Human review/merge, branch protections, build environment reviewers, Expo owner/project/credentials and signing setup remain pending external work.
+- SDD-018 is complete with the actual scaffold PR open and local checks recorded. Human review/merge, branch protections, build environment reviewers, Expo owner/project/credentials and signing setup remain pending external work.
 - EAS cloud Android/iOS builds, store release and OTA execution NOT RUN. Workflow configuration alone proves none of these.
 - All worker scenarios, mandatory six sync tests and TEST-03R remain NOT RUN; backend, durable domain storage, sync, auth and documents belong to later changes.
 - Android 9/2 GB behavior, iOS runtime and full bilingual/a11y worker UI are unverified. App identifiers are provisional.
 
-Tracked progress at local handoff: 3/5. SDD-002 and SDD-003 are verified/committed; PR preparation task is complete with explicit remote-base blocker. SDD-001 remains unchecked for human recording schedule; SDD-018 remains unchecked for actual hosted PR. Scaffold commit: 293eef6; planning-only local main baseline: 071f2c3. No main push is authorized or performed.
+Tracked progress after authorized bootstrap/PR creation: 4/5. SDD-002/003/018 and PR preparation are complete. SDD-001 remains unchecked solely for the unconfirmed human recording schedule. Scaffold implementation commit: 293eef6; Android evidence commit: 4f16274; planning-only main baseline: 071f2c3. The one-time baseline push was expressly approved; no scaffold code was pushed directly to main.

@@ -22,6 +22,6 @@ The only screen is a Spanish welcome route. There is no authentication, backend,
 
 ## Risks and human review
 
-No worker workflow or persistence guarantee has been verified; mandatory sync tests/manual scenarios remain future work. Hosted CI and cloud builds are NOT RUN until pushed/executed. EAS ownership/signing and protected environments need human setup; package IDs are provisional. Recording B capture schedule is pending. Review the static checker limits, build environment protection setup and external main branch protections. Original assessment is still pending comparison.
+No worker workflow or persistence guarantee has been verified; mandatory sync tests/manual scenarios remain future work. Hosted CI validation is running on PR #1; cloud builds are NOT RUN. EAS ownership/signing and protected environments need human setup; package IDs are provisional. Recording B capture schedule is pending. Review the static checker limits, build environment protection setup and external main branch protections. Original assessment is still pending comparison.
 
 This PR requires human review/merge. Do not auto-start another OpenSpec change after preparing it. No approval or release is claimed.
