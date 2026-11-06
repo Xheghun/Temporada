@@ -1,0 +1,79 @@
+[
+  {
+    "id": "517ebac5-6fd6-436c-8afe-4e24b473ab37",
+    "type": "terms_acceptance",
+    "status": "delivered",
+    "attemptCount": 1,
+    "code": null
+  },
+  {
+    "id": "90503161-4825-425c-92aa-590ea09a992f",
+    "type": "document_upload",
+    "status": "delivered",
+    "attemptCount": 1,
+    "code": null
+  },
+  {
+    "id": "c47b3361-eb60-4065-90a4-6e148e13443b",
+    "type": "document_upload",
+    "status": "delivered",
+    "attemptCount": 1,
+    "code": null
+  },
+  {
+    "id": "a875442b-8777-48fd-b423-2500ee314abe",
+    "type": "document_upload",
+    "status": "delivered",
+    "attemptCount": 1,
+    "code": null
+  },
+  {
+    "id": "49aeb536-8848-4bc6-a5ab-e928f3592f5d",
+    "type": "document_upload",
+    "status": "delivered",
+    "attemptCount": 2,
+    "code": null
+  },
+  {
+    "id": "e897d9c7-b7ca-44f2-8ec4-342039f8d4d5",
+    "type": "document_upload",
+    "status": "delivered",
+    "attemptCount": 1,
+    "code": null
+  },
+  {
+    "id": "211714d6-7726-4cf9-9914-b5ef89959fe5",
+    "type": "document_upload",
+    "status": "delivered",
+    "attemptCount": 2,
+    "code": null
+  },
+  {
+    "id": "3fa3da54-a765-4a7c-92fe-09b1226b9930",
+    "type": "document_upload",
+    "status": "delivered",
+    "attemptCount": 2,
+    "code": null
+  },
+  {
+    "id": "7b244cf8-39d1-4948-8aae-ef5638201eba",
+    "type": "document_upload",
+    "status": "delivered",
+    "attemptCount": 2,
+    "code": null
+  },
+  {
+    "id": "46a40920-db94-4b5c-bb80-ca4b4e2bc277",
+    "type": "terms_acceptance",
+    "status": "stale",
+    "attemptCount": 1,
+    "code": "stale_terms"
+  },
+  {
+    "id": "975eb748-2540-47c0-af41-d2e3de37daa0",
+    "type": "terms_acceptance",
+    "status": "delivered",
+    "attemptCount": 1,
+    "code": null
+  }
+]

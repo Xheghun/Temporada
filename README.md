@@ -55,3 +55,7 @@ Mock API evidence is in [mock-api verification](docs/evidence/mock-api.md). Root
 ### Persistent local intent
 
 Worker-scoped SQLite repositories now cache assignments and atomically record terms/document intent with stable action IDs. Run `npm run test:persistence` for 15 file-backed tests. See [persistence contracts](docs/persistence.md) and [Android restart evidence](docs/evidence/persistent-outbox.md). Network sync and worker capture screens remain separate changes.
+
+### Synchronization engine
+
+The worker-scoped engine now delivers durable intent, persists retries, handles stale terms and merges replay acknowledgments without regressing newer staff decisions. See [runtime contracts](docs/synchronization.md) and [executed sync evidence](docs/evidence/offline-sync.md). Run `npm run test:persistence` for the file-backed core and real-HTTP integration tests. Authentication/UI wiring and capture remain separate changes.

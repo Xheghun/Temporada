@@ -8,9 +8,9 @@ Recording B is assigned to this session by the user. Before coding, remind the u
 
 ## 1. Scoped implementation and verification
 
-- [ ] 1.1 SDD-008 Implement injected engine contracts, single-flight, eligible deterministic ordering/resource dependencies, captured-session checks and lifecycle triggers; verify TEST-01 and concurrent-trigger tests; document ordering and queue semantics.
-- [ ] 1.2 SDD-009 Implement persistent jittered retry, 401 pause/resume, 413/422 terminal remedies and unrelated progress; verify TEST-04 with fake clock, deadline recovery and auth tests; document classifications.
-- [ ] 1.3 SDD-010 Implement revision-aware 201/200 delivery/review merge, stale v2 as resolved for ordering and independent latest-terms refresh with explicit reconfirmation; verify TEST-03 against durable real backend, TEST-03R (commit/drop → staff decision → refresh → original replay preserves Approved/Correction Requested and reason), and TEST-05 through successful explicit v3 delivery without v2 supersession, including refresh failure/replay after v3; update sync evidence and decisions.
+- [x] 1.1 SDD-008 Implement injected engine contracts, single-flight, eligible deterministic ordering/resource dependencies, captured-session checks and lifecycle triggers; verify TEST-01 and concurrent-trigger tests; document ordering and queue semantics.
+- [x] 1.2 SDD-009 Implement persistent jittered retry, 401 pause/resume, 413/422 terminal remedies, explicit transactional failed-action supersession and unrelated progress; verify TEST-04 with fake clock, deadline recovery, auth tests and supersession reopen/rollback/worker-isolation tests; document classifications.
+- [x] 1.3 SDD-010 Implement revision-aware 201/200 delivery/review merge, stale v2 as resolved for ordering and independent latest-terms refresh with explicit reconfirmation; verify TEST-03 against durable real backend, TEST-03R (commit/drop → staff decision → refresh → original replay preserves Approved/Correction Requested and reason), and TEST-05 through successful explicit v3 delivery without v2 supersession, including refresh failure/replay after v3; update sync evidence and decisions.
 
 ## 2. PR handoff
 

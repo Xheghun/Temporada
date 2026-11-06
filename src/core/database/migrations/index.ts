@@ -25,8 +25,15 @@ export async function migrateDatabase(db: Database): Promise<void> {
     const current = await tx.first<{ user_version: number }>(
       'PRAGMA user_version',
     );
-    if (!current || current.user_version > 1)
+    if (!current || current.user_version > 2)
       throw new Error('unsupported_database_version');
     if (current.user_version === 0) await tx.exec(versionOne);
+    if (current.user_version < 2)
+      await tx.exec(`
+      ALTER TABLE refresh_state ADD COLUMN attempt_count INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE refresh_state ADD COLUMN next_attempt_at INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE refresh_state ADD COLUMN last_error_code TEXT;
+      PRAGMA user_version=2;
+    `);
   });
 }

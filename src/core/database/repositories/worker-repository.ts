@@ -282,7 +282,8 @@ export class WorkerRepository implements WorkerPersistence {
           previous.correctionReason !== incoming.correctionReason
         )
           throw new Error('conflicting_review_revision');
-        return;
+        // Upload receipts omit creation time. Equal-review snapshots may still complete metadata/projections.
+        if (previous.serverCreatedAt !== null) return;
       }
     }
     if (previous) {
@@ -554,7 +555,10 @@ export class WorkerRepository implements WorkerPersistence {
     if (!stored) throw new Error('action_insert_failed');
     action.sequence = stored.sequence;
   }
-  async enqueueTerms(termsVersionId: string): Promise<OutboxAction> {
+  async enqueueTerms(
+    termsVersionId: string,
+    supersedesActionId?: string,
+  ): Promise<OutboxAction> {
     assertNonEmptyString(termsVersionId);
     const { id, now } = this.identity();
     const action = this.newAction(
@@ -575,6 +579,14 @@ export class WorkerRepository implements WorkerPersistence {
         ))
       )
         throw new Error('terms_not_cached');
+      if (
+        supersedesActionId &&
+        !(await tx.first(
+          "SELECT 1 FROM outbox_actions WHERE worker_id=? AND client_action_id=? AND action_type='terms_acceptance' AND status='failed_permanent'",
+          [this.workerId, supersedesActionId],
+        ))
+      )
+        throw new Error('supersession_not_allowed');
       await this.insertAction(tx, action);
       await tx.run(
         `INSERT INTO terms_intents(
@@ -582,6 +594,11 @@ export class WorkerRepository implements WorkerPersistence {
         ) VALUES (?,?,?,?)`,
         [this.workerId, id, termsVersionId, now],
       );
+      if (supersedesActionId)
+        await tx.run(
+          "UPDATE outbox_actions SET status='superseded',updated_at=? WHERE worker_id=? AND client_action_id=?",
+          [now, this.workerId, supersedesActionId],
+        );
     });
     return action;
   }
@@ -589,6 +606,7 @@ export class WorkerRepository implements WorkerPersistence {
     documentType: string,
     file: DurableUpload,
     replacesSubmissionId?: string,
+    supersedesActionId?: string,
   ): Promise<OutboxAction> {
     assertNonEmptyString(documentType);
     if (
@@ -638,6 +656,26 @@ export class WorkerRepository implements WorkerPersistence {
         ))
       )
         throw new Error('replacement_not_owned');
+      if (supersedesActionId) {
+        const predecessor = await tx.first<{ payload: string }>(
+          `SELECT payload_json AS payload FROM outbox_actions
+           WHERE worker_id=? AND client_action_id=? AND status='failed_permanent'
+             AND action_type='document_upload'`,
+          [this.workerId, supersedesActionId],
+        );
+        if (!predecessor) throw new Error('supersession_not_allowed');
+        const payload = decodeActionPayload(predecessor.payload, {
+          workerId: this.workerId,
+          clientActionId: supersedesActionId,
+          actionType: 'document_upload',
+        });
+        if (
+          payload.kind !== 'document_upload' ||
+          payload.documentType !== documentType ||
+          payload.replacesSubmissionId !== (replacesSubmissionId ?? null)
+        )
+          throw new Error('supersession_resource_mismatch');
+      }
       await this.insertAction(tx, action);
       await tx.run(
         `INSERT INTO document_submissions(worker_id,
@@ -662,6 +700,11 @@ export class WorkerRepository implements WorkerPersistence {
         'UPDATE documents SET latest_local_action_id=?,updated_at=? WHERE worker_id=? AND document_type=?',
         [id, now, this.workerId, documentType],
       );
+      if (supersedesActionId)
+        await tx.run(
+          "UPDATE outbox_actions SET status='superseded',updated_at=? WHERE worker_id=? AND client_action_id=? AND status='failed_permanent'",
+          [now, this.workerId, supersedesActionId],
+        );
     });
     return action;
   }
