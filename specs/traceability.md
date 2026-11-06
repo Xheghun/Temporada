@@ -42,3 +42,5 @@ Each SDD task appears in exactly one active change checklist; the central change
 - [language-and-accessibility](../openspec/changes/language-and-accessibility/tasks.md): SDD-015.
 - [offline-integration](../openspec/changes/offline-integration/tasks.md): SDD-016, SDD-017, SDD-019.
 - [submission-documentation](../openspec/changes/submission-documentation/tasks.md): SDD-020, SDD-021.
+
+Mock-api: SDD-004/005 implementation evidence for R-API and the backend portions of M3/M4/M6/M7/M8/M10 is in docs/evidence/mock-api.md. Mobile acceptance for those invariants is not complete. Scaffold PR #1 was human-reviewed/merged before this branch; no subsequent feature is started.

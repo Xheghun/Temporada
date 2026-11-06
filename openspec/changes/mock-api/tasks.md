@@ -6,8 +6,8 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 
 ## 1. Scoped implementation and verification
 
-- [ ] 1.1 SDD-004 Implement exact seeds, OTP/auth and authorized X-Worker-Id assignment contract with persistent storage; verify endpoint smoke tests and forbidden-worker 403; document mock-only assumptions and proposed contract approval status.
-- [ ] 1.2 SDD-005 Implement transactional business effect/idempotency receipts, content fingerprint, terms/multipart documents, submission history and development failure controls; verify first/replay, same-ID mismatch, stale terms, 413/422, restart, post-commit drop and safe file recovery; document actual failure-control commands and check Android-to-server reachability.
+- [x] 1.1 SDD-004 Implement exact seeds, OTP/auth and authorized X-Worker-Id assignment contract with persistent storage; verify endpoint smoke tests and forbidden-worker 403; document mock-only assumptions and proposed contract approval status.
+- [x] 1.2 SDD-005 Implement transactional business effect/idempotency receipts, content fingerprint, terms/multipart documents, submission history and development failure controls; verify first/replay, same-ID mismatch, stale terms, 413/422, restart, post-commit drop and safe file recovery; document actual failure-control commands and check Android-to-server reachability.
 
 ## 2. PR handoff
 

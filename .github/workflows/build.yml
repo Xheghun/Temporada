@@ -41,6 +41,7 @@ jobs:
           test -n "$EAS_PROJECT_ID"
           test -n "$EXPO_OWNER"
       - run: npm ci
+      - run: npm ci --prefix mock-server
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run format:check
