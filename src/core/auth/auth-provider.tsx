@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import '../i18n';
 import { createWorkerRuntime } from './runtime';
 import type { WorkerRuntime } from './runtime';
+import { DocumentsContext } from '../../features/documents/hooks/use-documents';
 import { AssignmentContext } from '../../features/assignment/hooks/use-assignment';
 import { AuthContext } from './auth-context';
 export { useAuth, useAuthSnapshot } from './auth-context';
@@ -50,7 +51,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
     return (
       <AuthContext.Provider value={state.runtime.auth}>
         <AssignmentContext.Provider value={state.runtime.assignment}>
-          {children}
+          <DocumentsContext.Provider value={state.runtime.documents}>
+            {children}
+          </DocumentsContext.Provider>
         </AssignmentContext.Provider>
       </AuthContext.Provider>
     );

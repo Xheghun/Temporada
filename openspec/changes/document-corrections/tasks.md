@@ -6,7 +6,7 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 
 ## 1. Scoped implementation and verification
 
-- [ ] 1.1 SDD-013 Implement backend-catalog Documents, distinct delivery/review states, correction reason/new submission and ID/revision-aware merge; verify correction history, late old-passport decision cannot replace newer pending state, and TEST-03R preserves the same submission’s newer staff decision after replay; document conflict policy.
+- [x] 1.1 SDD-013 Implement backend-catalog Documents, distinct delivery/review states, correction reason/new submission and ID/revision-aware merge; verify correction history, late old-passport decision cannot replace newer pending state, and TEST-03R preserves the same submission’s newer staff decision after replay; document conflict policy.
 
 ## 2. PR handoff
 

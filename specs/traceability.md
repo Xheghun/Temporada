@@ -50,3 +50,5 @@ Offline-sync SDD-008/009/010: core delivery/retry/isolation/version/replay evide
 Worker-authentication SDD-011: auth/identity/M2/M9/M10 scope evidence is in docs/evidence/worker-authentication.md. Actual Android SecureStore resume/logout and shared-phone identity passed; whole-app worker UI scenarios remain incomplete.
 
 Home-and-terms SDD-012: cached assignment/timeline/connectivity/counts, exact-version terms and M1/M2/M4/M6/M9/M10 scoped evidence is in docs/evidence/home-and-terms.md. Android offline v3 confirmation/restart/reconnect passed; native stale UI and full document journeys remain unverified in this change.
+
+Document-corrections SDD-013: M4/M5/M8/M9/M10 catalog/projection/orchestration and history evidence is in docs/evidence/document-corrections.md. Camera/compression/private-file adapter and whole-worker resubmission journeys remain owned by document-capture/integration.

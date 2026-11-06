@@ -21,6 +21,13 @@ export default function WorkerLayout() {
         }}
       />
       <Stack.Screen
+        name="documents"
+        options={{
+          title: translate('documents.title'),
+          headerBackTitle: translate('home.title'),
+        }}
+      />
+      <Stack.Screen
         name="identity"
         options={{ title: translate('identityTitle') }}
       />

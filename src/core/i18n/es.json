@@ -42,7 +42,8 @@
     "local_data_error": "No se pudieron leer los datos guardados. Vuelve a intentarlo.",
     "save_failed": "No se pudo guardar la confirmación. Vuelve a intentarlo.",
     "refresh_failed": "No se pudo actualizar. Vuelve a intentarlo al recuperar la conexión.",
-    "language_failed": "No se pudo guardar el idioma. Vuelve a intentarlo."
+    "language_failed": "No se pudo guardar el idioma. Vuelve a intentarlo.",
+    "document_save_failed": "No se guardó el documento. Vuelve a intentarlo; no cierres la vista previa."
   },
   "configurationError": "No se ha configurado la conexión del servicio. Contacta con el equipo de soporte.",
   "home": {
@@ -74,7 +75,9 @@
     "offline": "Sin conexión · tus acciones se guardan en el teléfono",
     "loading": "Cargando tu oferta de trabajo…",
     "noData": "No se pudo cargar tu oferta. Actualiza o vuelve a intentarlo más tarde.",
-    "noOfflineData": "Aún no hay una oferta guardada. Conéctate para descargar tus datos."
+    "noOfflineData": "Aún no hay una oferta guardada. Conéctate para descargar tus datos.",
+    "documentsAvailable": "Consulta los requisitos, el estado de revisión y las correcciones.",
+    "openDocuments": "Ver documentos"
   },
   "terms": {
     "version": "Versión {{version}}",
@@ -96,5 +99,30 @@
     "staleHistory": "La confirmación de {{version}} fue rechazada por una actualización; no confirmó versiones nuevas.",
     "backHome": "Volver al inicio",
     "replaceFailed": "Volver a confirmar {{version}} y reemplazar el envío fallido"
+  },
+  "documents": {
+    "title": "Documentos",
+    "empty": "El catálogo aún no indica documentos. Actualiza o consulta con el equipo.",
+    "required": "Requerido",
+    "optional": "Opcional",
+    "captureUnavailable": "La captura de fotos estará disponible en el siguiente paso. Tu historial se conserva.",
+    "replace": "Tomar una foto nueva · próximamente",
+    "add": "Agregar foto · próximamente",
+    "history": "Envíos anteriores",
+    "deliveryPending": "Esta acción sigue pendiente de sincronizar. Los datos de revisión, si aparecen, provienen del servidor.",
+    "sizeError": "La imagen fue rechazada por tamaño. Necesitas una foto nueva de menos de 1.5 MB.",
+    "validationError": "El documento fue rechazado. Actualiza los requisitos y prepara una foto nueva.",
+    "failedError": "No se pudo enviar. Revisa los requisitos y prepara un nuevo envío.",
+    "reason": "Motivo: {{reason}}",
+    "status": {
+      "not_submitted": "Sin enviar",
+      "pending_sync": "Pendiente de sincronizar",
+      "pending_review": "Pendiente de revisión",
+      "approved": "Aprobado",
+      "correction_requested": "Corrección solicitada",
+      "failed": "Error de envío",
+      "superseded": "Reemplazado",
+      "needs_refresh": "Estado por confirmar · actualiza"
+    }
   }
 }
