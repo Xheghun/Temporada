@@ -28,6 +28,13 @@ export default function WorkerLayout() {
         }}
       />
       <Stack.Screen
+        name="capture"
+        options={{
+          title: translate('capture.title'),
+          headerBackTitle: translate('documents.title'),
+        }}
+      />
+      <Stack.Screen
         name="identity"
         options={{ title: translate('identityTitle') }}
       />

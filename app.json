@@ -2,7 +2,7 @@
   "expo": {
     "name": "Trabajador",
     "slug": "seasonal-worker-mobile",
-    "version": "0.1.0",
+    "version": "1.1.0",
     "scheme": "seasonal-worker",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -13,12 +13,38 @@
     "android": {
       "package": "com.cremedigital.seasonalworker"
     },
-    "plugins": ["expo-router", "expo-sqlite", "expo-secure-store"],
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Permite tomar fotos de tus documentos para enviarlos.",
+          "photosPermission": "Permite elegir una foto de tus documentos para enviarla.",
+          "microphonePermission": false
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     },
     "runtimeVersion": {
       "policy": "appVersion"
+    },
+    "locales": {
+      "es": {
+        "ios": {
+          "NSCameraUsageDescription": "Permite tomar fotos de tus documentos para enviarlos.",
+          "NSPhotoLibraryUsageDescription": "Permite elegir una foto de tus documentos para enviarla."
+        }
+      },
+      "en": {
+        "ios": {
+          "NSCameraUsageDescription": "Allow taking photos of your documents for submission.",
+          "NSPhotoLibraryUsageDescription": "Allow choosing photos of your documents for submission."
+        }
+      }
     }
   }
 }

@@ -43,7 +43,20 @@
     "save_failed": "Could not save confirmation. Try again.",
     "refresh_failed": "Could not refresh. Try again when connected.",
     "language_failed": "Could not save the language. Try again.",
-    "document_save_failed": "The document was not saved. Try again; keep the preview open."
+    "document_save_failed": "The document was not saved. Try again; keep the preview open.",
+    "capture_camera_denied": "Allow camera access in settings or choose an image.",
+    "capture_selection_failed": "Could not open the image. Choose another or try the camera again.",
+    "capture_compression_failed": "Could not prepare the image. Retake the photo or choose another.",
+    "upload_too_large": "The image must be below 1.5 MB. Choose another photo.",
+    "capture_save_failed": "No new submission was saved. Check Documents and choose a photo again.",
+    "capture_selection_changed": "The worker or document changed. Return to Documents to start again.",
+    "capture_cleanup_failed": "Image cleanup could not finish. Return to Documents and retry; pending uploads are kept.",
+    "local_file_missing": "The saved image is missing. Take a new photo to replace this submission.",
+    "local_file_changed": "The saved image changed. Take another photo to replace this submission.",
+    "file_ownership_invalid": "This image cannot be used for this worker. Choose a photo again.",
+    "capture_settings_failed": "Could not open settings. Open them from the system or choose an image.",
+    "local_file_unreadable": "The saved image cannot be read. Choose a new photo to replace the submission.",
+    "capture_storage_failed": "Could not store the image. Free storage on the phone and choose a photo again."
   },
   "configurationError": "The service connection is not configured. Contact the support team.",
   "home": {
@@ -124,5 +137,26 @@
       "superseded": "Replaced",
       "needs_refresh": "Status unknown · refresh"
     }
+  },
+  "capture": {
+    "title": "Document photo",
+    "guidance": "Include the whole document, avoid glare and keep the text readable. Check the preview before saving.",
+    "camera": "Take photo",
+    "retake": "Retake photo",
+    "gallery": "Choose image",
+    "save": "Save for sync",
+    "back": "Back to documents",
+    "settings": "Open permission settings",
+    "preview": "Document photo preview",
+    "bytes": "Compressed image: {{count}} bytes",
+    "choosing": "Choosing image…",
+    "preparing": "Compressing and storing the image…",
+    "saving": "Saving the action on this phone…",
+    "saved": "Document saved on this phone. Check Documents for sync and review status.",
+    "replaceDocument": "Prepare a new submission",
+    "addDocument": "Add document",
+    "inspect": "Inspect capture files (development)",
+    "inspectionTitle": "Capture inspection",
+    "inspectionFailed": "Storage inspection failed. Try again."
   }
 }
