@@ -113,3 +113,9 @@ The user explicitly amended M9 to English-first on 2026-11-06; Spanish remains a
 The shared button retains readable pressed-state contrast, announces busy/disabled state, and hides the redundant spinner from accessibility services. Errors expose localized hints and polite alerts; current statuses announce updates. The language switch is near the top of Home. Existing scroll views, scalable text and minimum 56dp controls accommodate wrapping. No new dependency or independent feature framework was introduced.
 
 Dictionary parity, interpolation, literal call-site keys, bilingual document states/errors, configured contrast pairs and real SQLite preference recovery are tested. The initial key audit incorrectly rejected plural base keys; it was corrected to recognize their one/other forms. Native evidence and unverified accessibility areas are recorded in docs/evidence/language-and-accessibility.md. Recording B remains unconfirmed; no footage or human review is claimed.
+
+## SDD-016/017/019: native integration evidence
+
+Integration preserves the existing contracts and uses isolated fictional server/mobile fixtures. Prior databases are archived only with resolved actions. Android snapshots include IDs, delivery/review revisions, counts, measured bytes and digest equality, excluding tokens and private paths. A loopback test proxy supplies native 422 and held-replay responses without adding production debug behavior. Backend 422 validation remains independently tested against the actual service.
+
+No product logic fix was justified by the observed results. Test-driver URI decoding and swipe adjustments are recorded in the integration evidence, separately from application behavior. Executed scenarios, reboot checks, limitations and quality results are in docs/evidence/offline-integration.md; the single coding ledger continues across branches. Recordings and production approvals are not inferred from emulator tests.

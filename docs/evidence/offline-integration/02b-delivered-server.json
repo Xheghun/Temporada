@@ -1,0 +1,59 @@
+{
+  "terms": {
+    "termsVersion": "v2",
+    "revision": 3
+  },
+  "receipts": [
+    {
+      "workerId": "ana",
+      "clientActionId": "08399887-2dc5-4928-919b-d1be64b27c40"
+    },
+    {
+      "workerId": "ana",
+      "clientActionId": "74639303-7654-42d4-b30a-c386854bb8c6"
+    }
+  ],
+  "acceptances": [
+    {
+      "acceptanceId": "seed-bruno-v2",
+      "workerId": "bruno",
+      "clientActionId": "seed-bruno-v2",
+      "termsVersionId": "v2"
+    },
+    {
+      "acceptanceId": "f72cca10-6aa5-4068-982d-bac0b63aa1ad",
+      "workerId": "ana",
+      "clientActionId": "08399887-2dc5-4928-919b-d1be64b27c40",
+      "termsVersionId": "v2"
+    }
+  ],
+  "documentSubmissions": [
+    {
+      "submissionId": "seed-bruno-passport",
+      "workerId": "bruno",
+      "clientActionId": "seed-bruno-passport",
+      "documentType": "passport",
+      "status": "approved",
+      "correctionReason": null,
+      "serverRevision": 1
+    },
+    {
+      "submissionId": "seed-carla-passport",
+      "workerId": "carla",
+      "clientActionId": "seed-carla-passport",
+      "documentType": "passport",
+      "status": "correction_requested",
+      "correctionReason": "Foto borrosa, vuelva a tomarla",
+      "serverRevision": 1
+    },
+    {
+      "submissionId": "8169bfa1-5d3a-4c67-997c-26741e31be42",
+      "workerId": "ana",
+      "clientActionId": "74639303-7654-42d4-b30a-c386854bb8c6",
+      "documentType": "passport",
+      "status": "pending_review",
+      "correctionReason": null,
+      "serverRevision": 3
+    }
+  ]
+}

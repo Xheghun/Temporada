@@ -1,0 +1,33 @@
+{
+  "automatedTests": {
+    "jest": 36,
+    "sqlitePersistenceSyncFiles": 85,
+    "mockHttpStorage": 12,
+    "architecture": 5,
+    "total": 138
+  },
+  "passedCommands": [
+    "npm run typecheck",
+    "npm run lint",
+    "npm run format:check",
+    "npm run arch:check",
+    "npm run test:ci",
+    "npm run expo:check",
+    "npm run config:check",
+    "npx expo-doctor (20/20)",
+    "npx expo export --platform android --output-dir /private/tmp/temporada-integration-export",
+    "openspec validate offline-integration --strict",
+    "python3 docs/evidence/offline-integration/verify.py (21 saved-evidence assertions)"
+  ],
+  "androidScenariosPassed": [1, 2, 3, 4, 5, 6, 7, 8],
+  "applicationLogicModified": false,
+  "hostedCi": "pending on PR #11; inspect GitHub Actions for the current commit",
+  "notRun": [
+    "iOS",
+    "Android 9/2GB performance",
+    "TalkBack speech/focus",
+    "signed/EAS/store builds",
+    "real backend integration",
+    "recordings A/B"
+  ]
+}

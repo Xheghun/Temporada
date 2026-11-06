@@ -1,0 +1,26 @@
+{
+  "passed": 21,
+  "checks": [
+    "TEST-01/02: original queued action IDs/payloads survive offline process restart",
+    "M7: private passport remains 523491 bytes with original digest",
+    "M4: passport is visibly Pending Sync after restart",
+    "M3: scenario 2 action delivered exactly once: 08399887-2dc5-4928-919b-d1be64b27c40",
+    "M3: scenario 2 action delivered exactly once: 74639303-7654-42d4-b30a-c386854bb8c6",
+    "M4: passport acknowledged Pending Review",
+    "TEST-03: dropped response reuses one ID over two attempts with one submission",
+    "TEST-04: 413 retains bytes, does not retry and does not block another resource",
+    "M5: second retry persists bounded jitter",
+    "M5: random 500 recovery delivers same replacement ID",
+    "TEST-06: worker switching preserves queued IDs and image integrity",
+    "M10: Bruno has no pending/attention and his own Approved passport",
+    "M2/M5: 401 preserves queued file and reauthentication delivers original ID",
+    "M8: Carla correction creates new intent targeting historical seed submission",
+    "M5: manual retry does not blindly resend 422",
+    "M4: staff Approved reaches UI while receipt remains unresolved",
+    "TEST-03R: replay resolves delivery without regressing Approved revision",
+    "M2: queued actions and private image survive actual device reboot",
+    "M2: kernel boot ID changes and airplane mode persists",
+    "TEST-05: v2 rejection does not accept any version for Ana automatically",
+    "TEST-05: explicit new v3 ID delivers while v2 remains stale without supersession"
+  ]
+}
