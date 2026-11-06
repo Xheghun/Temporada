@@ -1,6 +1,6 @@
 # Seasonal worker mobile application
 
-An Expo/TypeScript offline-first worker application under staged development. **This PR is the scaffold only:** a minimal Spanish welcome route, design tokens, strict tooling, CI/build definitions and a fail-closed feature-flag interface. Authentication, assignments, terms, documents, backend and synchronization are separate OpenSpec changes and are not implemented.
+An Expo/TypeScript offline-first worker application under staged development. The mobile app currently has a minimal Spanish welcome route, design tokens, strict tooling, CI/build definitions and a fail-closed feature-flag interface. The supporting mock API is implemented separately; mobile authentication, assignment/terms/document screens, durable local data and synchronization are not implemented.
 
 ## Local setup
 
@@ -8,6 +8,7 @@ Use Node 24.11.1 (`nvm use`) and npm. Dependencies are locked in package-lock.js
 
 ```sh
 npm ci
+npm ci --prefix mock-server
 npm start -- --go
 ```
 
@@ -39,12 +40,14 @@ Jest uses jest-expo; React Native Testing Library is installed for future featur
 
 ## Workflow and builds
 
-Apply only `project-scaffold`; see [change index](specs/tasks.md) for later scopes. Use a separate ticket branch/PR for each feature. Human-reviewed merges gate dependent changes. See [CONTRIBUTING](CONTRIBUTING.md) for PR conventions and external branch protection/environment settings.
+The scaffold PR is merged; `mock-api` is the current change. See [change index](specs/tasks.md) for independent scopes. Use a separate ticket branch/PR for each feature. Human-reviewed merges gate dependent changes. See [CONTRIBUTING](CONTRIBUTING.md) for PR conventions and external branch protection/environment settings.
 
 Validate runs on pull requests and main. Build is manual, main-only and build-only: no store submission, release or OTA is automated. EAS profiles cover development (Android APK/iOS simulator), preview (internal Android APK/iOS distribution) and production (Android AAB/iOS distribution). Configure authorized Expo owner/project ID, credentials and GitHub environment controls before running; identifiers are provisional and require ownership confirmation before release. EXPO_TOKEN belongs only in protected GitHub environment secrets, never source or AI context. No cloud build is claimed.
 
 ## Verification and limits
 
-See [scaffold evidence](docs/evidence/scaffold-progress.md) for executed commands, Android details, screenshots and outstanding work. Worker tests TEST-01–06, TEST-03R and all eight manual worker scenarios remain NOT RUN. No mock account, OTP or server startup command works yet; those arrive with mock-api. Only fictional records will be used. Recording B is prepared but not recorded; human capture scheduling is tracked in [the checklist](docs/recording-b-checklist.md).
+See [scaffold evidence](docs/evidence/scaffold-progress.md) for executed commands, Android details, screenshots and outstanding work. Worker tests TEST-01–06, TEST-03R and all eight manual worker scenarios remain NOT RUN. The mock service accepts OTP `123456` for Ana at `+52 55 1000 0001` and Bruno/Carla at `+52 55 1000 0002`. Start it with `MOCK_ENABLE_CONTROLS=1 npm run mock:start`; see [mock API instructions](mock-server/README.md) for the contract, durable state, failure controls and tested limitations. Only fictional records will be used. Recording B is prepared but not recorded; human capture scheduling is tracked in [the checklist](docs/recording-b-checklist.md).
 
 [AGENTS.md](AGENTS.md) and the root specs define safety invariants and dependency boundaries. A single [coding ledger](docs/coding-ledger.md) spans all changes; target four hours, hard stop five. SDK minimum OS support does not establish acceptable behavior/performance on an Android 9 device with 2 GB RAM; that testing remains pending.
+
+Mock API evidence is in [mock-api verification](docs/evidence/mock-api.md). Root typecheck/test:ci cover both packages; Node backend files use a separate tsconfig and never enter the mobile bundle. The backend uses experimental Node SQLite and refuses production startup.
