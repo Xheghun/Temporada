@@ -244,3 +244,98 @@ test('language preference survives v2 upgrade/reopen and repeat migrations witho
     await x.close();
   }
 });
+
+for (const version of ['v2', 'v3']) {
+  test(`explicit replacement of failed v2 with displayed ${version} commits a new ID and delivers without restart`, async () => {
+    const x = await fixture();
+    const engine = x.f.engine();
+    try {
+      await x.service.confirm('v2', 1);
+      const original = (await x.f.worker().listActions())[0]!;
+      x.f.online = true;
+      const send = x.f.api.send;
+      x.f.api.send = async () => ({ status: 422, code: 'validation_failed' });
+      await engine.request();
+      assert.equal(
+        (await x.f.worker().listActions())[0]?.status,
+        'failed_permanent',
+      );
+      x.f.api.send = send;
+      const snapshot = assignmentFixture('ana');
+      snapshot.terms.termsVersionId = version;
+      snapshot.serverRevision = 3;
+      await x.f.worker().cacheAssignment(snapshot);
+      await x.service.reload();
+      const view = x.service.getSnapshot().data!;
+      assert.equal(assignmentFacts(view).canConfirm, true);
+      assert.equal(assignmentFacts(view).replacementActionId, original.id);
+      // Ordinary confirmation/refresh cannot silently replace a permanent failure.
+      await x.service.refresh();
+      await x.service.confirm(version, 1);
+      assert.equal((await x.f.worker().listActions()).length, 1);
+      await Promise.all([
+        x.service.confirm(version, 1, original.id),
+        x.service.confirm(version, 1, original.id),
+      ]);
+      const actions = await x.f.worker().listActions();
+      assert.equal(actions.length, 2);
+      assert.equal(actions[0]?.status, 'superseded');
+      assert.equal(
+        actions[0]?.payload.kind === 'terms_acceptance' &&
+          actions[0].payload.termsVersionId,
+        'v2',
+      );
+      const replacement = actions[1]!;
+      assert.notEqual(replacement.id, original.id);
+      assert.equal(
+        replacement.payload.kind === 'terms_acceptance' &&
+          replacement.payload.termsVersionId,
+        version,
+      );
+      await engine.request();
+      assert.deepEqual(
+        x.f.attempts.map((a) => a.id),
+        [replacement.id],
+      );
+      assert.equal((await x.f.worker().listActions())[1]?.status, 'delivered');
+      assert.equal(
+        (await x.f.worker().getAssignment())?.terms.serverAcceptanceStatus,
+        'accepted',
+      );
+    } finally {
+      engine.stop();
+      await x.close();
+    }
+  });
+}
+
+test('replacement enqueue failure rolls back supersession and preserves failed intent for a later explicit retry', async () => {
+  const x = await fixture();
+  try {
+    await x.service.confirm('v2', 1);
+    const old = (await x.f.worker().listActions())[0]!;
+    await x.f.store().claimAction(old.id, 100);
+    await x.f
+      .store()
+      .finish(old, { kind: 'failed', code: 'validation_failed' }, 100);
+    await x.service.reload();
+    await x.f.db.exec(
+      "CREATE TRIGGER reject_replacement BEFORE UPDATE OF status ON outbox_actions WHEN NEW.status='superseded' BEGIN SELECT RAISE(ABORT,'test_replacement_failure'); END",
+    );
+    await x.service.confirm('v2', 1, old.id);
+    assert.equal(x.service.getSnapshot().error, 'save_failed');
+    assert.equal(x.service.getSnapshot().savedActionId, null);
+    assert.deepEqual(
+      (await x.f.worker().listActions()).map((a) => [a.id, a.status]),
+      [[old.id, 'failed_permanent']],
+    );
+    await x.f.db.exec('DROP TRIGGER reject_replacement');
+    await x.service.confirm('v2', 1, old.id);
+    assert.deepEqual(
+      (await x.f.worker().listActions()).map((a) => a.status),
+      ['superseded', 'queued'],
+    );
+  } finally {
+    await x.close();
+  }
+});

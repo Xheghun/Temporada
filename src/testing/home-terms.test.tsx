@@ -46,7 +46,7 @@ test('Terms confirms the displayed version and generation, without implying appr
       name: i18n.t('terms.confirm', { version: 'v2' }),
     }),
   );
-  expect(onConfirm).toHaveBeenCalledWith('v2', 1);
+  expect(onConfirm).toHaveBeenCalledWith('v2', 1, undefined);
   expect(screen.queryByText('Approved')).toBeNull();
 });
 test('Home shows cached assignment, offline state and explicit unavailable document navigation', async () => {
@@ -130,5 +130,51 @@ test('stale v2 history requires explicit v3 confirmation and never shows an old 
       name: i18n.t('terms.confirmNew', { version: 'v3' }),
     }),
   );
-  expect(onConfirm).toHaveBeenCalledWith('v3', 1);
+  expect(onConfirm).toHaveBeenCalledWith('v3', 1, undefined);
 });
+
+for (const version of ['v2', 'v3']) {
+  test(`failed v2 offers explicit ${version} replacement instead of leaving confirmation disabled`, async () => {
+    const value = state();
+    if (!value.data?.assignment) throw new Error('fixture');
+    value.data.assignment.terms.termsVersionId = version;
+    value.data.actions = [
+      {
+        sequence: 1,
+        id: 'failed-v2',
+        clientActionId: 'failed-v2',
+        workerId: 'ana',
+        actionType: 'terms_acceptance',
+        payload: {
+          kind: 'terms_acceptance',
+          workerId: 'ana',
+          clientActionId: 'failed-v2',
+          termsVersionId: 'v2',
+        },
+        fileUri: null,
+        status: 'failed_permanent',
+        attemptCount: 1,
+        nextAttemptAt: 0,
+        lastErrorCode: 'validation_failed',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    ];
+    const onConfirm = jest.fn();
+    await render(
+      <TermsContent
+        state={value}
+        onConfirm={onConfirm}
+        onRefresh={() => {}}
+        onHome={() => {}}
+      />,
+    );
+    const button = screen.getByRole('button', {
+      name: i18n.t('terms.replaceFailed', { version }),
+    });
+    expect(button).toBeEnabled();
+    expect(onConfirm).not.toHaveBeenCalled();
+    await fireEvent.press(button);
+    expect(onConfirm).toHaveBeenCalledWith(version, 1, 'failed-v2');
+  });
+}

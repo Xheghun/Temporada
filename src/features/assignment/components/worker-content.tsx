@@ -192,7 +192,11 @@ export function TermsContent({
   onHome,
 }: {
   state: AssignmentState;
-  onConfirm(version: string, generation: number): void;
+  onConfirm(
+    version: string,
+    generation: number,
+    replacesActionId?: string,
+  ): void;
   onRefresh(): void;
   onHome(): void;
 }) {
@@ -235,7 +239,7 @@ export function TermsContent({
       {facts.termsStatus === 'pending_sync' ? (
         <Body>{t('terms.pendingHint')}</Body>
       ) : null}
-      {facts.termsStatus === 'failed' ? (
+      {facts.termsStatus === 'failed' || facts.replacementActionId ? (
         <Body>{t('terms.failedHint')}</Body>
       ) : null}
       <ErrorNotice code={state.error} />
@@ -252,14 +256,22 @@ export function TermsContent({
       ) : null}
       <Action
         label={t(
-          facts.needsReconfirmation ? 'terms.confirmNew' : 'terms.confirm',
+          facts.replacementActionId
+            ? 'terms.replaceFailed'
+            : facts.needsReconfirmation
+              ? 'terms.confirmNew'
+              : 'terms.confirm',
           { version: assignment.terms.termsVersionId },
         )}
         disabled={!facts.canConfirm || state.generation === null}
         busy={state.saving}
         onPress={() => {
           if (state.generation !== null)
-            onConfirm(assignment.terms.termsVersionId, state.generation);
+            onConfirm(
+              assignment.terms.termsVersionId,
+              state.generation,
+              facts.replacementActionId ?? undefined,
+            );
         }}
       />
       {data.refreshNeeded ||

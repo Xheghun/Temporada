@@ -7,8 +7,8 @@ export default function Terms() {
   return (
     <TermsContent
       state={state}
-      onConfirm={(version, generation) => {
-        void service.confirm(version, generation);
+      onConfirm={(version, generation, replacesActionId) => {
+        void service.confirm(version, generation, replacesActionId);
       }}
       onRefresh={() => {
         void service.refresh();

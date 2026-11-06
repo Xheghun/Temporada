@@ -19,3 +19,5 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 - Archive/sync this change only through the appropriate later workflow; preserved programme reference is not an active or completed change.
 
 Scoped handoff: https://github.com/Xheghun/Temporada/pull/7. Implementation/evidence in docs/evidence/home-and-terms.md; human review/merge pending.
+
+Review follow-up verified: explicit permanent-failure replacement of displayed v2/v3, atomic rollback, duplicate suppression and same-engine delivery. Five new tests; 103 total. Emulator replacement flow NOT RUN; see updated evidence.

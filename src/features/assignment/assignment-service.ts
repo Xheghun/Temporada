@@ -6,7 +6,10 @@ import type { SessionProvider, SyncSession } from '../../core/sync/types.ts';
 import { assignmentFacts } from './domain/view-state.ts';
 export interface AssignmentReader {
   readView(): Promise<WorkerViewData>;
-  enqueueTerms(version: string): Promise<OutboxAction>;
+  enqueueTerms(
+    version: string,
+    supersedesActionId?: string,
+  ): Promise<OutboxAction>;
 }
 export interface AssignmentDependencies {
   enabled(): boolean;
@@ -117,7 +120,11 @@ export class AssignmentService {
         this.update({ loading: false, error: 'local_data_error' });
     }
   }
-  async confirm(version: string, generation: number): Promise<void> {
+  async confirm(
+    version: string,
+    generation: number,
+    replacesActionId?: string,
+  ): Promise<void> {
     const session = this.deps.session.current();
     if (
       !this.isEnabled() ||
@@ -142,7 +149,14 @@ export class AssignmentService {
       );
       if (unresolved || (sameVersion && !assignmentFacts(before).canConfirm))
         return;
-      const action = await reader.enqueueTerms(version);
+      // M5: only an explicit, still-current replacement may resolve a permanent failure.
+      // The repository supersedes the failed predecessor and inserts new intent atomically.
+      const failedId = assignmentFacts(before).replacementActionId;
+      if ((failedId ?? undefined) !== replacesActionId) {
+        await this.reload();
+        return;
+      }
+      const action = await reader.enqueueTerms(version, replacesActionId);
       if (this.current(session)) {
         await this.reload();
         if (this.current(session)) this.update({ savedActionId: action.id });

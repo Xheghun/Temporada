@@ -12,7 +12,7 @@ See proposal.md for scope and motivation. The inspected repository contains plan
 
 ## Decisions
 
-Render local source-of-truth state through services; never raw sync calls. Home locale toggle foundation is usable now; language-and-accessibility completes the audit. Keep stale history while v3 confirmation remains enabled and queues a distinct action. Use existing engine tests plus UI reconfirmation coverage.
+Render local source-of-truth state through services; never raw sync calls. Home locale toggle foundation is usable now; language-and-accessibility completes the audit. Keep stale history while v3 confirmation remains enabled and queues a distinct action. Use existing engine tests plus UI reconfirmation coverage. Permanent terms failures expose explicit reconfirmation of the displayed version. The callback includes the failed predecessor ID; the service revalidates it, and the existing repository atomically supersedes that failure and inserts new intent with a new UUID. Refresh alone does not replace failures; stale history remains resolved without supersession.
 
 Apply only `home-and-terms` on `feature/SDD-012-home-and-terms`. Do not apply, implement or auto-start any sibling change. Prerequisite: `worker-authentication` human-reviewed and merged. A prerequisite is a human review/merge gate, not CLI-enforced dependency metadata. If unmet, stop before coding. Request this change explicitly to apply it. Stop after preparing its scoped PR; human review/merge and the next change require separate actions. No direct main push, automatic merge or AI-branded branch. Ticket IDs are provisional local IDs.
 

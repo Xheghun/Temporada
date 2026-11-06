@@ -19,6 +19,7 @@ export function assignmentFacts(data: WorkerViewData) {
   );
   const latest = current.at(-1);
   const latestTerms = terms.filter((a) => a.status !== 'superseded').at(-1);
+  const failedPredecessor = terms.find((a) => a.status === 'failed_permanent');
   const stale = current.some((a) => a.status === 'stale');
   const status: TermsStatus = stale
     ? 'update_required'
@@ -37,6 +38,7 @@ export function assignmentFacts(data: WorkerViewData) {
     attentionCount:
       data.actions.filter((a) => a.status === 'failed_permanent').length +
       (latestTerms?.status === 'stale' ? 1 : 0),
-    canConfirm: !!version && status === 'unconfirmed',
+    replacementActionId: failedPredecessor?.id ?? null,
+    canConfirm: !!version && (status === 'unconfirmed' || status === 'failed'),
   };
 }

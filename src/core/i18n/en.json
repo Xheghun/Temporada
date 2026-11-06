@@ -90,10 +90,11 @@
     "reconfirm": "The terms have changed. Review this version and confirm again if you agree.",
     "updateRequired": "This version was rejected as outdated. Connect and refresh to review the current terms.",
     "pendingHint": "Your confirmation is saved on this phone. The server has not acknowledged it yet.",
-    "failedHint": "Refresh the terms. If the problem continues, contact the support team.",
+    "failedHint": "Submission failed. Review these terms and confirm again to create a new submission. Refreshing alone does not resend it.",
     "saved": "Confirmation saved on this phone.",
     "history": "Previous confirmations",
     "staleHistory": "Confirmation of {{version}} was rejected after an update; it did not confirm newer versions.",
-    "backHome": "Back to Home"
+    "backHome": "Back to Home",
+    "replaceFailed": "Confirm {{version}} again and replace failed submission"
   }
 }
