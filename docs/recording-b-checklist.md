@@ -6,6 +6,7 @@ Proposed session: offline-sync feature, after prerequisite human-reviewed merges
 Before the chosen task, the human starts screen/audio capture and records the real prompt, agent plan and human review. Aim for 10–15 minutes. Show a genuine correction/rejection only if one occurs; never stage one. Record actual implementation, relevant test execution and Android emulator behavior, the resulting PR description and the human explanation of decisions. Protect credentials; use fictional seed data only. Keep coding time in the shared ledger.
 
 Capture checklist:
+
 - Human confirms session and starts capture before prompt/plan/review.
 - Real requirement, scope, files and intended tests are visible.
 - Human review and genuine correction are evidenced, or marked missing.

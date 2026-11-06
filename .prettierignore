@@ -1,0 +1,10 @@
+node_modules
+.expo
+dist
+coverage
+package-lock.json
+.agents
+openspec
+specs/programme
+docs/evidence/*.xml
+specs
