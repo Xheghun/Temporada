@@ -15,6 +15,7 @@ import { nativeClock, nativeSignals } from '../sync/native-signals.ts';
 import { attachSyncTriggers } from '../sync/sync-triggers.ts';
 import { retryDelay } from '../sync/retry-policy.ts';
 import i18n from '../i18n/index.ts';
+import { DocumentsService } from '../../features/documents/documents-service.ts';
 import { AssignmentService } from '../../features/assignment/assignment-service.ts';
 import { isFeatureEnabled } from '../config/feature-flags.ts';
 
@@ -49,6 +50,8 @@ export async function createWorkerRuntime() {
   )
     throw new Error('api_configuration_missing');
   const homeEnabled = await workerAppEnabled('worker_home_and_terms');
+  const documentsEnabled =
+    homeEnabled && (await workerAppEnabled('worker_document_corrections'));
   const database = await openWorkerDatabase();
   const preference = await database.first<{ language: string }>(
     'SELECT language FROM app_settings WHERE id=1',
@@ -121,6 +124,28 @@ export async function createWorkerRuntime() {
       await i18n.changeLanguage(language);
     },
   });
+  const documents = new DocumentsService({
+    enabled: () => documentsEnabled,
+    session: auth,
+    repository: (workerId) => workerRepository(database, workerId),
+    online: syncSignals.connectivity.online,
+    subscribeNetwork: syncSignals.signals.connectivity,
+    subscribeData(listener) {
+      viewListeners.add(listener);
+      return () => {
+        viewListeners.delete(listener);
+      };
+    },
+    notifyEnqueued(workerId) {
+      viewListeners.forEach((notify) => notify(workerId));
+      enqueueListeners.forEach((notify) => notify());
+    },
+    async refresh(session) {
+      if (!auth.isCurrent(session)) return;
+      await persistence(session.workerId).requestRefresh();
+      if (auth.isCurrent(session)) await engine.manualRetry();
+    },
+  });
   let selectedGeneration = -1;
   const prepareSelection = auth.subscribeSession(() => {
     const session = auth.current();
@@ -142,6 +167,7 @@ export async function createWorkerRuntime() {
   return {
     auth,
     assignment,
+    documents,
     database,
     notifyEnqueued() {
       enqueueListeners.forEach((notify) => notify());
@@ -149,6 +175,7 @@ export async function createWorkerRuntime() {
     async dispose() {
       prepareSelection();
       assignment.dispose();
+      documents.dispose();
       detach();
       syncSignals.dispose();
       await engine.settled();

@@ -42,7 +42,8 @@
     "local_data_error": "Could not read saved data. Try again.",
     "save_failed": "Could not save confirmation. Try again.",
     "refresh_failed": "Could not refresh. Try again when connected.",
-    "language_failed": "Could not save the language. Try again."
+    "language_failed": "Could not save the language. Try again.",
+    "document_save_failed": "The document was not saved. Try again; keep the preview open."
   },
   "configurationError": "The service connection is not configured. Contact the support team.",
   "home": {
@@ -74,7 +75,9 @@
     "offline": "Offline · your actions are saved on this phone",
     "loading": "Loading your job assignment…",
     "noData": "Could not load your assignment. Refresh or try again later.",
-    "noOfflineData": "No assignment is saved yet. Connect to download your data."
+    "noOfflineData": "No assignment is saved yet. Connect to download your data.",
+    "documentsAvailable": "View requirements, review status and corrections.",
+    "openDocuments": "View documents"
   },
   "terms": {
     "version": "Version {{version}}",
@@ -96,5 +99,30 @@
     "staleHistory": "Confirmation of {{version}} was rejected after an update; it did not confirm newer versions.",
     "backHome": "Back to Home",
     "replaceFailed": "Confirm {{version}} again and replace failed submission"
+  },
+  "documents": {
+    "title": "Documents",
+    "empty": "No documents are listed yet. Refresh or contact the team.",
+    "required": "Required",
+    "optional": "Optional",
+    "captureUnavailable": "Photo capture will be available in the next step. Your submission history is kept.",
+    "replace": "Take a new photo · coming soon",
+    "add": "Add photo · coming soon",
+    "history": "Previous submissions",
+    "deliveryPending": "This action is still pending sync. Any review information shown comes from the server.",
+    "sizeError": "The image was rejected for size. A new photo below 1.5 MB is needed.",
+    "validationError": "The document was rejected. Refresh the requirements and prepare a new photo.",
+    "failedError": "Delivery failed. Check the requirements and prepare a new submission.",
+    "reason": "Reason: {{reason}}",
+    "status": {
+      "not_submitted": "Not submitted",
+      "pending_sync": "Pending Sync",
+      "pending_review": "Pending Review",
+      "approved": "Approved",
+      "correction_requested": "Correction Requested",
+      "failed": "Delivery failed",
+      "superseded": "Replaced",
+      "needs_refresh": "Status unknown · refresh"
+    }
   }
 }

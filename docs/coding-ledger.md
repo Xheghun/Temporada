@@ -56,3 +56,9 @@ Home-and-terms publication/handoff: 2026-11-06T19:45:13.495366+00:00 to 2026-11-
 Home-and-terms failed-confirmation review follow-up: conservatively 2026-11-06T19:58:00+00:00 to 2026-11-06T20:01:33.792372+00:00, 3.56 minutes. Recorded cumulative: 131.29 minutes. Explicit same-version/new-version replacement, rollback and UI regressions pass; 103 total tests and Android JavaScript export pass. Replacement emulator flow NOT RUN. Hosted CI waiting follows separately.
 
 Implementation-wide naming review: conservatively 2026-11-06T20:08:00+00:00 to 2026-11-06T20:19:15.634092+00:00, 11.26 minutes. Recorded cumulative: 142.55 minutes. TypeScript-aware/manual naming cleanup, 103 tests, quality checks, Android JavaScript export and cold Home launch pass. Existing schema/protocol keys preserved; full native journeys NOT RUN. Hosted CI waiting follows separately.
+
+Document-corrections inspection conservatively started 2026-11-06T20:27:00+00:00; implementation 2026-11-06T20:30:51.038646+00:00. Prior cumulative 142.55 minutes; scope target 10 minutes, cumulative hard stop 300. Recording B capture remains unconfirmed; existing checklist prepared.
+
+Document-corrections implementation/local verification ended 2026-11-06T20:48:24.931303+00:00, 21.42 minutes conservatively including the reconnect interval and documentation. Recorded cumulative: 163.97 minutes. Exceeded the 10-minute scope target during native navigation/connection verification; hard cumulative stop remains 300. 113 tests, quality/Expo checks and native catalog/correction/Approved/offline restart checks pass. Capture/resubmission UI and full journeys NOT RUN; no recording claimed. Publication/CI follow-up recorded separately.
+
+Document-corrections publication/handoff: 2026-11-06T20:48:24.931303+00:00 to 2026-11-06T20:50:17.987172+00:00, 1.88 minutes. Recorded cumulative: 165.85 minutes. PR https://github.com/Xheghun/Temporada/pull/8; hosted CI waiting/human review follow separately.

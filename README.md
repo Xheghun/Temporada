@@ -63,3 +63,7 @@ The worker-scoped engine now delivers durable intent, persists retries, handles 
 ### Worker authentication
 
 Phone/OTP sign-in, authorized worker selection and SecureStore session restore are now wired to synchronization. See [setup and session behavior](docs/authentication.md) and [verification](docs/evidence/worker-authentication.md). Development mode requires EXPO_PUBLIC_ASSESSMENT_MODE=1; OTP is 123456. Home and version-specific Terms now use the persistent cache/outbox. See [behavior and flags](docs/home-and-terms.md) and [executed evidence](docs/evidence/home-and-terms.md). Document screens remain separate changes.
+
+### Documents and corrections
+
+Home now links to the backend document catalog, review states and correction history. `worker_document_corrections` gates production access. [State/submission contracts](docs/documents.md) and [verification](docs/evidence/document-corrections.md) describe this scope. Camera/compression remain the next change; photo controls are visibly unavailable for now.

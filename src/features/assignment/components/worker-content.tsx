@@ -64,6 +64,7 @@ export function HomeContent({
   onSwitch,
   onLogout,
   shared,
+  onDocuments,
 }: {
   state: AssignmentState;
   workerName: string;
@@ -73,6 +74,7 @@ export function HomeContent({
   onSwitch(): void;
   onLogout(): void;
   shared: boolean;
+  onDocuments?: (() => void) | undefined;
 }) {
   const { t: translate, i18n } = useTranslation();
   const data = state.data,
@@ -181,12 +183,20 @@ export function HomeContent({
       )}
       <Card>
         <Text style={styles.section}>{translate('home.documents')}</Text>
-        <Body>{translate('home.documentsUnavailable')}</Body>
+        <Body>
+          {translate(
+            onDocuments
+              ? 'home.documentsAvailable'
+              : 'home.documentsUnavailable',
+          )}
+        </Body>
         <Action
-          disabled
+          disabled={!onDocuments}
           secondary
-          label={translate('home.documentsSoon')}
-          onPress={onTerms}
+          label={translate(
+            onDocuments ? 'home.openDocuments' : 'home.documentsSoon',
+          )}
+          onPress={onDocuments ?? onTerms}
         />
       </Card>
       <Action

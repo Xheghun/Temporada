@@ -85,3 +85,11 @@ The initial Home/Terms service only used ordinary enqueue. That left same-versio
 ### Naming review
 
 Use purpose-specific names throughout implementation and tests, including `transaction`, `database`, `dependencies`, `httpResponse`, `action`, `submission` and `testContext`. AGENTS.md records this convention; ESLint rejects recurring abbreviated declarations/parameters. Public protocol fields and persisted schemas retain their existing spelling. The review used TypeScript-aware renames plus manual semantic checks, corrected response-name collisions/unintended object keys, and verified all 103 tests and Android Home startup. React Native guidance was consulted; no behavior/state architecture change was required.
+
+## SDD-013: document states and correction history
+
+Documents uses an injected headless service with the existing atomic worker read view. Projection joins local actions and server history by client/submission identity, keeping delivery and staff review separate (M4). Replacement links and local sequence identify the current worker intent; review revision orders decisions only within one submission. Old-passport decisions cannot become current merely because they have a newer review revision (M8). A refresh-known staff decision remains visible while the original receipt is retried.
+
+Correction creates new immutable intent referencing the prior server submission. Failed local replacement uses the existing transactional supersession path (M5), with a new UUID; retry IDs remain stable (M3). Session generations reject stale callbacks and worker-owned notifications refresh Home counts (M10). App strings are localized; server free text is retained (M9).
+
+The production feature flag defaults closed. Capture/file verification remains a caller precondition until document-capture; this change exercises real durable fixtures and deliberately leaves photo controls unavailable rather than faking a worker upload. No new API/schema contract or production-security guarantee is claimed. React Native guidance was consulted; UI remains scrollable and text-based. Testing corrected a local Bruno fixture to include his seeded Approved passport and localized the new route header. No recording or human correction is fabricated.
