@@ -16,6 +16,7 @@ Private files use `Paths.document/workers/{workerId}/uploads/capture-{uuid}.jpg`
 
 - Active preview leases prevent in-process orphan cleanup.
 - Restart drops leases; a copied file without a committed reference can be removed.
+- Empty, truncated or schema-invalid journals move into a private worker-local quarantine without using their contents to delete files. Valid journals continue processing. Unknown cache references are not guessed. Journal IO/quarantine failures are reported after database-aware reconciliation, so they cannot block pending-file checks or orphan removal.
 - Queued/sending/retry/failed references retain their bytes. Missing/changed queued bytes become actionable permanent local failures; a conditional update never interrupts a sending action. Dispatch independently verifies the bytes before upload.
 - Acknowledgment or explicit failed-action supersession permits cleanup. Business history/action rows remain.
 - Startup/worker selection, foreground and sync outcome events schedule reconciliation. Interrupted sends recover before startup file inspection; offline recovery can flag missing bytes without waiting for network.

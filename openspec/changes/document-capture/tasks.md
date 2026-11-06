@@ -19,3 +19,5 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 - Archive/sync this change only through the appropriate later workflow; preserved programme reference is not an active or completed change.
 
 Scoped PR: https://github.com/Xheghun/Temporada/pull/9. Evidence: docs/evidence/document-capture.md. Human review/merge pending; no sibling change started.
+
+P2 review verified: malformed journals are quarantined per worker without blocking valid journals or DB-aware file reconciliation; pending bytes remain intact across repeated recovery. 130 tests pass; emulator fault injection NOT RUN.

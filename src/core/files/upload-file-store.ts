@@ -117,7 +117,13 @@ export class UploadFileStore {
   }
   reconcile(workerId: string): Promise<void> {
     return this.exclusive(async () => {
-      await this.storage.recoverTemporaryFiles(workerId);
+      let temporaryRecoveryFailure: { error: unknown } | null = null;
+      try {
+        await this.storage.recoverTemporaryFiles(workerId);
+      } catch (error) {
+        temporaryRecoveryFailure = { error };
+      }
+      // Journal IO must not prevent database-backed upload checks or orphan cleanup. M2/M7.
       const actions = await this.references.actions(workerId);
       const keep = new Set<string>();
       for (const action of actions) {
@@ -145,6 +151,7 @@ export class UploadFileStore {
       for (const uri of await this.storage.list(workerId))
         if (!keep.has(uri) && !this.previews.has(uri))
           await this.storage.remove(workerId, uri);
+      if (temporaryRecoveryFailure) throw temporaryRecoveryFailure.error;
     });
   }
   settled(): Promise<unknown> {

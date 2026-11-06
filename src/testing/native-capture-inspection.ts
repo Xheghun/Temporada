@@ -40,12 +40,22 @@ export async function inspectNativeCapture(workerId: string): Promise<string> {
       workerId,
     );
     const picker = new Directory(Paths.cache, 'ImagePicker');
+    const quarantine = new Directory(journals, 'quarantine');
     return JSON.stringify(
       {
         workerId,
         actions: rows,
         managedFiles: (await nativeCaptureStorage.list(workerId)).length,
-        journals: journals.exists ? journals.list().length : 0,
+        journals: journals.exists
+          ? journals
+              .list()
+              .filter(
+                (entry) => entry instanceof File && entry.uri.endsWith('.json'),
+              ).length
+          : 0,
+        quarantinedJournals: quarantine.exists
+          ? quarantine.list().filter((entry) => entry instanceof File).length
+          : 0,
         pickerCacheFiles: picker.exists
           ? picker.list().filter((entry) => entry instanceof File).length
           : 0,

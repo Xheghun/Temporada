@@ -1,3 +1,5 @@
+import { UploadFileStore } from '../core/files/upload-file-store';
+import type { OutboxAction } from '../core/offline/domain/types';
 import { nativeCaptureStorage } from '../core/files/native-capture-storage';
 const mockFiles = new Map<string, Uint8Array>();
 let mockSizes: number[] = [];
@@ -39,6 +41,16 @@ jest.mock('expo-file-system', () => {
         destination.uri,
         new Uint8Array(mockFiles.get(this.uri) ?? []),
       );
+    }
+    async move(destination: File) {
+      await Promise.resolve();
+      if (mockFiles.has(destination.uri)) throw new Error('destination_exists');
+      mockFiles.set(
+        destination.uri,
+        new Uint8Array(mockFiles.get(this.uri) ?? []),
+      );
+      mockFiles.delete(this.uri);
+      this.uri = destination.uri;
     }
     delete() {
       mockFiles.delete(this.uri);
@@ -173,4 +185,76 @@ test('durable copy failure cleans temporary app copies and reports storage recov
     }),
   ).rejects.toThrow('capture_storage_failed');
   expect([...mockFiles.keys()]).toEqual([]);
+});
+
+test('truncated/invalid journals are quarantined while valid recovery and DB-aware reconciliation preserve pending bytes across repeated runs', async () => {
+  const pendingUri =
+    'file:///private/workers/ana/uploads/capture-11111111-1111-4111-8111-111111111111.jpg';
+  const orphanUri =
+    'file:///private/workers/ana/uploads/capture-22222222-2222-4222-8222-222222222222.jpg';
+  const invalid = ['', '{"sourceUri":', '{"outputs":[]}'];
+  for (const [index, text] of invalid.entries())
+    mockFiles.set(
+      `file:///private/capture-journals/ana/broken-${index}.json`,
+      new Uint8Array(Buffer.from(text)),
+    );
+  mockFiles.set(pendingUri, new Uint8Array(100));
+  mockFiles.set(orphanUri, new Uint8Array(100));
+  mockFiles.set('file:///cache/valid-source.jpg', new Uint8Array(100));
+  mockFiles.set(
+    'file:///private/capture-journals/ana/valid.json',
+    new Uint8Array(
+      Buffer.from(
+        JSON.stringify({
+          sourceUri: 'file:///cache/valid-source.jpg',
+          outputs: [],
+        }),
+      ),
+    ),
+  );
+  const action: OutboxAction = {
+    sequence: 1,
+    id: '33333333-3333-4333-8333-333333333333',
+    clientActionId: '33333333-3333-4333-8333-333333333333',
+    workerId: 'ana',
+    actionType: 'document_upload',
+    payload: {
+      kind: 'document_upload',
+      clientActionId: '33333333-3333-4333-8333-333333333333',
+      workerId: 'ana',
+      documentType: 'passport',
+      localSubmissionId: '33333333-3333-4333-8333-333333333333',
+      sha256: '0'.repeat(64),
+      replacesSubmissionId: null,
+    },
+    fileUri: pendingUri,
+    status: 'queued',
+    attemptCount: 0,
+    nextAttemptAt: 0,
+    lastErrorCode: null,
+    createdAt: 100,
+    updatedAt: 100,
+  };
+  const actions = jest.fn(async () => [action]),
+    fail = jest.fn(async () => {});
+  const files = new UploadFileStore(nativeCaptureStorage, { actions, fail });
+  await files.reconcile('ana');
+  expect(mockFiles.has(pendingUri)).toBe(true);
+  expect(mockFiles.has(orphanUri)).toBe(false);
+  expect(mockFiles.has('file:///cache/valid-source.jpg')).toBe(false);
+  expect(mockFiles.has('file:///private/capture-journals/ana/valid.json')).toBe(
+    false,
+  );
+  const quarantined = [...mockFiles.keys()].filter((uri) =>
+    uri.includes('/quarantine/'),
+  );
+  expect(quarantined).toHaveLength(3);
+  expect(
+    quarantined.map((uri) => Buffer.from(mockFiles.get(uri)!).toString()),
+  ).toEqual(invalid);
+  await files.reconcile('ana');
+  expect(actions).toHaveBeenCalledTimes(2);
+  expect(fail).not.toHaveBeenCalled();
+  expect(mockFiles.has(pendingUri)).toBe(true);
+  expect(action.status).toBe('queued');
 });

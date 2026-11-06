@@ -425,3 +425,36 @@ test('late picker/compression and worker switch never reveal another worker prev
     await testContext.close();
   }
 });
+
+test('journal IO failure is reported after database-aware reconciliation preserves pending files and removes orphan files', async () => {
+  const testContext = await fixture();
+  try {
+    const pending = await testContext.files.prepare('ana', testContext.image());
+    await testContext.files.commit(
+      pending,
+      async () =>
+        (
+          await testContext.context
+            .worker()
+            .enqueueDocument('passport', pending)
+        ).id,
+    );
+    const orphan = await testContext.files.prepare('ana', testContext.image());
+    testContext.storage.recoverTemporaryFiles = async () => {
+      throw new CaptureError('capture_cleanup_failed');
+    };
+    const restarted = new UploadFileStore(
+      testContext.storage,
+      testContext.references,
+    );
+    await assert.rejects(restarted.reconcile('ana'), /capture_cleanup_failed/);
+    assert.equal(existsSync(new URL(pending.uri)), true);
+    assert.equal(existsSync(new URL(orphan.uri)), false);
+    assert.equal(
+      (await testContext.context.worker().listActions())[0]?.status,
+      'queued',
+    );
+  } finally {
+    await testContext.close();
+  }
+});

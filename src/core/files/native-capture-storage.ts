@@ -188,13 +188,38 @@ export const nativeCaptureStorage: CaptureStorage = {
     workerRoot(workerId);
     const root = new Directory(Paths.document, 'capture-journals', workerId);
     if (!root.exists) return;
+    let cleanupFailed = false;
+    const quarantine = async (entry: File) => {
+      const directory = new Directory(root, 'quarantine');
+      directory.create({ intermediates: true, idempotent: true });
+      const name = entry.uri.slice(entry.uri.lastIndexOf('/') + 1);
+      // Preserve opaque metadata; never infer upload/cache ownership from a partial journal. M2/M7.
+      await entry.move(new File(directory, `${name}.${randomUUID()}.invalid`));
+    };
     for (const entry of root.list()) {
       if (!(entry instanceof File) || !entry.uri.endsWith('.json')) continue;
-      const parsed = journalSchema.safeParse(JSON.parse(await entry.text()));
-      if (!parsed.success) throw new CaptureError('capture_cleanup_failed');
-      deleteCacheCopy(parsed.data.sourceUri);
-      parsed.data.outputs.forEach(deleteCacheCopy);
-      entry.delete();
+      try {
+        const text = await entry.text();
+        let decoded: unknown;
+        try {
+          decoded = JSON.parse(text);
+        } catch {
+          await quarantine(entry);
+          continue;
+        }
+        const parsed = journalSchema.safeParse(decoded);
+        if (!parsed.success) {
+          await quarantine(entry);
+          continue;
+        }
+        deleteCacheCopy(parsed.data.sourceUri);
+        parsed.data.outputs.forEach(deleteCacheCopy);
+        entry.delete();
+      } catch {
+        // Preserve unreadable/unmovable metadata for retry, but still inspect the remaining journals.
+        cleanupFailed = true;
+      }
     }
+    if (cleanupFailed) throw new CaptureError('capture_cleanup_failed');
   },
 };
