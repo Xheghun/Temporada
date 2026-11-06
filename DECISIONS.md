@@ -31,3 +31,5 @@ Original assessment not yet supplied; user master requirements remain provisiona
 ## Actual AI usage and corrections
 
 Tools used: OpenSpec CLI, shell/Git/npm/Expo tooling and official documentation lookup. Applicable React Native/Expo skills informed native stack and safe-area layout. No tasks delegated to sub-agents. Genuine issues encountered: managed sandbox initially denied Git creation; user enabled filesystem access; npm shared cache contained inaccessible entries (used a temporary cache); npm auto-selected react-dom 19.3.1 against React 19.3.0 (pinned SDK-compatible React DOM). No human review, recording or cloud execution is fabricated. Executed check results are maintained in docs/evidence/scaffold-progress.md.
+
+Hosted CI caught a real governance-check bug: GitHub checks out a synthetic merge commit whose generated subject has no ticket. The commit check now validates base-to-PR-head subjects, while the remaining validation still tests the merged tree. No ticket requirement was relaxed.

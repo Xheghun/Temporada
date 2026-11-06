@@ -45,3 +45,5 @@ Shared npm cache had inaccessible entries; used a temporary cache without changi
 - Android 9/2 GB behavior, iOS runtime and full bilingual/a11y worker UI are unverified. App identifiers are provisional.
 
 Tracked progress after authorized bootstrap/PR creation: 4/5. SDD-002/003/018 and PR preparation are complete. SDD-001 remains unchecked solely for the unconfirmed human recording schedule. Scaffold implementation commit: 293eef6; Android evidence commit: 4f16274; planning-only main baseline: 071f2c3. The one-time baseline push was expressly approved; no scaffold code was pushed directly to main.
+
+Hosted CI run 42252083647 failed because the ticket check included GitHub’s synthetic merge commit. Corrected its range to the validated base/head SHAs from the PR event; validated the exact workflow script locally against the actual branch/commits. Subsequent run result will be recorded separately.

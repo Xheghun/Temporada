@@ -27,6 +27,7 @@ jobs:
           BRANCH_NAME: ${{ github.head_ref }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           node --input-type=module <<'JS'
           import { execFileSync } from 'node:child_process';
@@ -37,8 +38,9 @@ jobs:
           }
           if (!/[A-Z]+-\d+/.test(title)) throw new Error('PR title must include a ticket ID');
           const base = process.env.BASE_SHA ?? '';
-          if (!/^[a-f0-9]{40}$/.test(base)) throw new Error('Invalid base SHA');
-          const subjects = execFileSync('git', ['log', '--format=%s', `${base}..HEAD`], { encoding: 'utf8' }).trim().split('\n').filter(Boolean);
+          const head = process.env.HEAD_SHA ?? '';
+          if (!/^[a-f0-9]{40}$/.test(base) || !/^[a-f0-9]{40}$/.test(head)) throw new Error('Invalid PR commit SHA');
+          const subjects = execFileSync('git', ['log', '--format=%s', `${base}..${head}`], { encoding: 'utf8' }).trim().split('\n').filter(Boolean);
           if (subjects.some((subject) => !/[A-Z]+-\d+/.test(subject))) throw new Error('Every commit must include a ticket ID');
           JS
       - run: npm run typecheck
