@@ -15,10 +15,14 @@ export function DocumentsContent({
   state,
   onRefresh,
   onHome,
+  onCapture,
 }: {
   state: DocumentsState;
   onRefresh(): void;
   onHome(): void;
+  onCapture?:
+    | ((documentType: string, expectedSubmissionId: string | null) => void)
+    | undefined;
 }) {
   const { t: translate, i18n } = useTranslation();
   const language = i18n.resolvedLanguage === 'en' ? 'en' : 'es';
@@ -68,13 +72,26 @@ export function DocumentsContent({
           ) : null}
           {document.canSubmit ? (
             <>
-              <Body>{translate('documents.captureUnavailable')}</Body>
+              {!onCapture ? (
+                <Body>{translate('documents.captureUnavailable')}</Body>
+              ) : null}
               <Action
-                disabled
+                disabled={!onCapture}
                 label={translate(
-                  document.current ? 'documents.replace' : 'documents.add',
+                  onCapture
+                    ? document.current
+                      ? 'capture.replaceDocument'
+                      : 'capture.addDocument'
+                    : document.current
+                      ? 'documents.replace'
+                      : 'documents.add',
                 )}
-                onPress={() => {}}
+                onPress={() =>
+                  onCapture?.(
+                    document.documentType,
+                    document.current?.id ?? null,
+                  )
+                }
               />
             </>
           ) : null}
@@ -116,12 +133,19 @@ function SubmissionDetails({ submission }: { submission: SubmissionView }) {
       {submission.delivery === 'failed_permanent' ? (
         <Body>
           {translate(
-            submission.errorCode === 'upload_too_large'
-              ? 'documents.sizeError'
-              : submission.errorCode === 'invalid_upload' ||
-                  submission.errorCode === 'unknown_document_type'
-                ? 'documents.validationError'
-                : 'documents.failedError',
+            [
+              'local_file_missing',
+              'local_file_changed',
+              'local_file_unreadable',
+              'file_ownership_invalid',
+            ].includes(submission.errorCode ?? '')
+              ? `errors.${submission.errorCode}`
+              : submission.errorCode === 'upload_too_large'
+                ? 'documents.sizeError'
+                : submission.errorCode === 'invalid_upload' ||
+                    submission.errorCode === 'unknown_document_type'
+                  ? 'documents.validationError'
+                  : 'documents.failedError',
           )}
         </Body>
       ) : null}

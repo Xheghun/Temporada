@@ -723,10 +723,24 @@ export class WorkerRepository implements WorkerPersistence {
           clientActionId: supersedesActionId,
           actionType: 'document_upload',
         });
+        // M5/M8: refresh may know this failed action's server submission even when its local receipt never completed.
+        const replacesFailedServerSubmission =
+          replacesSubmissionId &&
+          (await transaction.first(
+            `SELECT 1 FROM document_submissions
+           WHERE worker_id=? AND document_type=? AND client_action_id=? AND server_submission_id=?`,
+            [
+              this.workerId,
+              documentType,
+              supersedesActionId,
+              replacesSubmissionId,
+            ],
+          ));
         if (
           payload.kind !== 'document_upload' ||
           payload.documentType !== documentType ||
-          payload.replacesSubmissionId !== (replacesSubmissionId ?? null)
+          (payload.replacesSubmissionId !== (replacesSubmissionId ?? null) &&
+            !replacesFailedServerSubmission)
         )
           throw new Error('supersession_resource_mismatch');
       }
@@ -774,6 +788,13 @@ export class WorkerRepository implements WorkerPersistence {
       [now, this.workerId, clientActionId, now],
     );
     return result.changes === 1;
+  }
+  async failUploadFile(actionId: string, code: string): Promise<void> {
+    await this.database.run(
+      `UPDATE outbox_actions SET status='failed_permanent',last_error_code=?,updated_at=?
+       WHERE worker_id=? AND client_action_id=? AND action_type='document_upload' AND status IN ('queued','retry_wait')`,
+      [code, this.clock.now(), this.workerId, actionId],
+    );
   }
   async recoverSending(): Promise<number> {
     const result = await this.database.run(

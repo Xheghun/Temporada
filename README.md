@@ -67,3 +67,7 @@ Phone/OTP sign-in, authorized worker selection and SecureStore session restore a
 ### Documents and corrections
 
 Home now links to the backend document catalog, review states and correction history. `worker_document_corrections` gates production access. [State/submission contracts](docs/documents.md) and [verification](docs/evidence/document-corrections.md) describe this scope. Camera/compression remain the next change; photo controls are visibly unavailable for now.
+
+### Capture and upload files
+
+Documents now offers camera/gallery capture, a compressed preview and explicit offline Save. Enable `worker_document_capture` with the existing flags for production behavior; development assessment mode enables the demo. [File lifecycle](docs/capture.md) and [executed Android evidence](docs/evidence/document-capture.md) describe retention, cleanup and recovery. New native packages/permissions require a new 1.1.0 binary; do not ship this as a JS-only OTA to the earlier binary. EAS/iOS builds remain unexecuted.

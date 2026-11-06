@@ -6,7 +6,7 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 
 ## 1. Scoped implementation and verification
 
-- [ ] 1.1 SDD-014 Implement camera/gallery/preview, measured compression, durable private copy, transactional enqueue and safe file reconciliation; verify byte threshold, restart file retention, DB-failure/orphan cleanup, missing bytes and permission/413 recovery; document file lifecycle.
+- [x] 1.1 SDD-014 Implement camera/gallery/preview, measured compression, durable private copy, transactional enqueue and safe file reconciliation; verify byte threshold, restart file retention, DB-failure/orphan cleanup, missing bytes and permission/413 recovery; document file lifecycle.
 
 ## 2. PR handoff
 

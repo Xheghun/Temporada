@@ -367,3 +367,54 @@ test('failed local enqueue never reports saved; disabled feature and stale docum
     await testContext.close();
   }
 });
+
+test('failed delivery remains explicitly replaceable even when refresh already obtained a staff decision for that submission', async () => {
+  const testContext = await fixture('ana');
+  try {
+    await testContext.service.submit(
+      'passport',
+      testContext.context.image(),
+      1,
+      null,
+    );
+    const action = (await testContext.context.worker().listActions())[0]!;
+    await testContext.context.worker().claimAction(action.id, 100);
+    const snapshot = assignmentFixture('ana');
+    snapshot.serverRevision = 4;
+    snapshot.documentSubmissions = [
+      {
+        submissionId: 'server-' + action.id,
+        clientActionId: action.id,
+        documentType: 'passport',
+        status: 'approved',
+        correctionReason: null,
+        serverRevision: 4,
+        createdAt: 100,
+      },
+    ];
+    await testContext.context.worker().cacheAssignment(snapshot);
+    await testContext.context
+      .store()
+      .finish(action, { kind: 'failed', code: 'local_file_missing' }, 100);
+    await testContext.service.reload();
+    const before = passport(testContext.service);
+    assert.equal(before.current?.status, 'approved');
+    assert.equal(before.canSubmit, true);
+    await testContext.service.submit(
+      'passport',
+      testContext.context.image(),
+      1,
+      before.current!.id,
+    );
+    assert.equal(passport(testContext.service).current?.status, 'pending_sync');
+    assert.equal(passport(testContext.service).history[0]?.status, 'approved');
+    assert.deepEqual(
+      (await testContext.context.worker().listActions()).map(
+        (action) => action.status,
+      ),
+      ['superseded', 'queued'],
+    );
+  } finally {
+    await testContext.close();
+  }
+});

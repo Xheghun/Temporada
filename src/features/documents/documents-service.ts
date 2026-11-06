@@ -131,7 +131,7 @@ export class DocumentsService {
     file: DurableUpload,
     generation: number,
     expectedSubmissionId: string | null,
-  ): Promise<void> {
+  ): Promise<OutboxAction | null> {
     const session = this.dependencies.session.current();
     if (
       !this.isEnabled() ||
@@ -140,13 +140,13 @@ export class DocumentsService {
       file.workerId !== session.workerId ||
       this.saving
     )
-      return;
+      return null;
     this.saving = true;
     this.update({ saving: true, error: null, savedActionId: null });
     try {
       const reader = this.dependencies.repository(session.workerId);
       const currentView = await reader.readView();
-      if (!this.isCurrentSession(session)) return;
+      if (!this.isCurrentSession(session)) return null;
       const document = documentViews(currentView).find(
         (candidate) => candidate.documentType === documentType,
       );
@@ -155,7 +155,7 @@ export class DocumentsService {
         (document.current?.id ?? null) !== expectedSubmissionId
       ) {
         await this.reload();
-        return;
+        return null;
       }
       const current = document.current;
       const replacesId = current?.serverId ?? current?.replacesId ?? undefined;
@@ -175,9 +175,11 @@ export class DocumentsService {
           this.update({ savedActionId: action.id });
       }
       this.dependencies.notifyEnqueued(session.workerId);
+      return action;
     } catch {
       if (this.isCurrentSession(session))
         this.update({ error: 'document_save_failed' });
+      return null;
     } finally {
       if (this.isCurrentSession(session)) {
         this.saving = false;

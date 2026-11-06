@@ -15,6 +15,11 @@ import { nativeClock, nativeSignals } from '../sync/native-signals.ts';
 import { attachSyncTriggers } from '../sync/sync-triggers.ts';
 import { retryDelay } from '../sync/retry-policy.ts';
 import i18n from '../i18n/index.ts';
+import { CaptureService } from '../../features/capture/capture-service.ts';
+import { documentViews } from '../../features/documents/domain/document-view.ts';
+import { UploadFileStore } from '../files/upload-file-store.ts';
+import { nativeCaptureStorage } from '../files/native-capture-storage.ts';
+import { chooseImage } from '../files/native-image-picker.ts';
 import { DocumentsService } from '../../features/documents/documents-service.ts';
 import { AssignmentService } from '../../features/assignment/assignment-service.ts';
 import { isFeatureEnabled } from '../config/feature-flags.ts';
@@ -52,6 +57,8 @@ export async function createWorkerRuntime() {
   const homeEnabled = await workerAppEnabled('worker_home_and_terms');
   const documentsEnabled =
     homeEnabled && (await workerAppEnabled('worker_document_corrections'));
+  const captureEnabled =
+    documentsEnabled && (await workerAppEnabled('worker_document_capture'));
   const database = await openWorkerDatabase();
   const preference = await database.first<{ language: string }>(
     'SELECT language FROM app_settings WHERE id=1',
@@ -81,6 +88,11 @@ export async function createWorkerRuntime() {
     }
     return repository;
   };
+  const files = new UploadFileStore(nativeCaptureStorage, {
+    actions: (workerId) => workerRepository(database, workerId).listActions(),
+    fail: (workerId, actionId, code) =>
+      workerRepository(database, workerId).failUploadFile(actionId, code),
+  });
   const viewListeners = new Set<(workerId: string) => void>();
   const engine = new SyncEngine({
     persistence,
@@ -92,7 +104,17 @@ export async function createWorkerRuntime() {
     enabled: () => enabled,
     report: (event) => {
       const workerId = event.workerId;
-      if (workerId) viewListeners.forEach((notify) => notify(workerId));
+      if (workerId) {
+        viewListeners.forEach((notify) => notify(workerId));
+        if (captureEnabled)
+          void files
+            .reconcile(workerId)
+            .then(() => viewListeners.forEach((notify) => notify(workerId)))
+            .catch(() => {
+              if (auth.current()?.workerId === workerId)
+                auth.reportIssue('capture_cleanup_failed');
+            });
+      }
       if (event.type === 'error' && event.workerId === auth.current()?.workerId)
         auth.reportIssue('sync_unavailable');
     },
@@ -146,6 +168,51 @@ export async function createWorkerRuntime() {
       if (auth.isCurrent(session)) await engine.manualRetry();
     },
   });
+  const capture = new CaptureService({
+    enabled: () => captureEnabled,
+    session: auth,
+    files,
+    choose: chooseImage,
+    validate(selection) {
+      const data = documents.getSnapshot();
+      if (
+        data.workerId !== selection.workerId ||
+        data.generation !== selection.generation ||
+        !data.data
+      )
+        return false;
+      const document = documentViews(data.data).find(
+        (candidate) => candidate.documentType === selection.documentType,
+      );
+      return (
+        !!document?.canSubmit &&
+        (document.current?.id ?? null) === selection.expectedSubmissionId
+      );
+    },
+    async submit(selection, file) {
+      return (
+        (
+          await documents.submit(
+            selection.documentType,
+            file,
+            selection.generation,
+            selection.expectedSubmissionId,
+          )
+        )?.id ?? null
+      );
+    },
+    reportCleanupFailure() {
+      auth.reportIssue('capture_cleanup_failed');
+    },
+  });
+  const stopFileForeground = syncSignals.signals.foreground(() => {
+    const workerId = auth.current()?.workerId;
+    if (workerId && captureEnabled)
+      void files
+        .reconcile(workerId)
+        .then(() => viewListeners.forEach((notify) => notify(workerId)))
+        .catch(() => auth.reportIssue('capture_cleanup_failed'));
+  });
   let selectedGeneration = -1;
   const prepareSelection = auth.subscribeSession(() => {
     const session = auth.current();
@@ -155,6 +222,11 @@ export async function createWorkerRuntime() {
       if (!worker) return;
       void workerRepository(database, session.workerId)
         .ensureWorkerIdentity(worker.displayName)
+        .then(() => engine.request())
+        .then(() =>
+          captureEnabled ? files.reconcile(session.workerId) : undefined,
+        )
+        .then(() => viewListeners.forEach((notify) => notify(session.workerId)))
         .then(() => persistence(session.workerId).requestRefresh())
         .then(() => engine.request())
         .catch(() => {
@@ -168,17 +240,21 @@ export async function createWorkerRuntime() {
     auth,
     assignment,
     documents,
+    capture,
     database,
     notifyEnqueued() {
       enqueueListeners.forEach((notify) => notify());
     },
     async dispose() {
       prepareSelection();
+      stopFileForeground();
+      capture.dispose();
       assignment.dispose();
       documents.dispose();
       detach();
       syncSignals.dispose();
       await engine.settled();
+      await files.settled();
       await auth.settled();
       await database.close();
     },

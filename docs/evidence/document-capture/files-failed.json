@@ -1,0 +1,24 @@
+{
+  "workerId": "bruno",
+  "actions": [
+    {
+      "actionId": "6514a65f-5dc5-4173-8e0c-22d87b1cb330",
+      "documentType": "ds160_confirmation",
+      "status": "delivered",
+      "exists": false,
+      "bytes": null,
+      "digestMatches": null
+    },
+    {
+      "actionId": "02167775-d9bb-441a-901c-d4f6f5c9eb91",
+      "documentType": "signed_contract",
+      "status": "failed_permanent",
+      "exists": true,
+      "bytes": 21460,
+      "digestMatches": true
+    }
+  ],
+  "managedFiles": 1,
+  "journals": 0,
+  "pickerCacheFiles": 0
+}

@@ -52,3 +52,5 @@ Worker-authentication SDD-011: auth/identity/M2/M9/M10 scope evidence is in docs
 Home-and-terms SDD-012: cached assignment/timeline/connectivity/counts, exact-version terms and M1/M2/M4/M6/M9/M10 scoped evidence is in docs/evidence/home-and-terms.md. Android offline v3 confirmation/restart/reconnect passed; native stale UI and full document journeys remain unverified in this change.
 
 Document-corrections SDD-013: M4/M5/M8/M9/M10 catalog/projection/orchestration and history evidence is in docs/evidence/document-corrections.md. Camera/compression/private-file adapter and whole-worker resubmission journeys remain owned by document-capture/integration.
+
+Document-capture SDD-014: M1/M2/M3/M5/M7/M8/M9/M10 file/capture evidence in docs/evidence/document-capture.md includes native permission recovery, measured gallery/camera compression, actual private-file/SQL inspection after offline force-stop, acknowledgment cleanup and 413 explicit replacement. Reboot/iOS/low-end performance/full scenarios remain unverified.

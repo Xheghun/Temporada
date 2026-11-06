@@ -43,7 +43,20 @@
     "save_failed": "No se pudo guardar la confirmación. Vuelve a intentarlo.",
     "refresh_failed": "No se pudo actualizar. Vuelve a intentarlo al recuperar la conexión.",
     "language_failed": "No se pudo guardar el idioma. Vuelve a intentarlo.",
-    "document_save_failed": "No se guardó el documento. Vuelve a intentarlo; no cierres la vista previa."
+    "document_save_failed": "No se guardó el documento. Vuelve a intentarlo; no cierres la vista previa.",
+    "capture_camera_denied": "Permite el acceso a la cámara en ajustes o elige una imagen.",
+    "capture_selection_failed": "No se pudo abrir la imagen. Elige otra o vuelve a intentar la cámara.",
+    "capture_compression_failed": "No se pudo preparar la imagen. Toma otra foto o elige una diferente.",
+    "upload_too_large": "La imagen debe ocupar menos de 1.5 MB. Elige otra foto.",
+    "capture_save_failed": "No se guardó un nuevo envío. Revisa Documentos y vuelve a elegir una foto.",
+    "capture_selection_changed": "La identidad o el documento cambió. Vuelve a Documentos para empezar de nuevo.",
+    "capture_cleanup_failed": "No se pudo completar la limpieza de imágenes. Vuelve a Documentos y reintenta; los envíos pendientes se conservan.",
+    "local_file_missing": "Falta la imagen guardada. Toma una foto nueva para reemplazar este envío.",
+    "local_file_changed": "La imagen guardada cambió. Toma otra foto para reemplazar este envío.",
+    "file_ownership_invalid": "No se puede usar esta imagen para esta identidad. Vuelve a elegir una foto.",
+    "capture_settings_failed": "No se pudieron abrir los ajustes. Ábrelos desde el sistema o elige una imagen.",
+    "local_file_unreadable": "No se puede leer la imagen guardada. Elige una foto nueva para reemplazar el envío.",
+    "capture_storage_failed": "No se pudo guardar la imagen. Libera espacio en el teléfono y vuelve a elegir una foto."
   },
   "configurationError": "No se ha configurado la conexión del servicio. Contacta con el equipo de soporte.",
   "home": {
@@ -124,5 +137,26 @@
       "superseded": "Reemplazado",
       "needs_refresh": "Estado por confirmar · actualiza"
     }
+  },
+  "capture": {
+    "title": "Foto del documento",
+    "guidance": "Incluye el documento completo, sin reflejos y con texto legible. Revisa la vista previa antes de guardar.",
+    "camera": "Tomar foto",
+    "retake": "Volver a tomar foto",
+    "gallery": "Elegir imagen",
+    "save": "Guardar para sincronizar",
+    "back": "Volver a documentos",
+    "settings": "Abrir ajustes de permisos",
+    "preview": "Vista previa de la foto del documento",
+    "bytes": "Imagen comprimida: {{count}} bytes",
+    "choosing": "Seleccionando imagen…",
+    "preparing": "Comprimiendo y guardando la imagen…",
+    "saving": "Guardando la acción en este teléfono…",
+    "saved": "Documento guardado en este teléfono. El estado de sincronización y revisión aparece en Documentos.",
+    "replaceDocument": "Preparar un nuevo envío",
+    "addDocument": "Agregar documento",
+    "inspect": "Inspeccionar archivos (desarrollo)",
+    "inspectionTitle": "Inspección de archivos",
+    "inspectionFailed": "No se pudo inspeccionar el almacenamiento. Reintenta."
   }
 }

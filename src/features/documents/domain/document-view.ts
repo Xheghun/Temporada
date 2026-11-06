@@ -112,7 +112,8 @@ export function documentViews(data: WorkerViewData) {
       null;
     const canSubmit =
       current === null ||
-      ['correction_requested', 'failed'].includes(current.status);
+      ['correction_requested', 'failed'].includes(current.status) ||
+      current.delivery === 'failed_permanent';
     return {
       ...catalogDocument,
       current,
