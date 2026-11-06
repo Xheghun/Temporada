@@ -11,7 +11,7 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 
 ## 2. PR handoff
 
-- [ ] 2.1 Prepare only the `mock-api` PR on `feature/SDD-004-mock-api` with relevant requirement links, executed check results, scoped documentation and explicit limitations; verify changed files remain in scope and record PR URL or remote/reviewer blocker. Stop here without implementing another change.
+- [x] 2.1 Prepare only the `mock-api` PR on `feature/SDD-004-mock-api` with relevant requirement links, executed check results, scoped documentation and explicit limitations; verify changed files remain in scope and record PR URL or remote/reviewer blocker. Stop here without implementing another change.
 
 ## Workflow follow-up
 
