@@ -12,7 +12,7 @@ All timestamps UTC epoch milliseconds. Versioned PRAGMA user_version migrations;
 | terms_intents | worker_id + client_action_id PK, terms_version_id, created_at; composite references to exact terms and owning outbox action |
 | documents | worker_id + document_type PK, latest_local_action_id nullable, latest_server_submission_id, updated_at; projection only |
 | outbox_actions | sequence INTEGER PK AUTOINCREMENT, id UNIQUE, worker_id FK, client_action_id unique, action_type, immutable payload_json, file_uri nullable, status, attempt_count, next_attempt_at, last_error_code, created_at, updated_at |
-| refresh_state | worker_id PK, assignment_refresh_needed, terms_refresh_needed |
+| refresh_state | worker_id PK, assignment_refresh_needed, terms_refresh_needed, attempt_count, next_attempt_at, last_error_code (v2) |
 
 Indexes: outbox(worker_id,status,next_attempt_at,sequence), submissions(worker_id,document_type,created_at), worker-scoped assignment/catalog/terms indexes. Foreign keys/composite constraints ensure referenced submissions belong to the same worker. Payload includes terms version OR document type, local submission ID, optional replaced server submission ID and file digest; never token. File paths are generated under private worker/action UUID directories, not user input.
 
@@ -23,3 +23,5 @@ Atomic enqueue: insert local intent/submission + outbox in one exclusive transac
 Startup: recover sending; serialize file reconciliation with enqueue; detect missing bytes; remove only provably unreferenced app files. Keep files for active/failed uploads until ack or explicit resolution. Ack then cleanup is crash-safe; logout removes no pending rows/files. Token/authorized identity metadata live in SecureStore; selected worker is restored only when membership is known. No SQL encryption guarantee.
 
 Implemented in persistent-outbox: migrations v1, foreign keys, parameterized worker-scoped repositories and immutable-action/submission identity triggers. outbox sequence is the deterministic enqueue order (not a wall-clock/UUID tie-breaker). Local creation time stays immutable; server_created_at is stored separately for latest-server-submission projections. Private connection serializes reads and transactions so no partial enqueue is visible. Repository metadata attestation does not replace the later file adapter's actual durable-file verification. See docs/persistence.md and docs/evidence/persistent-outbox.md for commands/evidence.
+
+Offline-sync adds v2 refresh retry metadata without deleting v1 rows. Delivery outcomes and review updates commit atomically; explicit failed-action replacement commits supersession with new intent. Permanent refresh errors stay flagged but paused until explicit resolution. See docs/synchronization.md and docs/evidence/offline-sync.md.

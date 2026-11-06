@@ -42,7 +42,7 @@ export async function runNativePersistenceCheck(mode: string): Promise<string> {
       await carla.cacheAssignment(assignmentFixture('carla'));
       await bruno.cacheAssignment(assignmentFixture('bruno'));
       if (!file.exists) file.create();
-      file.write(fixtureBytes);
+      await file.write(fixtureBytes);
       const terms = await carla.enqueueTerms('v2');
       await carla.enqueueDocument(
         'passport',

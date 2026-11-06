@@ -48,3 +48,10 @@ Delivery and review MUST merge independently by submission identity. An older re
 #### Scenario: Lost response followed by staff decision and replay
 - **WHEN** an upload commits, its response drops, staff approve or request correction, a refresh caches that decision, and the original upload replay returns
 - **THEN** delivery becomes resolved, the newer decision/reason/revision remains visible, and exactly one server submission exists
+
+### Requirement: Explicit failed-action resolution
+Replacing a permanently failed action MUST atomically mark that predecessor superseded and enqueue a new immutable action, scoped to the same worker/resource. History and original IDs MUST remain. Active, delivered and stale actions MUST NOT be silently superseded.
+
+#### Scenario: Supersession survives restart
+- **WHEN** a worker explicitly replaces a failed document action
+- **THEN** replacement intent and predecessor supersession commit together, survive reopen and allow the replacement to deliver; rollback or a foreign-worker reference changes neither action

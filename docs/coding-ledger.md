@@ -30,3 +30,13 @@ PR publication and handoff preparation: 2026-11-06T17:33:50.816167+00:00 to 2026
 User-reported probe correction: 2026-11-06T17:40:20+00:00 to 2026-11-06T17:41:57.136027+00:00, 1.62 minutes (conservatively includes investigation). Recorded cumulative: 47.24 minutes. Repeated-check Android evidence retained without reset/reseed; no sibling change started.
 
 Maintainability review follow-up: 2026-11-06T17:53:00+00:00 to 2026-11-06T17:57:29.655530+00:00, 4.49 minutes (conservative start, includes verification). Recorded cumulative: 51.73 minutes. Scoped repository refactor and JSON validation; 44 tests pass.
+
+Offline-sync started 2026-11-06T18:02:28.397476+00:00. Prior recorded cumulative: 51.73 minutes (includes the maintainability follow-up). Budget 50 minutes; hard cumulative stop 300. Recording reminder delivered, capture unconfirmed.
+
+Offline-sync initial inspection is conservatively counted from 2026-11-06T18:01:00+00:00 (before the implementation-start entry). Final elapsed total will include this setup interval.
+
+Offline-sync implementation/local verification ended 2026-11-06T18:27:57.278415+00:00: 26.95 minutes including initial inspection. Recorded cumulative: 78.68 minutes. 72 automated tests passed; four native development probes passed with documented injection/fixture limitations. PR publication/CI follow-up follows separately; Recording B remains unconfirmed.
+
+Offline-sync publication/handoff: 2026-11-06T18:27:57.278415+00:00 to 2026-11-06T18:28:35.281044+00:00, 0.63 minutes. Recorded cumulative: 79.31 minutes. PR https://github.com/Xheghun/Temporada/pull/5; subsequent hosted CI waiting is not active coding. Human review/merge pending.
+
+P1 local-completion recovery review: conservatively 2026-11-06T18:38:00+00:00 to 2026-11-06T18:41:52.710209+00:00, 3.88 minutes. Recorded cumulative: 83.19 minutes. Reproduced failure before fix; 75 tests pass after targeted recovery. No native fault test or sibling change claimed.

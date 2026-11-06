@@ -44,3 +44,5 @@ Each SDD task appears in exactly one active change checklist; the central change
 - [submission-documentation](../openspec/changes/submission-documentation/tasks.md): SDD-020, SDD-021.
 
 Mock-api: SDD-004/005 implementation evidence for R-API and the backend portions of M3/M4/M6/M7/M8/M10 is in docs/evidence/mock-api.md. Mobile acceptance for those invariants is not complete. Scaffold PR #1 was human-reviewed/merged before this branch; no subsequent feature is started.
+
+Offline-sync SDD-008/009/010: core delivery/retry/isolation/version/replay evidence is in docs/evidence/offline-sync.md, including all six mandatory core tests and Android development probes. Whole-app UI/airplane-mode/media/production acceptance is still incomplete.

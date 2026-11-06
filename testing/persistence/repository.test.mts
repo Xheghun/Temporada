@@ -54,7 +54,7 @@ test('versioned migrations can be reapplied without erasing cached worker data',
     assert.equal(
       (await f.db.first<{ user_version: number }>('PRAGMA user_version'))
         ?.user_version,
-      1,
+      2,
     );
     assert.equal(
       (await f.worker('ana').getAssignment())?.worker.displayName,
