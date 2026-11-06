@@ -11,10 +11,12 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 
 ## 2. PR handoff
 
-- [ ] 2.1 Prepare only the `persistent-outbox` PR on `feature/SDD-006-persistent-outbox` with relevant requirement links, executed check results, scoped documentation and explicit limitations; verify changed files remain in scope and record PR URL or remote/reviewer blocker. Stop here without implementing another change.
+- [x] 2.1 Prepare only the `persistent-outbox` PR on `feature/SDD-006-persistent-outbox` with relevant requirement links, executed check results, scoped documentation and explicit limitations; verify changed files remain in scope and record PR URL or remote/reviewer blocker. Stop here without implementing another change.
 
 ## Workflow follow-up
 
 - Human reviews/merges this PR; record merge and required CI evidence separately from implementation completion.
 - Only after review and a new explicit request may another named change be applied. Never treat completing this checklist as authorization for all siblings.
 - Archive/sync this change only through the appropriate later workflow; preserved programme reference is not an active or completed change.
+
+Handoff: https://github.com/Xheghun/Temporada/pull/4. Local evidence: docs/evidence/persistent-outbox.md. Hosted CI and human review/merge remain separate gates. No sibling change implemented.
