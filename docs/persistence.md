@@ -40,3 +40,5 @@ adb shell am start -a android.intent.action.VIEW -d 'exp://127.0.0.1:8081/--/dev
 Expect RECOVERY_PASSED: same two Carla IDs/payloads and saved fixture after process death, interrupted sending recovered, original correction history intact, Bruno queue empty. The probe uses persistence-proof.sqlite and a small fictional fixture; it never opens or resets the actual worker database. It is blocked by `__DEV__` in production. No worker screen, network synchronization, real media adapter or offline OTP sign-in is implemented in this change. TEST-02 persistence is exercised; TEST-01 delivery and other sync-engine acceptance await offline-sync.
 
 Executed results and native screenshots: [verification evidence](evidence/persistent-outbox.md).
+
+The verify route can be reopened after successful recovery. It permits the probe's own sending-to-queued transition while still comparing immutable intent and retry metadata. Reset/reseed is only necessary to start a new proof.

@@ -4,6 +4,7 @@ import {
   openWorkerDatabase,
   workerRepository,
 } from '../core/database/expo-database.ts';
+import { assertRecoverySnapshot } from './recovery-snapshot.ts';
 import { assignmentFixture } from './persistence-fixtures.ts';
 import type { OutboxAction } from '../core/offline/domain/types.ts';
 
@@ -71,9 +72,8 @@ export async function runNativePersistenceCheck(mode: string): Promise<string> {
     );
     if (!record) throw new Error('proof_not_seeded');
     const expected = JSON.parse(record.value) as OutboxAction[];
-    if (JSON.stringify(await carla.listActions()) !== JSON.stringify(expected))
-      throw new Error('actions_changed_after_process_restart');
-    if ((await carla.recoverSending()) !== 1)
+    const sending = assertRecoverySnapshot(expected, await carla.listActions());
+    if ((await carla.recoverSending()) !== sending)
       throw new Error('interrupted_action_not_recovered');
     const actual = await carla.listActions();
     for (const old of expected) {

@@ -21,3 +21,9 @@ Environment: Small_Phone emulator, Android 16/API 36, 360 dp width; Expo Go, SDK
 Result: PASS for this persistence probe and TEST-02's storage reconstruction requirement. This is not whole-app offline scenario 2: worker screens, sync transport and camera capture are not implemented here. Device reboot/logout UI and iOS were NOT RUN. The fixture is a small fictional text file, not a compressed photograph.
 
 During development the probe reset initially used an incorrect native path-to-URI conversion, leaving an earlier schema behind. Reset now opens/closes and deletes only its named proof database through SQLite APIs. The successful evidence above was captured after this fix.
+
+## Repeated-check correction
+
+The user reported `actions_changed_after_process_restart` after handoff. Reproduced on the emulator: the original probe compared all fields to its sending snapshot even though its first run had already recovered sending to queued. The probe now permits only that recovery transition and its updated timestamp; all other action fields remain checked. No production persistence behavior changed. A new real-SQLite test verifies repeated checks after reopen and rejection of changed IDs, payloads, files, retry counts and unexpected status changes.
+
+The existing proof data was retained (no reset/reseed). Hot refresh and another force-stop/relaunch both returned RECOVERY_PASSED. [Repeated recovery screenshot](outbox-repeated-recovery.png), [UI hierarchy](outbox-repeated-recovery.xml).

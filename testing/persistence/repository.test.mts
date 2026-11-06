@@ -502,3 +502,48 @@ test('cached newer terms never substitute the exact version passed to confirmati
     await f.close();
   }
 });
+
+test('native probe accepts repeated recovery after reopen but rejects changed intent or retry metadata', async () => {
+  const { assertRecoverySnapshot } =
+    await import('../../src/testing/recovery-snapshot.ts');
+  const f = await fixture();
+  try {
+    const worker = f.worker('ana');
+    await worker.cacheAssignment(assignmentFixture('ana'));
+    const action = await worker.enqueueTerms('v2');
+    await worker.claimAction(action.id, 100);
+    const expected = await worker.listActions();
+    await f.reopen();
+    assert.equal(
+      assertRecoverySnapshot(expected, await f.worker('ana').listActions()),
+      1,
+    );
+    await f.worker('ana').recoverSending();
+    await f.reopen();
+    const recovered = await f.worker('ana').listActions();
+    assert.equal(assertRecoverySnapshot(expected, recovered), 0);
+    assert.equal(assertRecoverySnapshot(expected, recovered), 0);
+    const first = recovered[0];
+    assert.ok(first);
+    for (const mutation of [
+      { ...first, clientActionId: randomUUID() },
+      {
+        ...first,
+        payload: { ...first.payload, termsVersionId: 'v3' },
+      },
+      { ...first, fileUri: 'file:///changed' },
+      { ...first, attemptCount: 8 },
+      { ...first, status: 'delivered' as const },
+    ])
+      assert.throws(
+        () => assertRecoverySnapshot(expected, [mutation]),
+        /actions_changed/,
+      );
+    assert.throws(
+      () => assertRecoverySnapshot(expected, []),
+      /actions_changed/,
+    );
+  } finally {
+    await f.close();
+  }
+});

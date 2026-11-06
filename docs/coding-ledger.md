@@ -26,3 +26,5 @@ Persistent-outbox started 2026-11-06T17:14:43.324231+00:00. Prior recorded cumul
 Persistent-outbox implementation/local verification ended 2026-11-06T17:33:50.816167+00:00: 19.12 minutes; recorded cumulative 44.80 minutes. 41 automated tests and Android force-stop/relaunch persistence probe passed. Publication/CI follow-up is tracked separately; no recording or sibling implementation claimed.
 
 PR publication and handoff preparation: 2026-11-06T17:33:50.816167+00:00 to 2026-11-06T17:34:40+00:00, 0.82 minutes. Updated recorded cumulative total: 45.62 minutes. PR #4; subsequent hosted CI waiting is not active coding.
+
+User-reported probe correction: 2026-11-06T17:40:20+00:00 to 2026-11-06T17:41:57.136027+00:00, 1.62 minutes (conservatively includes investigation). Recorded cumulative: 47.24 minutes. Repeated-check Android evidence retained without reset/reseed; no sibling change started.
