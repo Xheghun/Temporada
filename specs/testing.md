@@ -1,6 +1,6 @@
 # Verification plan
 
-Current state: every application test and manual scenario is NOT RUN. Planning validation is separate from app correctness.
+Current state: scaffold-only configuration/flag/boundary checks and Android startup have executed; see docs/evidence/scaffold-progress.md. Every worker-domain test and manual worker scenario remains NOT RUN. Planning validation is separate from app correctness.
 
 Automated: Jest/Expo + RNTL; pure engine clock/RNG/transport fakes; isolated real SQLite repository integration through an appropriate Node adapter or instrumented Expo harness. Do not claim fake reconstruction proves native persistence. Backend tests start actual service/storage for replay/restart; use temporary files and deterministic failure controls.
 

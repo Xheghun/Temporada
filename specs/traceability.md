@@ -1,6 +1,6 @@
 # Traceability
 
-Every row is proposed / NOT VERIFIED. Populate actual commands, commit IDs and evidence paths during implementation; file existence is not behavioral acceptance.
+Worker requirements remain proposed / NOT VERIFIED. Scaffold-only evidence for R-ANDROID/R-QUALITY/R-GOV is recorded in docs/evidence/scaffold-progress.md (commit 293eef6); whole-app acceptance is incomplete. Populate PR/CI/review evidence when executed; file existence is not behavioral acceptance.
 
 | Requirement | Capability / change owner | Tasks | Verification |
 |---|---|---|---|

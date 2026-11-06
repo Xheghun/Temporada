@@ -1,0 +1,55 @@
+name: Internal or approved production build
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        type: choice
+        options: [android, ios]
+        default: android
+        required: true
+      profile:
+        type: choice
+        options: [development, preview, production]
+        default: preview
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: build-${{ inputs.platform }}-${{ inputs.profile }}
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: ${{ inputs.profile }}
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
+      EXPO_OWNER: ${{ vars.EXPO_OWNER }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Require reviewed main and preconfigured build account
+        env:
+          SELECTED_REF: ${{ github.ref }}
+        run: |
+          test "$SELECTED_REF" = refs/heads/main
+          test -n "$EXPO_TOKEN"
+          test -n "$EAS_PROJECT_ID"
+          test -n "$EXPO_OWNER"
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run arch:check
+      - run: npm run test:ci
+      - run: npm run expo:check
+      - run: npm run config:check
+      - name: Build only; never submit or publish OTA
+        env:
+          BUILD_PLATFORM: ${{ inputs.platform }}
+          BUILD_PROFILE: ${{ inputs.profile }}
+        run: npx --yes eas-cli@27.5.0 build --platform "$BUILD_PLATFORM" --profile "$BUILD_PROFILE" --non-interactive

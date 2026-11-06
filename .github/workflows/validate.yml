@@ -1,0 +1,55 @@
+name: Validate
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Check ticket and branch convention
+        if: github.event_name == 'pull_request'
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          node --input-type=module <<'JS'
+          import { execFileSync } from 'node:child_process';
+          const branch = process.env.BRANCH_NAME ?? '';
+          const title = process.env.PR_TITLE ?? '';
+          if (!/^(feature|fix|chore)\/[A-Z]+-\d+-[a-z0-9]+(?:-[a-z0-9]+)*$/.test(branch) || /codex|agents?|openai/i.test(branch)) {
+            throw new Error('Use a descriptive ticket branch with no AI branding');
+          }
+          if (!/[A-Z]+-\d+/.test(title)) throw new Error('PR title must include a ticket ID');
+          const base = process.env.BASE_SHA ?? '';
+          const head = process.env.HEAD_SHA ?? '';
+          if (!/^[a-f0-9]{40}$/.test(base) || !/^[a-f0-9]{40}$/.test(head)) throw new Error('Invalid PR commit SHA');
+          const subjects = execFileSync('git', ['log', '--format=%s', `${base}..${head}`], { encoding: 'utf8' }).trim().split('\n').filter(Boolean);
+          if (subjects.some((subject) => !/[A-Z]+-\d+/.test(subject))) throw new Error('Every commit must include a ticket ID');
+          JS
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run arch:check
+      - run: npm run test:ci
+      - run: npm run expo:check
+      - run: npm run config:check
+      - run: npx expo-doctor
+      - name: Bundle Android JavaScript
+        run: npx expo export --platform android
