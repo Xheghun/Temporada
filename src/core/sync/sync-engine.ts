@@ -97,6 +97,9 @@ export class SyncEngine {
         .retryNow(this.deps.clock.now());
     await this.request();
   }
+  settled(): Promise<void> {
+    return this.running ?? Promise.resolve();
+  }
   stop(): void {
     this.stopped = true;
     this.cancelWake?.();

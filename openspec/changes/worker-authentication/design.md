@@ -32,3 +32,7 @@ Budget: 20 coding minutes. One cumulative programme ledger targets 240 coding mi
 ## Migration Plan
 
 Branch from current reviewed/merged main (scaffold establishes the initial baseline, preserving existing files). Run applicable checks, prepare the scoped PR and stop. No release, credential handling or merge is authorized by applying this change. Roll back unmerged work through its isolated branch; do not delete durable user data or rewrite shared history.
+
+## Implementation evidence
+
+The baseline above describes the original planning inspection. The merged foundation/sync now supports this scoped auth implementation. Session/runtime contracts are in docs/authentication.md; executed tests/native evidence and limitations are in docs/evidence/worker-authentication.md. Home business content remains outside this change.

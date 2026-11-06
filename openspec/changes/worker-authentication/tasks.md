@@ -6,7 +6,7 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 
 ## 1. Scoped implementation and verification
 
-- [ ] 1.1 SDD-011 Implement localized phone/OTP forms, SecureStore sessions, worker picker, cached resume, switch/logout isolation and auth route gates; verify invalid OTP, single/shared phone, TEST-06, late-response isolation and logout/reauth queue survival; document seeded login flow.
+- [x] 1.1 SDD-011 Implement localized phone/OTP forms, SecureStore sessions, worker picker, cached resume, switch/logout isolation and auth route gates; verify invalid OTP, single/shared phone, TEST-06, late-response isolation and logout/reauth queue survival; document seeded login flow.
 
 ## 2. PR handoff
 
