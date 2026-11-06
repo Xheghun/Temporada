@@ -1,0 +1,27 @@
+# Proposal: Assessment documentation and recording verification
+
+## Why
+
+Deliver assessment documentation and recording verification as an independently reviewable increment so applying this change cannot silently grow into the entire assessment application.
+
+## What Changes
+
+- Finalize checked README, DECISIONS/PROCESS/release plan, four short answers, genuine AI evidence and final recording editing/verification.
+- Scope exclusions: No coding, delayed Recording B capture, invented approvals or claims of unexecuted tests/builds.
+- Preserve the programme requirements and evidence discipline in specs/requirements.md and specs/programme/design.md.
+
+## Capabilities
+
+### New Capabilities
+
+None. Tooling, verification or documentation only; skip_specs is explicit.
+
+### Modified Capabilities
+
+None. No main capabilities exist at planning time. Sibling changes own distinct capability paths; review current main specs before apply and reconcile conflicts explicitly.
+
+## Impact
+
+Apply only `submission-documentation` on `chore/SDD-020-submission-documentation`. Do not apply, implement or auto-start any sibling change. Prerequisite: `offline-integration` human-reviewed and merged. A prerequisite is a human review/merge gate, not CLI-enforced dependency metadata. If unmet, stop before coding. Request this change explicitly to apply it. Stop after preparing its scoped PR; human review/merge and the next change require separate actions. No direct main push, automatic merge or AI-branded branch. Ticket IDs are provisional local IDs.
+
+Task ownership: SDD-020, SDD-021. Planning only; no behavior verified. Reference documents: `specs/requirements.md`, `specs/testing.md`, `specs/traceability.md`. The original assessment is pending; mobile correctness is the focus. Mock work remains supporting infrastructure.

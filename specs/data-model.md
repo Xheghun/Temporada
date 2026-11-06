@@ -1,0 +1,22 @@
+# Data model
+
+All timestamps UTC epoch milliseconds. Versioned migration ledger; foreign keys enabled per connection; migrations transactional and repeatable via version tracking. Worker-scoped queries are mandatory, never inferred from a mutable global selection.
+
+| Table | Key / principal fields |
+|---|---|
+| workers | worker_id PK, display_name, optional normalized phone, updated_at |
+| assignments | worker_id + order_id PK, employer, worksite, season_start/end, current_terms_version_id, server_revision, cached_at |
+| terms | worker_id + terms_version_id PK, content/summary, server_acceptance_status, cached_at |
+| document_catalog | worker_id + document_type PK, localized label keys/server display content, required, revision |
+| document_submissions | worker_id + submission_id PK (local UUID before acknowledgment), document_type, client_action_id unique, server_submission_id nullable, server_status, correction_reason, server_revision, created_at |
+| documents | worker_id + document_type PK, latest_local_action_id nullable, latest_server_submission_id, updated_at; projection only |
+| outbox_actions | id PK, worker_id FK, client_action_id unique, action_type, immutable payload_json, file_uri nullable, status, attempt_count, next_attempt_at, last_error_code, created_at, updated_at |
+| refresh_state | worker_id PK, assignment_refresh_needed, terms_refresh_needed |
+
+Indexes: outbox(worker_id,status,next_attempt_at,created_at,id), submissions(worker_id,document_type,created_at), worker-scoped assignment/catalog/terms indexes. Foreign keys/composite constraints ensure referenced submissions belong to the same worker. Payload includes terms version OR document type, local submission ID, optional replaced server submission ID and file digest; never token. File paths are generated under private worker/action UUID directories, not user input.
+
+Delivery enum: queued, sending, retry_wait, delivered, stale, failed_permanent, superseded. Staff enum: pending_review, approved, correction_requested. Not submitted is absence; Pending Sync derives from a local active action. Keep failed delivery visible separately. Pending count counts queued/sending/retry_wait for selected worker; failed/stale require separate attention count.
+
+Atomic enqueue: insert local intent/submission + outbox in one exclusive transaction. Ack: update action + that submission/terms acceptance in one transaction, never a different current worker row. Delivery acknowledgments update delivery independently; review fields merge only from strictly newer revisions for the same submission. Equal revisions must agree; older/missing/incomparable receipt revisions preserve known staff decisions and correction reasons (refresh if revision is unavailable). Stale outbox actions are resolved for ordering without supersession. Server snapshots merge by revision/submission identity and cannot replace local active actions. Preserve history of stale acceptance and corrections. New correction creates a new action; user replacement explicitly supersedes failed predecessor without deleting it.
+
+Startup: recover sending; serialize file reconciliation with enqueue; detect missing bytes; remove only provably unreferenced app files. Keep files for active/failed uploads until ack or explicit resolution. Ack then cleanup is crash-safe; logout removes no pending rows/files. Token/authorized identity metadata live in SecureStore; selected worker is restored only when membership is known. No SQL encryption guarantee.
