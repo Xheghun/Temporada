@@ -2,7 +2,7 @@
 
 ## Context
 
-See proposal.md for scope and motivation. The inspected repository contains planning artifacts only; no application or Git repository was present at baseline. SDK compatibility and Android startup are unverified; ADB listener binding was denied. Prerequisite: `offline-integration` human-reviewed and merged.
+See proposal.md for scope and motivation. The original baseline restrictions are historical. Offline-integration PR #11 and iOS follow-up PR #12 are merged. Android acceptance and partial iOS evidence are available; the coding ledger stopped at 299.91 minutes. This change is documentation-only.
 
 ## Goals / Non-Goals
 
@@ -32,3 +32,7 @@ Budget: documentation/recording outside coding budget. One cumulative programme 
 ## Migration Plan
 
 Branch from current reviewed/merged main (scaffold establishes the initial baseline, preserving existing files). Run applicable checks, prepare the scoped PR and stop. No release, credential handling or merge is authorized by applying this change. Roll back unmerged work through its isolated branch; do not delete durable user data or rewrite shared history.
+
+## Apply-time evidence status
+
+The user confirmed on 2026-11-07 that neither recording exists. Prepare written handoff/recording guidance, but leave SDD-021 unchecked: genuine implementation footage cannot be reconstructed after the fact. This does not waive the recording requirement. No application code, manual app tests or credential/build operations are authorized by this documentation change.

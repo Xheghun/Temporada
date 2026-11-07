@@ -1,6 +1,6 @@
 # Traceability
 
-Feature-local and Android integration verification are recorded in dated docs/evidence files. See offline-integration.md for actual scenario results and limits; production, recordings and submission acceptance remain separate. Scaffold evidence is in docs/evidence/scaffold-progress.md. File existence is not behavioral acceptance.
+Feature-local and Android integration verification are recorded in dated docs/evidence files. See [integration evidence](../docs/evidence/offline-integration.md) for actual scenario results and limits; production, recordings and submission acceptance remain separate. Scaffold evidence is in docs/evidence/scaffold-progress.md. File existence is not behavioral acceptance.
 
 | Requirement | Capability / change owner | Tasks | Verification |
 |---|---|---|---|
@@ -58,3 +58,5 @@ Document-capture SDD-014: M1/M2/M3/M5/M7/M8/M9/M10 file/capture evidence in docs
 Language-and-accessibility SDD-015: user-amended M9 English-first defaults, saved preference preservation, bilingual status/error coverage and accessible shared controls are traced in docs/evidence/language-and-accessibility.md. Native 360dp/130% text inspection is distinct from unexecuted TalkBack/iOS acceptance.
 
 Offline-integration SDD-016/017/019: all eight Android scenarios, actual device reboot, original action/file retention, deduplication, 401/413/422, persisted backoff, stale-v2 → explicit-v3, shared-phone counters and Approved-after-replay are recorded in docs/evidence/offline-integration.md. No product fix was needed. Recordings, iOS/low-end/release-binary behavior and real-backend sign-off remain outside this evidence.
+
+Submission-documentation SDD-020: README, consolidated DECISIONS, PROCESS, docs/release-plan.md and four bounded answers in docs/architecture-answers.md describe the implemented system and external release work. SDD-021 remains incomplete: the user confirmed no Recordings A/B exist. docs/recordings.md records their requirements, a truthful A outline and the missing B limitation. No new application coding/verification occurred after the 299.91-minute cutoff.

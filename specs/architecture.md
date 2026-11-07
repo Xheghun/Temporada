@@ -10,7 +10,7 @@ Foundation: current compatible Expo SDK, New Architecture, strict TS, Router, SD
 
 Session generation guards late responses. Every operation captures worker ID. Worker changes clear current views before asynchronous work; persisted queues survive. One global sync flight settles before processing the newly selected worker. Token expiry pauses sends. Production feature flags use remote configuration and default false on missing/unreachable service; local assessment mode is explicitly development-only.
 
-Observed baseline: no app/package manifest/Git; Node 24.11.1/npm 11.6.2; SDK/AVDs present; ADB startup denied listener binding. No emulator launch verified. Security-sensitive tokens never enter logs or ordinary database; app-private SQLite/images do not establish encryption or protection against device compromise.
+Historical initial baseline: no app/package manifest/Git and ADB startup was blocked. Current implementation uses Expo SDK 58/React Native 0.88.1, has executed Android integration and partial iOS evidence, and retains the interfaces described above. See README.md, DECISIONS.md and docs/evidence/offline-integration.md. Security-sensitive tokens never enter logs or ordinary database; app-private SQLite/images do not establish encryption or protection against device compromise.
 
 Mobile behavior and Android evidence are the focus. The mock backend remains supporting test infrastructure limited to the contracts, durable idempotency and failure controls needed by the client. Reconcile the original assessment once supplied; no new backend product scope is planned.
 

@@ -1,6 +1,6 @@
 # Recording B — genuine implementation session
 
-Status: user confirmed the offline-sync implementation session for Recording B. Start screen/audio capture before that session’s prompt, plan and review, after persistent-outbox has been reviewed and merged. The session selection is complete; no footage or completed recording is claimed.
+Status (2026-11-07): the user confirmed no footage exists. The offline-sync session was selected and this checklist was prepared before coding, but capture was not completed. This is the original preparation checklist, not evidence of a recording. See [current recording status](recordings.md).
 
 Before the chosen task, the human starts screen/audio capture and records the real prompt, agent plan and human review. Aim for 10–15 minutes. Show a genuine correction/rejection only if one occurs; never stage one. Record actual implementation, relevant test execution and Android emulator behavior, the resulting PR description and the human explanation of decisions. Protect credentials; use fictional seed data only. Keep coding time in the shared ledger.
 
