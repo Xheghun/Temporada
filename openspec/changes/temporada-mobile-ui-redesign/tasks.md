@@ -53,7 +53,7 @@
 - [x] 9.2 Execute all six mandatory synchronization cases against actual persistence and Android: offline enqueue, process restart/files, lost-response replay, 500/413/422 classification, stale-v2/explicit-v3 and shared-phone isolation; include reconnection, logout/reauth and real correction replacement, recording new evidence rather than substituting mocks or historical screenshots.
 - [ ] 9.3 Inspect actual updated screens on an available Android emulator at approximately 360dp and at least 130% font scale in both languages, including auth keyboard, safe areas, navigation, TalkBack focus/status feedback and cached/no-cache states; fix observed issues and save actual screenshots with device/settings metadata, or leave unavailable checks NOT RUN.
 - [x] 9.4 Review the complete diff for presentation scope, no private cross-feature imports, no credentials/worker data, no sync/file/ID/retry regressions and no unsupported production enablement; record actual review and separate subsequent-work ledger totals without changing assessed history.
-- [ ] 9.5 Prepare ticketed reviewable commits and one focused PR with visual summary, modified/added files, navigation changes, actual test/screenshot links and explicit gaps; verify branch/commit conventions and PR contents, then stop at human review handoff without auto-merge or production release.
+- [x] 9.5 Prepare ticketed reviewable commits and one focused PR with visual summary, modified/added files, navigation changes, actual test/screenshot links and explicit gaps; verify branch/commit conventions and PR contents, then stop at human review handoff without auto-merge or production release.
 
 ## Workflow follow-up
 
@@ -61,3 +61,5 @@
 - Archive only after a separate explicit archive request and completion review; keep incomplete verification visible.
 
 Verification note: task 9.3 has executed 360dp English/Spanish 100–130% layouts, keyboard/navigation/safe-area checks, actual screenshots and TalkBack focus traversal. Audible status announcements remain NOT RUN and await human verification; the task remains unchecked. See `docs/evidence/ui-redesign/README.md`. The native classification proof’s initial setup failure was corrected and rerun successfully without production sync changes.
+
+Scoped handoff: https://github.com/Xheghun/Temporada/pull/15 (draft). Local checks and Android evidence are recorded; task 9.3 remains open pending the user’s offered audible TalkBack check. Hosted CI is separate from local verification. No merge or release performed.
