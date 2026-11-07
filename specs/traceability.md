@@ -29,18 +29,18 @@ Planning artifacts: requirements, architecture, data-model, sync-engine, api-con
 
 ## Exact task ownership
 
-Each SDD task appears in exactly one active change checklist; the central change index is [tasks.md](tasks.md). Feature PR handoff tasks are local to each change. Programme reference tasks are historical prose, not active progress boxes. No whole-app apply target remains.
+Each SDD task appears in exactly one change checklist, active or archived; the central change index is [tasks.md](tasks.md). Feature PR handoff tasks are local to each change. Programme reference tasks are historical prose, not active progress boxes. No whole-app apply target remains.
 
-- [project-scaffold](../openspec/changes/project-scaffold/tasks.md): SDD-001, SDD-002, SDD-003, SDD-018.
-- [mock-api](../openspec/changes/mock-api/tasks.md): SDD-004, SDD-005.
-- [persistent-outbox](../openspec/changes/persistent-outbox/tasks.md): SDD-006, SDD-007.
-- [offline-sync](../openspec/changes/offline-sync/tasks.md): SDD-008, SDD-009, SDD-010.
-- [worker-authentication](../openspec/changes/worker-authentication/tasks.md): SDD-011.
-- [home-and-terms](../openspec/changes/home-and-terms/tasks.md): SDD-012.
-- [document-corrections](../openspec/changes/document-corrections/tasks.md): SDD-013.
-- [document-capture](../openspec/changes/document-capture/tasks.md): SDD-014.
-- [language-and-accessibility](../openspec/changes/language-and-accessibility/tasks.md): SDD-015.
-- [offline-integration](../openspec/changes/offline-integration/tasks.md): SDD-016, SDD-017, SDD-019.
+- [project-scaffold](../openspec/changes/archive/2026-11-07-project-scaffold/tasks.md): SDD-001, SDD-002, SDD-003, SDD-018.
+- [mock-api](../openspec/changes/archive/2026-11-07-mock-api/tasks.md): SDD-004, SDD-005.
+- [persistent-outbox](../openspec/changes/archive/2026-11-07-persistent-outbox/tasks.md): SDD-006, SDD-007.
+- [offline-sync](../openspec/changes/archive/2026-11-07-offline-sync/tasks.md): SDD-008, SDD-009, SDD-010.
+- [worker-authentication](../openspec/changes/archive/2026-11-07-worker-authentication/tasks.md): SDD-011.
+- [home-and-terms](../openspec/changes/archive/2026-11-07-home-and-terms/tasks.md): SDD-012.
+- [document-corrections](../openspec/changes/archive/2026-11-07-document-corrections/tasks.md): SDD-013.
+- [document-capture](../openspec/changes/archive/2026-11-07-document-capture/tasks.md): SDD-014.
+- [language-and-accessibility](../openspec/changes/archive/2026-11-07-language-and-accessibility/tasks.md): SDD-015.
+- [offline-integration](../openspec/changes/archive/2026-11-07-offline-integration/tasks.md): SDD-016, SDD-017, SDD-019.
 - [submission-documentation](../openspec/changes/submission-documentation/tasks.md): SDD-020, SDD-021.
 
 Mock-api: SDD-004/005 implementation evidence for R-API and the backend portions of M3/M4/M6/M7/M8/M10 is in docs/evidence/mock-api.md. Mobile acceptance for those invariants is not complete. Scaffold PR #1 was human-reviewed/merged before this branch; no subsequent feature is started.
