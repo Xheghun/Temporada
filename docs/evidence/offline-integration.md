@@ -38,3 +38,13 @@ No application defect was found in the executed scenarios, so no product logic w
 NOT RUN: iOS, Android 9/2GB performance, TalkBack speech/focus traversal, physical-device camera quality, signed/EAS/store builds and real backend integration. Expo Go execution and JavaScript export do not prove release-binary behavior. Recordings A/B and original-assessment comparison remain incomplete; no human recording or release approval is claimed. Mock behavior proves this test contract, not production security or guaranteed background delivery.
 
 PR: https://github.com/Xheghun/Temporada/pull/11. Local work stops at this scoped handoff; hosted CI and human review are separate.
+
+## iOS startup follow-up
+
+2026-11-06 UTC: Expo Go installed and launched on iPhone 17 Pro / iOS 26.5. Metro compiled the iOS entry (1,562 modules), iOS export to `/private/tmp/temporada-ios-export` passed, and the native app database initialized at schema v3 with English and zero cached workers. No application code changed. Sign-in, worker selection and offline/media flows remain NOT RUN: the computer-use tool rejected Simulator access twice, including after the user requested permission. No screenshot evidence or successful interactive test is claimed. PR #11 hosted validation passed at commit 625dfe6 (run 42312466107).
+
+### Expanded iOS checks — 2026-11-07 UTC
+
+Using the React Native guidance, a fresh isolated mock on port 3009 and preserved prior resolved mobile records, the following passed through Simulator UI plus read-only native SQLite/file inspection: English/Spanish switching; backend-unreachable enqueue and force-stop/reopen with original IDs; private JPEG 822,983 bytes with matching SHA-256 before/after restart; stale v2 rejection without automatic acceptance followed by successful explicit v3; DS-160 dropped response with two attempts and Pending Review; forced 413 with retained bytes and an explicit new-ID replacement; persisted 500 retries followed by Pending Review. No application logic changed and no new screenshot set was added.
+
+The outage used a paused localhost server, **not** an iOS airplane-mode test. The camera UI opened but did not produce a capture in Simulator; it was cancelled and gallery selection succeeded. Physical-camera capture remains unverified. Carla’s correction reason was visible and a new passport action was saved, but Computer Use then returned `cgWindowNotFound`. Worker-switch isolation, expired-session reauthentication, native 422, review-versus-replay and device reboot were not completed on iOS. The isolated backend was restored; queued intent was not deleted. Verification stopped at the cumulative coding hard limit rather than claiming these remaining checks passed. Android’s executed evidence remains unchanged.
