@@ -1,6 +1,6 @@
 # Requirements
 
-Status: scaffold implemented and locally verified only; see docs/evidence/scaffold-progress.md. Worker features remain proposed and unverified.
+Status: worker features are implemented; all eight Android scenarios and a partial iOS run have dated integration evidence. Recording, release and remaining device/accessibility obligations remain incomplete. See docs/evidence/offline-integration.md and docs/recordings.md.
 Source: user-supplied master task, 2026-11-06. Original assessment not present; compare when available and record discrepancies. OpenSpec capability owners are split across the changes in tasks.md: mock-worker-api, offline-intent, offline-delivery, worker-identity, worker-home-and-terms, document-review, document-capture and worker-language. Cross-cutting assessment/governance requirements remain in this document and the programme reference.
 
 | ID | Contract | Priority |
