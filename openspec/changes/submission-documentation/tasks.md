@@ -11,7 +11,7 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 
 ## 2. PR handoff
 
-- [ ] 2.1 Prepare only the `submission-documentation` PR on `chore/SDD-020-submission-documentation` with relevant requirement links, executed check results, scoped documentation and explicit limitations; verify changed files remain in scope and record PR URL or remote/reviewer blocker. Stop here without implementing another change.
+- [x] 2.1 Prepare only the `submission-documentation` PR on `chore/SDD-020-submission-documentation` with relevant requirement links, executed check results, scoped documentation and explicit limitations; verify changed files remain in scope and record PR URL or remote/reviewer blocker. Stop here without implementing another change.
 
 ## Workflow follow-up
 
@@ -21,4 +21,6 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 
 Apply-time status: PRs #11/#12 are merged. User confirmed no recordings exist (2026-11-07). SDD-021 remains incomplete; its written outline/status cannot substitute for real footage. This documentation-only stage does not reset the 299.91-minute coding ledger or rerun application verification.
 
-SDD-020 checks: documentation formatting and strict OpenSpec validation passed; 46 local Markdown link targets exist; architecture answers are 120/115/117/131 words, DECISIONS 1,392 words, PROCESS 710 words and release plan 249 words. Claims were reconciled against existing integration/source evidence. No application test/build/emulator run was added. SDD-021 written outline/status is prepared, but both actual recordings remain absent.
+SDD-020 checks: documentation formatting and strict OpenSpec validation passed; 47 local Markdown link targets exist; architecture answers are 120/115/117/131 words, DECISIONS 1,392 words, PROCESS 710 words and release plan 249 words. Claims were reconciled against existing integration/source evidence. No application test/build/emulator run was added. SDD-021 written outline/status is prepared, but both actual recordings remain absent.
+
+PR handoff: https://github.com/Xheghun/Temporada/pull/13. Written submission and scoped handoff are complete; SDD-021 remains unchecked because no recordings exist. Hosted CI/human review are separate. Do not archive this change as complete or infer recording acceptance from this PR.
