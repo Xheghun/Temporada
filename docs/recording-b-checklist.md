@@ -14,3 +14,7 @@ Capture checklist:
 - Save original capture; note date, task/change/commit and file location.
 
 SDD-021 handles final editing, duration, narration and artifact verification. Missed footage cannot be recreated and labeled as a genuine session. Recordings A/B remain incomplete until real artifacts exist.
+
+## Subsequent SDD-022 session preparation
+
+Prepared before UI source edits. Capture the actual redesign prompt, shared-component changes, real tests, emulator inspection and PR handoff. Use fictional records and exclude credentials. Human capture availability is unconfirmed; no footage or human review is claimed. This session cannot replace missing footage from the original assessment.

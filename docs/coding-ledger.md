@@ -90,3 +90,17 @@ iOS expanded verification: conservatively 2026-11-07T00:00:00+00:00 to 2026-11-0
 Submission-documentation: work after the 299.91-minute cutoff is documentation/recording preparation only, outside the assessment coding budget. Existing results are reconciled; no application coding, manual app verification, build or new application test run is performed. Recording A/B absence confirmed by the user; SDD-021 stays incomplete. Documentation formatting, links, answer word limits and OpenSpec metadata are checked separately.
 
 Documentation handoff: https://github.com/Xheghun/Temporada/pull/13. Word limits, local links, Markdown formatting and strict OpenSpec validation checked; no new application coding/verification. Coding total remains 299.91 minutes. SDD-021 is incomplete because both recordings are absent.
+
+## Subsequent work — SDD-022 UI redesign
+
+This separately requested redesign is outside the original assessment. The original 299.91-minute endpoint above is unchanged. Additional implementation/verification must be disclosed if submitted with the assessment.
+
+Implementation preparation began 2026-11-07T12:33:04.271301+00:00. Base: reviewed main `065cc9d` (PR #14 merged); branch `feature/SDD-022-temporada-mobile-ui-redesign`. Tests/builds/device checks for this change: NOT RUN. Genuine human capture is unconfirmed; no recording evidence claimed.
+
+Subsequent SDD-022 implementation/verification checkpoint: 2026-11-07T13:32:33.401976+00:00. The preparation window began at 2026-11-07T12:33:04Z; elapsed time through this checkpoint is 59.49 minutes, conservatively including interruptions, tool/network waits and verification. This is additional work, not part of the original 299.91-minute assessment.
+
+Executed: 160 automated tests (58 Jest, 5 architecture, 12 mock API, 85 persistence), typecheck/lint/format/architecture/config, local-map Expo dependency check, Expo Doctor 20/20 and Android JavaScript export. Actual Android 360dp/100–130% English/Spanish inspection covered auth, shared selection, cached/no-cache Home, My Job, terms, gallery capture, offline/restart/file digest, 413 replacement, 500 retry, lost-response review replay, stale v2/explicit v3, worker switch/logout/reauthentication and eventual delivery. A native classification proof initially used the wrong replacement argument, was corrected, and passed against real native SQLite/files/HTTP; failed proof records were retained. No production sync/file policy changed. Safe-area and Spanish tab-width issues found on-device were corrected.
+
+TalkBack service/focus was exercised; audible status announcement quality remains NOT RUN pending human verification. iOS, physical-camera quality, low-end profiling, signed release binaries and genuine human recording remain NOT RUN. Evidence is in docs/evidence/ui-redesign/README.md. PR publication/CI/human review are recorded separately; no review or recording is invented.
+
+Final presentation review follow-up: capture’s saved feedback now follows actual document delivery/review state instead of retaining waiting-to-send after acknowledgment. Typecheck, lint, architecture and targeted capture/route/accessibility tests pass; the final full suite passes 161 tests (59 Jest + 5 architecture + 12 mock + 85 persistence), and Android export passes again. This is subsequent work only. Spoken TalkBack verification remains pending the user’s offered manual check.

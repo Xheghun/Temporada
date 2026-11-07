@@ -11,3 +11,9 @@ Terms renders the cached localized summary and version. Confirmation captures th
 English is the initial language when no preference exists (SDD-015 user amendment); existing saved choices are preserved. Home toggles Spanish/English; schema v3 stores the app-wide preference without identity data, tokens or queue deletion. Migration/reopen coverage verifies pending intent survives the upgrade. Layouts scroll and avoid fixed content heights. The complete accessibility audit belongs to its later change.
 
 See [executed verification](evidence/home-and-terms.md). Camera, document status/corrections and full integration scenarios remain separate changes.
+
+## Subsequent SDD-022 redesign
+
+Home replaces the static timeline with a single state-derived next step and catalog rows. Terms needing confirmation precede required corrections, missing required documents and other permanent failures. Pending local work and staff review are reassurance states, not duplicate worker tasks. Unknown/refresh-needed state never implies completion. Home projects document and terms facts from the same atomic cache read and uses the actual selected display name with a neutral greeting. Primary Home/Documents/My Job navigation retains existing route paths and guards; secondary screens use the existing Stack.
+
+My Job presents only cached employer, worksite, order reference and season dates; date-only formatting cannot shift a day across timezones. Terms explicitly describes its content as a summary, preserves displayed-version callbacks and hides stale history behind an accessible disclosure. Existing offline, stale-version and explicit failed-action replacement tests remain intact. Ten new priority/job tests plus existing Home/terms presentation tests, typecheck, lint and architecture checks passed; new native evidence is recorded separately.

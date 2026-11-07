@@ -1,6 +1,6 @@
 # Independently applied change index
 
-The original whole-app change has been split. Its planning provenance is preserved under [programme/](programme/design.md), outside active OpenSpec changes; it is not an apply target and has not been completed or archived. The ten completed implementation changes are archived under `openspec/changes/archive/2026-11-07-*`. Their current capability specifications live in `openspec/specs/`. Only `submission-documentation` remains active. Each change retains its original checklist, branch and PR. **Apply only the explicitly named active change.**
+The original whole-app change has been split. Its planning provenance is preserved under [programme/](programme/design.md), outside active OpenSpec changes; it is not an apply target and has not been completed or archived. The ten completed implementation changes are archived under `openspec/changes/archive/2026-11-07-*`. Their current capability specifications live in `openspec/specs/`. `submission-documentation` remains active with missing recordings; the separately requested subsequent redesign is identified below. Each change retains its original checklist, branch and PR. **Apply only the explicitly named active change.**
 
 The table preserves the original implementation order and review gates. Archived changes are historical records, not new apply targets. A separate explicit apply request and prerequisite human-reviewed merge are required for subsequent work. OpenSpec does not enforce cross-change prerequisites itself; verify them before coding. If invoked without a name, select explicitly rather than applying all active changes.
 
@@ -25,3 +25,7 @@ One cumulative coding ledger targets 240 minutes, with maximum 60-minute critica
 Recording B preparation/scheduling belongs to project-scaffold (SDD-001), capture occurs during genuine implementation, final editing/verification belongs to submission-documentation (SDD-021). Coding on camera counts. Human recordings and approvals are never fabricated.
 
 PR descriptions state behavior/problem, requirements, significant decisions, actual check results/Android evidence and risks without duplicating the diff. Record PR/CI/review/merge status separately. Current status: feature/integration PRs #1–11, iOS evidence PR #12 and submission-documentation PR #13 are merged. The ten completed implementation/integration changes are archived, with eight consolidated capability specifications. All eight Android scenarios and partial iOS results are recorded. Submission documentation remains active because recordings A/B are absent and SDD-021 remains incomplete; its merged documentation PR does not establish recording completion.
+
+## Subsequent work outside the original assessment
+
+SDD-022 [Temporada UI redesign](../openspec/changes/temporada-mobile-ui-redesign/tasks.md) uses `feature/SDD-022-temporada-mobile-ui-redesign`, based on reviewed main after PR #14 (merge `065cc9d`). This additional implementation and verification is outside the original 299.91-minute assessment record. It does not complete missing recordings or apply submission-documentation.

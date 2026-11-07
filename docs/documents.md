@@ -17,3 +17,7 @@ The caller must supply verified durable private image bytes/digest (M7). This sc
 Spanish/English resources cover app-owned statuses, errors, history and accessibility controls. Server correction reasons remain verbatim. Refresh failures do not hide cached history. Worker switch clears the view immediately and ignores late reads from the old generation.
 
 See [executed verification](evidence/document-corrections.md).
+
+## Subsequent SDD-022 presentation
+
+Documents now uses divider-separated rows, explicit sending/retry feedback and collapsed per-document history. A known staff decision remains visible independently of pending/failed delivery; reasons remain verbatim. The count means current required submissions delivered for staff review, not approval: local pending/failed replacements and historical submissions do not count, while delivered correction requests do. This definition is displayed beside the count. Route guards and expected submission/generation capture parameters are unchanged. Targeted bilingual/presentation tests pass; native evidence is recorded separately.
