@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { BackHandler, Pressable, Text } from 'react-native';
 import { Redirect, Stack } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,6 +26,14 @@ export default function Verify() {
     defaultValues: { otp: '' },
     resolver: zodResolver(otpFormSchema),
   });
+  useEffect(() => {
+    if (state.phase !== 'code_sent') return;
+    const listener = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (!state.busy) void auth.perform(() => auth.logout());
+      return true;
+    });
+    return () => listener.remove();
+  }, [auth, state.phase, state.busy]);
   if (state.phase === 'ready') return <Redirect href="/(worker)/home" />;
   if (state.phase === 'worker_selection')
     return <Redirect href="/(auth)/select-worker" />;
@@ -31,10 +41,29 @@ export default function Verify() {
   return (
     <AuthPage>
       <Stack.Screen
-        options={{ title: translate('verifyTitle'), headerBackVisible: false }}
+        options={{
+          title: '',
+          headerBackVisible: false,
+          headerLeft: () => (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={translate('ui.back')}
+              accessibilityState={{ disabled: state.busy }}
+              disabled={state.busy}
+              onPress={() => {
+                void auth.perform(() => auth.logout());
+              }}
+              style={{ minHeight: 48, minWidth: 48, justifyContent: 'center' }}
+            >
+              <Text>{translate('ui.back')}</Text>
+            </Pressable>
+          ),
+        }}
       />
       <Heading>{translate('verifyTitle')}</Heading>
-      <Body>{translate('verifyIntro')}</Body>
+      <Body>
+        {translate('verifyIntro', { phone: state.verificationPhone })}
+      </Body>
       <Controller
         control={control}
         name="otp"

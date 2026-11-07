@@ -1,4 +1,10 @@
-import { ActivityIndicator, Text, View, StyleSheet } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  Text,
+  View,
+  StyleSheet,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
   AuthPage,
@@ -9,6 +15,14 @@ import {
 } from '../../../design-system/components/auth-controls';
 import type { AssignmentState } from '../assignment-service';
 import { assignmentFacts } from '../domain/view-state';
+import {
+  SectionHeading,
+  ListRow,
+  Disclosure,
+  StatusIndicator,
+  WorkerAvatar,
+} from '../../../design-system/components/worker-controls';
+import type { NextAction } from '../domain/next-action';
 import { tokens } from '../../../design-system/tokens';
 export function Card({ children }: { children: React.ReactNode }) {
   return <View style={styles.card}>{children}</View>;
@@ -29,7 +43,7 @@ export function CacheState({
 }) {
   const { t: translate } = useTranslation();
   if (
-    state.loading ||
+    (!state.data?.assignment && state.loading) ||
     (!state.data?.assignment &&
       state.online &&
       !state.data?.refreshError &&
@@ -60,160 +74,122 @@ export function HomeContent({
   workerName,
   onTerms,
   onRefresh,
-  onLanguage,
-  onSwitch,
-  onLogout,
-  shared,
   onDocuments,
+  onJob,
+  onProfile,
+  nextAction = 'refresh',
+  documentRows = [],
+  footer,
 }: {
   state: AssignmentState;
   workerName: string;
   onTerms(): void;
   onRefresh(): void;
-  onLanguage(): void;
-  onSwitch(): void;
-  onLogout(): void;
-  shared: boolean;
   onDocuments?: (() => void) | undefined;
+  onJob?: (() => void) | undefined;
+  onProfile?: (() => void) | undefined;
+  nextAction?: NextAction;
+  documentRows?: { title: string; status: string }[];
+  footer?: React.ReactNode;
 }) {
-  const { t: translate, i18n } = useTranslation();
-  const data = state.data,
-    assignment = data?.assignment,
-    facts = data ? assignmentFacts(data) : null;
-  const locale = i18n.resolvedLanguage === 'en' ? 'en-US' : 'es-MX';
+  const { t: translate } = useTranslation();
+  const assignment = state.data?.assignment;
+  const needsDocuments = ['correction', 'missing', 'failed'].includes(
+    nextAction,
+  );
+  const onNext =
+    nextAction === 'terms'
+      ? onTerms
+      : needsDocuments
+        ? onDocuments
+        : nextAction === 'refresh'
+          ? onRefresh
+          : undefined;
   return (
-    <AuthPage>
-      <Heading>{workerName}</Heading>
-      <Action
-        secondary
-        label={translate('home.changeLanguage')}
-        onPress={onLanguage}
-      />
-      <Status
-        text={translate(
-          state.online ? 'home.connectionAvailable' : 'home.offline',
-        )}
-      />
-      {assignment && facts ? (
+    <AuthPage
+      footer={footer}
+      headerTrailing={
+        onProfile ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={translate('ui.profile')}
+            onPress={onProfile}
+          >
+            <WorkerAvatar name={workerName} />
+          </Pressable>
+        ) : null
+      }
+    >
+      <Heading>{translate('ui.greeting', { name: workerName })}</Heading>
+      <Body>{translate('ui.subtitle')}</Body>
+      {!state.online ? (
+        <StatusIndicator>{translate('home.offline')}</StatusIndicator>
+      ) : null}
+      <ErrorNotice code={state.error} />
+      {assignment ? (
         <>
-          <Card>
-            <Text style={styles.overline}>{translate('home.assignment')}</Text>
-            <Heading>{assignment.assignment.employer}</Heading>
-            <Body>
-              {translate('home.order', { id: assignment.assignment.orderId })}
-            </Body>
-            <Body>{assignment.assignment.worksite}</Body>
-            <Body>
-              {translate('home.season', {
-                start: formatSeasonDate(
-                  assignment.assignment.seasonStart,
-                  locale,
-                ),
-                end: formatSeasonDate(assignment.assignment.seasonEnd, locale),
-              })}
-            </Body>
-          </Card>
-          <Card>
-            <Text style={styles.section}>{translate('home.syncTitle')}</Text>
-            <Status
-              text={translate('home.pending', { count: facts.pendingCount })}
-            />
-            <Body>
-              {translate('home.attention', { count: facts.attentionCount })}
-            </Body>
-            {data.cachedAt !== null ? (
-              <Body>
-                {translate('home.cachedAt', {
-                  date: new Intl.DateTimeFormat(locale, {
-                    dateStyle: 'medium',
-                    timeStyle: 'short',
-                  }).format(new Date(data.cachedAt)),
-                })}
-              </Body>
-            ) : null}
-            {data.refreshNeeded ? (
-              <Body>
-                {translate(
-                  data.refreshError
-                    ? 'home.refreshFailed'
-                    : 'home.refreshPending',
+          <View style={styles.featured}>
+            <Text accessibilityRole="header" style={styles.featuredTitle}>
+              {translate(`ui.next.${nextAction}`)}
+            </Text>
+            <Text style={styles.featuredBody}>
+              {translate(
+                needsDocuments
+                  ? 'ui.next.documentsHint'
+                  : `ui.next.${nextAction}Hint`,
+              )}
+            </Text>
+            {onNext ? (
+              <Action
+                label={translate(
+                  nextAction === 'terms'
+                    ? 'ui.reviewTerms'
+                    : needsDocuments
+                      ? 'home.openDocuments'
+                      : 'home.refresh',
                 )}
-              </Body>
+                onPress={onNext}
+                busy={nextAction === 'refresh' && state.refreshing}
+                highlighted
+                secondary
+              />
             ) : null}
-            <ErrorNotice code={state.error} />
-            <Action
-              secondary
-              label={translate('home.refresh')}
-              busy={state.refreshing}
-              onPress={onRefresh}
+          </View>
+          <View>
+            <SectionHeading>{translate('home.documents')}</SectionHeading>
+            {documentRows.map((document, index) => (
+              <ListRow
+                key={index}
+                title={document.title}
+                detail={document.status}
+                onPress={onDocuments}
+              />
+            ))}
+            {!onDocuments ? (
+              <Body>{translate('home.documentsUnavailable')}</Body>
+            ) : null}
+          </View>
+          <View>
+            <SectionHeading>{translate('ui.job')}</SectionHeading>
+            <ListRow
+              title={assignment.assignment.employer}
+              detail={assignment.assignment.worksite}
+              onPress={onJob}
             />
-          </Card>
-          <Card>
-            <Text style={styles.section}>{translate('home.terms')}</Text>
+          </View>
+          {state.data?.refreshNeeded ? (
             <Body>
-              {translate('terms.version', {
-                version: assignment.terms.termsVersionId,
-              })}
+              {translate(
+                state.data.refreshError
+                  ? 'home.refreshFailed'
+                  : 'home.refreshPending',
+              )}
             </Body>
-            <Status text={translate(`terms.status.${facts.termsStatus}`)} />
-            <Body>
-              {
-                assignment.terms.summary[
-                  i18n.resolvedLanguage === 'en' ? 'en' : 'es'
-                ]
-              }
-            </Body>
-            <Action label={translate('home.openTerms')} onPress={onTerms} />
-          </Card>
-          <Card>
-            <Text style={styles.section}>{translate('home.timeline')}</Text>
-            <Body>{translate('home.sessionFact')}</Body>
-            <Body>{translate('home.assignmentFact')}</Body>
-            <Body>
-              {translate('home.termsFact', {
-                status: translate(`terms.status.${facts.termsStatus}`),
-              })}
-            </Body>
-            <Body>
-              {translate('home.catalogFact', {
-                count: assignment.requiredDocuments.filter(
-                  (document) => document.required,
-                ).length,
-              })}
-            </Body>
-          </Card>
+          ) : null}
         </>
       ) : (
         <CacheState state={state} onRefresh={onRefresh} />
       )}
-      <Card>
-        <Text style={styles.section}>{translate('home.documents')}</Text>
-        <Body>
-          {translate(
-            onDocuments
-              ? 'home.documentsAvailable'
-              : 'home.documentsUnavailable',
-          )}
-        </Body>
-        <Action
-          disabled={!onDocuments}
-          secondary
-          label={translate(
-            onDocuments ? 'home.openDocuments' : 'home.documentsSoon',
-          )}
-          onPress={onDocuments ?? onTerms}
-        />
-      </Card>
-
-      {shared ? (
-        <Action
-          secondary
-          label={translate('switchWorker')}
-          onPress={onSwitch}
-        />
-      ) : null}
-      <Action secondary label={translate('logout')} onPress={onLogout} />
-      <Body>{translate('logoutHint')}</Body>
     </AuthPage>
   );
 }
@@ -273,6 +249,7 @@ export function TermsContent({
         })}
       </Body>
       <Status text={translate(`terms.status.${facts.termsStatus}`)} />
+      <Body>{translate('ui.termsExplanation')}</Body>
       <Body>{assignment.terms.summary[language]}</Body>
       {facts.needsReconfirmation ? (
         <Body>{translate('terms.reconfirm')}</Body>
@@ -280,28 +257,10 @@ export function TermsContent({
       {facts.termsStatus === 'update_required' ? (
         <Body>{translate('terms.updateRequired')}</Body>
       ) : null}
-      {facts.termsStatus === 'pending_sync' ? (
-        <Body>{translate('terms.pendingHint')}</Body>
-      ) : null}
       {facts.termsStatus === 'failed' || facts.replacementActionId ? (
         <Body>{translate('terms.failedHint')}</Body>
       ) : null}
       <ErrorNotice code={state.error} />
-      {data.actions.some(
-        (action) =>
-          action.id === state.savedActionId &&
-          action.payload.kind === 'terms_acceptance' &&
-          action.payload.termsVersionId === assignment.terms.termsVersionId &&
-          !['stale', 'failed_permanent'].includes(action.status),
-      ) ? (
-        <Text
-          accessibilityRole="alert"
-          accessibilityLiveRegion="polite"
-          style={styles.status}
-        >
-          {translate('terms.saved')}
-        </Text>
-      ) : null}
       <Action
         label={translate(
           facts.replacementActionId
@@ -333,36 +292,35 @@ export function TermsContent({
         />
       ) : null}
       {staleVersions.length ? (
-        <Card>
-          <Text style={styles.section}>{translate('terms.history')}</Text>
+        <Disclosure
+          key={`${state.workerId}:${state.generation}`}
+          title={translate('terms.history')}
+        >
           {staleVersions.map((version) => (
             <Body key={version}>
               {translate('terms.staleHistory', { version })}
             </Body>
           ))}
-        </Card>
+        </Disclosure>
       ) : null}
       <Action secondary label={translate('terms.backHome')} onPress={onHome} />
     </AuthPage>
   );
 }
-function formatSeasonDate(value: string, locale: string) {
-  const parsed = new Date(value + 'T00:00:00Z');
-  return Number.isNaN(parsed.valueOf())
-    ? value
-    : new Intl.DateTimeFormat(locale, {
-        dateStyle: 'medium',
-        timeZone: 'UTC',
-      }).format(parsed);
-}
 const styles = StyleSheet.create({
+  featured: {
+    padding: 24,
+    gap: 16,
+    borderRadius: 12,
+    backgroundColor: tokens.colors.primary,
+  },
+  featuredTitle: { fontSize: 22, fontWeight: '700', color: '#FFFFFF' },
+  featuredBody: { fontSize: 16, lineHeight: 24, color: '#FFFFFF' },
   card: {
     gap: 12,
     padding: 16,
-    borderWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: tokens.colors.border,
-    borderRadius: 12,
-    backgroundColor: tokens.colors.surface,
   },
   section: { fontSize: 21, fontWeight: '700', color: tokens.colors.text },
   overline: { fontSize: 16, fontWeight: '600', color: tokens.colors.muted },

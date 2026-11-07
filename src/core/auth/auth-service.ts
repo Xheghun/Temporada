@@ -29,6 +29,7 @@ export class AuthError extends Error {
   }
 }
 export interface AuthSnapshot {
+  verificationPhone: string | null;
   phase: 'booting' | 'signed_out' | 'code_sent' | 'worker_selection' | 'ready';
   workers: readonly WorkerIdentity[];
   selectedWorker: WorkerIdentity | null;
@@ -86,6 +87,7 @@ export class AuthService implements SessionProvider {
   private epoch = 0;
   private snapshot: AuthSnapshot = {
     phase: 'booting',
+    verificationPhone: null,
     workers: [],
     selectedWorker: null,
     busy: true,
@@ -126,6 +128,7 @@ export class AuthService implements SessionProvider {
     const workers = this.record?.workers ?? [];
     this.snapshot = {
       phase,
+      verificationPhone: phase === 'code_sent' ? this.phone : null,
       busy,
       error,
       workers,

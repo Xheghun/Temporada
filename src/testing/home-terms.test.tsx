@@ -56,18 +56,17 @@ test('Home shows cached assignment, offline state and explicit unavailable docum
       workerName="Ana López"
       onTerms={() => {}}
       onRefresh={() => {}}
-      onLanguage={() => {}}
-      onSwitch={() => {}}
-      onLogout={() => {}}
-      shared={false}
     />,
   );
   expect(screen.getByText('Valle Verde Farms')).toBeTruthy();
-  expect(screen.getByText(/JO-2026-0142/)).toBeTruthy();
-  expect(screen.getByText(i18n.t('home.offline'))).toBeTruthy();
   expect(
-    screen.getByRole('button', { name: i18n.t('home.documentsSoon') }),
-  ).toBeDisabled();
+    screen.getByText(i18n.t('ui.greeting', { name: 'Ana López' })),
+  ).toBeTruthy();
+  expect(screen.getByText(i18n.t('home.offline'))).toBeTruthy();
+  expect(screen.getByText(i18n.t('home.documentsUnavailable'))).toBeTruthy();
+  expect(
+    screen.queryByRole('button', { name: i18n.t('home.openDocuments') }),
+  ).toBeNull();
 });
 test('English and offline empty state explain how to recover', async () => {
   await i18n.changeLanguage('en');
@@ -178,3 +177,41 @@ for (const version of ['v2', 'v3']) {
     expect(onConfirm).toHaveBeenCalledWith(version, 1, 'failed-v2');
   });
 }
+
+test('a delivered confirmation never keeps a waiting-to-send saved notice', async () => {
+  const value = state();
+  value.data!.assignment!.terms.serverAcceptanceStatus = 'accepted';
+  value.savedActionId = 'delivered-confirmation';
+  value.data!.actions = [
+    {
+      sequence: 1,
+      id: 'delivered-confirmation',
+      clientActionId: 'delivered-confirmation',
+      workerId: 'ana',
+      actionType: 'terms_acceptance',
+      payload: {
+        kind: 'terms_acceptance',
+        workerId: 'ana',
+        clientActionId: 'delivered-confirmation',
+        termsVersionId: 'v2',
+      },
+      fileUri: null,
+      status: 'delivered',
+      attemptCount: 1,
+      nextAttemptAt: 0,
+      lastErrorCode: null,
+      createdAt: 1,
+      updatedAt: 2,
+    },
+  ];
+  await render(
+    <TermsContent
+      state={value}
+      onConfirm={() => {}}
+      onRefresh={() => {}}
+      onHome={() => {}}
+    />,
+  );
+  expect(screen.getByText(i18n.t('terms.status.accepted'))).toBeTruthy();
+  expect(screen.queryByText(i18n.t('terms.saved'))).toBeNull();
+});

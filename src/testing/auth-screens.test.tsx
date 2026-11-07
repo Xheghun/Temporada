@@ -58,7 +58,9 @@ beforeEach(async () => {
 });
 test('Spanish phone validation prevents a request and valid form normalizes the phone', async () => {
   await render(<SignIn />);
-  await fireEvent.press(screen.getByRole('button', { name: 'Recibir código' }));
+  await fireEvent.press(
+    screen.getByRole('button', { name: i18n.t('requestCode') }),
+  );
   await waitFor(() =>
     expect(
       screen.getByText('Introduce un teléfono válido con el código del país.'),
@@ -69,7 +71,9 @@ test('Spanish phone validation prevents a request and valid form normalizes the 
     screen.getByLabelText('Número de teléfono'),
     '+52 55 1000 0001',
   );
-  await fireEvent.press(screen.getByRole('button', { name: 'Recibir código' }));
+  await fireEvent.press(
+    screen.getByRole('button', { name: i18n.t('requestCode') }),
+  );
   await waitFor(() =>
     expect(api.requestOtp).toHaveBeenCalledWith('+525510000001'),
   );
@@ -81,7 +85,7 @@ test('invalid OTP renders an actionable Spanish error and correct OTP selects An
     screen.getByLabelText('Código de verificación'),
     '000000',
   );
-  await fireEvent.press(screen.getByRole('button', { name: 'Continuar' }));
+  await fireEvent.press(screen.getByRole('button', { name: i18n.t('verify') }));
   await waitFor(() =>
     expect(
       screen.getByText(
@@ -93,7 +97,7 @@ test('invalid OTP renders an actionable Spanish error and correct OTP selects An
     screen.getByLabelText('Código de verificación'),
     '123456',
   );
-  await fireEvent.press(screen.getByRole('button', { name: 'Continuar' }));
+  await fireEvent.press(screen.getByRole('button', { name: i18n.t('verify') }));
   await waitFor(() => expect(mockAuth.current()?.workerId).toBe('ana'));
 });
 test('English picker shows authorized identities and selection never retains the old identity', async () => {
@@ -108,7 +112,7 @@ test('English picker shows authorized identities and selection never retains the
   await mockAuth.verify('123456');
   await i18n.changeLanguage('en');
   await render(<SelectWorker />);
-  expect(screen.getByText('Who is continuing?')).toBeTruthy();
+  expect(screen.getByText(i18n.t('pickTitle'))).toBeTruthy();
   expect(screen.queryByText('Ana López')).toBeNull();
   await fireEvent.press(
     screen.getByRole('button', { name: 'Continue as Carla Díaz' }),
@@ -139,4 +143,43 @@ test('identity view clears synchronously on worker switch; signed-out deep link 
   await render(<WorkerLayout />);
   expect(Redirect).toHaveBeenCalled();
   expect(Redirect.mock.calls[0][0].href).toBe('/(auth)/sign-in');
+});
+
+test('verification phone is memory-only and cleared after leaving verification', async () => {
+  await mockAuth.requestOtp('+525510000001');
+  expect(mockAuth.getSnapshot().verificationPhone).toBe('+525510000001');
+  await render(<Verify />);
+  expect(
+    screen.getByText(i18n.t('verifyIntro', { phone: '+525510000001' })),
+  ).toBeTruthy();
+  await mockAuth.verify('123456');
+  expect(mockAuth.getSnapshot().verificationPhone).toBeNull();
+});
+test('phone input survives a network failure and busy presses do not duplicate requests', async () => {
+  let rejectRequest: ((error: Error) => void) | undefined;
+  api.requestOtp = jest.fn(
+    () =>
+      new Promise<void>((_resolve, reject) => {
+        rejectRequest = reject;
+      }),
+  );
+  await render(<SignIn />);
+  await fireEvent.changeText(
+    screen.getByLabelText(i18n.t('phone')),
+    '+525510000001',
+  );
+  await fireEvent.press(
+    screen.getByRole('button', { name: i18n.t('requestCode') }),
+  );
+  await fireEvent.press(
+    screen.getByRole('button', { name: i18n.t('requestCode') }),
+  );
+  expect(api.requestOtp).toHaveBeenCalledTimes(1);
+  await act(async () => {
+    rejectRequest?.(new AuthError('network'));
+  });
+  expect(screen.getByLabelText(i18n.t('phone')).props.value).toBe(
+    '+525510000001',
+  );
+  expect(screen.getByText(i18n.t('errors.network'))).toBeTruthy();
 });

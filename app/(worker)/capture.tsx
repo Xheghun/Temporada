@@ -3,7 +3,11 @@ import { Linking } from 'react-native';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useCapture, CaptureContent } from '@/features/capture';
-import { useDocuments, documentViews } from '@/features/documents';
+import {
+  useDocuments,
+  documentViews,
+  submissionStatusKey,
+} from '@/features/documents';
 export default function Capture() {
   const params = useLocalSearchParams<{
     documentType: string;
@@ -48,6 +52,11 @@ export default function Capture() {
   return (
     <CaptureContent
       state={state}
+      savedStatus={
+        document?.current?.actionId === state.savedActionId
+          ? translate(submissionStatusKey(document?.current ?? null))
+          : undefined
+      }
       label={
         document?.label[i18n.resolvedLanguage === 'en' ? 'en' : 'es'] ??
         translate('capture.title')
@@ -58,7 +67,10 @@ export default function Capture() {
       onSave={() => {
         void service.save();
       }}
-      onBack={() => router.replace('/(worker)/documents')}
+      onBack={() => {
+        if (router.canGoBack()) router.back();
+        else router.replace('/(worker)/documents');
+      }}
       onSettings={() => {
         void Linking.openSettings().catch(() => service.settingsFailed());
       }}

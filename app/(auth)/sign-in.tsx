@@ -31,7 +31,7 @@ export default function SignIn() {
   return (
     <AuthPage>
       <Stack.Screen
-        options={{ title: translate('signIn'), headerBackVisible: false }}
+        options={{ title: translate('signIn'), headerShown: false }}
       />
       <Heading>{translate('welcome')}</Heading>
       <Body>{translate('intro')}</Body>
@@ -54,8 +54,6 @@ export default function SignIn() {
           />
         )}
       />
-      <Body>{translate('phoneHint')}</Body>
-      <ErrorNotice code={state.error} />
       <Action
         label={translate('requestCode')}
         busy={state.busy}
@@ -65,6 +63,10 @@ export default function SignIn() {
           })();
         }}
       />
+
+      <Body>{translate('phoneHint')}</Body>
+      <Body>{translate('ui.verificationHint')}</Body>
+      <ErrorNotice code={state.error} />
     </AuthPage>
   );
 }

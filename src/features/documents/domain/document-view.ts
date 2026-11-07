@@ -127,3 +127,44 @@ export function documentViews(data: WorkerViewData) {
     };
   });
 }
+
+export function documentPresentationFacts(
+  documents: ReturnType<typeof documentViews>,
+) {
+  return documents.map((document) => {
+    const current = document.current;
+    const isPending = ['queued', 'sending', 'retry_wait'].includes(
+      current?.delivery ?? '',
+    );
+    const hasPermanentFailure =
+      current?.delivery === 'failed_permanent' || current?.status === 'failed';
+    return {
+      required: document.required,
+      needsCorrection: current?.status === 'correction_requested' && !isPending,
+      isMissing: !current,
+      hasPermanentFailure,
+      isPending,
+      isApproved:
+        current?.status === 'approved' && !isPending && !hasPermanentFailure,
+      needsRefresh: current?.status === 'needs_refresh',
+      isSent:
+        !!current?.serverId &&
+        !isPending &&
+        !hasPermanentFailure &&
+        current.delivery !== 'superseded' &&
+        current.status !== 'needs_refresh',
+    };
+  });
+}
+export function submissionStatusKey(submission: SubmissionView | null): string {
+  // A known staff decision remains primary while delivery feedback is independent.
+  if (
+    submission?.status === 'approved' ||
+    submission?.status === 'correction_requested'
+  )
+    return `documents.status.${submission.status}`;
+  if (submission?.delivery === 'sending') return 'ui.sending';
+  if (submission?.delivery === 'retry_wait') return 'ui.retry';
+  if (submission?.delivery === 'queued') return 'ui.saved';
+  return `documents.status.${submission?.status ?? 'not_submitted'}`;
+}

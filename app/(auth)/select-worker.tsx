@@ -1,3 +1,7 @@
+import {
+  ListRow,
+  WorkerAvatar,
+} from '@/design-system/components/worker-controls';
 import { Redirect, Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useAuth, useAuthSnapshot } from '@/core/auth/auth-provider';
@@ -18,13 +22,17 @@ export default function SelectWorker() {
   return (
     <AuthPage>
       <Stack.Screen
-        options={{ title: translate('pickTitle'), headerBackVisible: false }}
+        options={{ title: translate('pickTitle'), headerShown: false }}
       />
       <Heading>{translate('pickTitle')}</Heading>
       <Body>{translate('pickIntro')}</Body>
       <ErrorNotice code={state.error} />
+      {state.busy ? <Body>{translate('busy')}</Body> : null}
+      {!state.workers.length ? <Body>{translate('ui.noWorkers')}</Body> : null}
       {state.workers.map((worker) => (
-        <Action
+        <ListRow
+          leading={<WorkerAvatar name={worker.displayName} />}
+          title={worker.displayName}
           key={worker.workerId}
           label={translate('selectWorker', { name: worker.displayName })}
           disabled={state.busy}
@@ -33,6 +41,7 @@ export default function SelectWorker() {
           }}
         />
       ))}
+      <Body>{translate('ui.workerSeparation')}</Body>
       <Action
         secondary
         label={translate('logout')}

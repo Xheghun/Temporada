@@ -119,6 +119,12 @@ export async function createWorkerRuntime() {
         auth.reportIssue('sync_unavailable');
     },
   });
+  async function setLanguage(language: 'en' | 'es') {
+    await database.run('UPDATE app_settings SET language=? WHERE id=1', [
+      language,
+    ]);
+    await i18n.changeLanguage(language);
+  }
   const assignment = new AssignmentService({
     enabled: () => homeEnabled,
     session: auth,
@@ -139,12 +145,7 @@ export async function createWorkerRuntime() {
       await persistence(session.workerId).requestRefresh();
       if (auth.isCurrent(session)) await engine.manualRetry();
     },
-    async setLanguage(language) {
-      await database.run('UPDATE app_settings SET language=? WHERE id=1', [
-        language,
-      ]);
-      await i18n.changeLanguage(language);
-    },
+    setLanguage,
   });
   const documents = new DocumentsService({
     enabled: () => documentsEnabled,
@@ -238,6 +239,7 @@ export async function createWorkerRuntime() {
   await auth.restore();
   return {
     auth,
+    setLanguage,
     assignment,
     documents,
     capture,

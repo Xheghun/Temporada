@@ -1,5 +1,6 @@
+import { StatusIndicator } from '../../../design-system/components/worker-controls';
 import { Image } from 'expo-image';
-import { ActivityIndicator, StyleSheet } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
   AuthPage,
@@ -16,8 +17,10 @@ export function CaptureContent({
   onSave,
   onBack,
   onSettings,
+  savedStatus,
 }: {
   state: CaptureState;
+  savedStatus?: string | undefined;
   label: string;
   onChoose(source: 'camera' | 'gallery'): void;
   onSave(): void;
@@ -41,7 +44,9 @@ export function CaptureContent({
       ) : null}
       {state.phase === 'saved' ? (
         <>
-          <Body>{translate('capture.saved')}</Body>
+          <StatusIndicator>
+            {savedStatus ?? translate('capture.saved')}
+          </StatusIndicator>
           <Action label={translate('capture.back')} onPress={onBack} />
         </>
       ) : (
@@ -58,9 +63,7 @@ export function CaptureContent({
                 accessibilityLabel={translate('capture.preview')}
                 style={styles.preview}
               />
-              <Body>
-                {translate('capture.bytes', { count: state.preview.byteSize })}
-              </Body>
+
               <Action
                 label={translate('capture.save')}
                 busy={state.phase === 'saving'}
@@ -68,11 +71,16 @@ export function CaptureContent({
                 onPress={onSave}
               />
             </>
-          ) : null}
+          ) : (
+            <View style={styles.empty}>
+              <Body>{translate('ui.photoEmpty')}</Body>
+            </View>
+          )}
           <Action
             label={translate(
               state.preview ? 'capture.retake' : 'capture.camera',
             )}
+            secondary={!!state.preview}
             disabled={busy || !state.selection}
             onPress={() => onChoose('camera')}
           />
@@ -100,5 +108,12 @@ export function CaptureContent({
   );
 }
 const styles = StyleSheet.create({
-  preview: { width: '100%', aspectRatio: 0.8, maxHeight: 440 },
+  empty: {
+    minHeight: 140,
+    padding: 24,
+    justifyContent: 'center',
+    backgroundColor: '#EFEEE5',
+    borderRadius: 8,
+  },
+  preview: { width: '100%', aspectRatio: 0.8, maxHeight: 280 },
 });

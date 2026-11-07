@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+import { Disclosure } from '../../../design-system/components/worker-controls';
 import { Text, View, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,7 +10,11 @@ import {
   ErrorNotice,
 } from '../../../design-system/components/auth-controls';
 import { tokens } from '../../../design-system/tokens';
-import { documentViews } from '../domain/document-view';
+import {
+  documentViews,
+  documentPresentationFacts,
+  submissionStatusKey,
+} from '../domain/document-view';
 import type { DocumentsState } from '../documents-service';
 import type { SubmissionView } from '../domain/document-view';
 export function DocumentsContent({
@@ -16,8 +22,10 @@ export function DocumentsContent({
   onRefresh,
   onHome,
   onCapture,
+  footer,
 }: {
   state: DocumentsState;
+  footer?: ReactNode;
   onRefresh(): void;
   onHome(): void;
   onCapture?:
@@ -28,13 +36,27 @@ export function DocumentsContent({
   const language = i18n.resolvedLanguage === 'en' ? 'en' : 'es';
   const documents = state.data ? documentViews(state.data) : [];
   return (
-    <AuthPage>
+    <AuthPage footer={footer}>
       <Heading>{translate('documents.title')}</Heading>
-      <Body>
-        {translate(state.online ? 'home.connectionAvailable' : 'home.offline')}
-      </Body>
+      <View style={{ gap: 8 }}>
+        <Body>{translate('ui.documentsIntro')}</Body>
+        {!state.online ? <Body>{translate('home.offline')}</Body> : null}
+        {state.data?.assignment ? (
+          <>
+            <Body>
+              {translate('ui.sentCount', {
+                sent: documentPresentationFacts(documents).filter(
+                  (document) => document.required && document.isSent,
+                ).length,
+                total: documents.filter((document) => document.required).length,
+              })}
+            </Body>
+            <Text style={styles.helper}>{translate('ui.sentDefinition')}</Text>
+          </>
+        ) : null}
+      </View>
       <ErrorNotice code={state.error} />
-      {state.loading ? (
+      {state.loading && !state.data?.assignment ? (
         <Body>{translate('home.loading')}</Body>
       ) : !state.data?.assignment ? (
         <Body>
@@ -53,23 +75,24 @@ export function DocumentsContent({
         </Body>
       ) : null}
       {documents.map((document) => (
-        <View key={document.documentType} style={styles.card}>
+        <View
+          key={`${state.workerId}:${state.generation}:${document.documentType}`}
+          style={styles.card}
+        >
           <Text accessibilityRole="header" style={styles.title}>
             {document.label[language]}
           </Text>
-          <Body>
+          <Text style={styles.helper}>
             {translate(
               document.required ? 'documents.required' : 'documents.optional',
             )}
-          </Body>
+          </Text>
           <Text
             selectable
             accessibilityLiveRegion="polite"
             style={styles.status}
           >
-            {translate(
-              `documents.status.${document.current?.status ?? 'not_submitted'}`,
-            )}
+            {translate(submissionStatusKey(document.current))}
           </Text>
           {document.current ? (
             <SubmissionDetails submission={document.current} />
@@ -80,6 +103,7 @@ export function DocumentsContent({
                 <Body>{translate('documents.captureUnavailable')}</Body>
               ) : null}
               <Action
+                secondary
                 disabled={!onCapture}
                 label={translate(
                   onCapture
@@ -100,10 +124,7 @@ export function DocumentsContent({
             </>
           ) : null}
           {document.history.length ? (
-            <View style={styles.history}>
-              <Text accessibilityRole="header" style={styles.title}>
-                {translate('documents.history')}
-              </Text>
+            <Disclosure title={translate('documents.history')}>
               {document.history.map((submission) => (
                 <View key={submission.id} style={styles.historyItem}>
                   <Text style={styles.status}>
@@ -112,7 +133,7 @@ export function DocumentsContent({
                   <SubmissionDetails submission={submission} />
                 </View>
               ))}
-            </View>
+            </Disclosure>
           ) : null}
         </View>
       ))}
@@ -122,7 +143,13 @@ export function DocumentsContent({
         busy={state.refreshing}
         onPress={onRefresh}
       />
-      <Action secondary label={translate('terms.backHome')} onPress={onHome} />
+      {!footer ? (
+        <Action
+          secondary
+          label={translate('terms.backHome')}
+          onPress={onHome}
+        />
+      ) : null}
     </AuthPage>
   );
 }
@@ -131,8 +158,17 @@ function SubmissionDetails({ submission }: { submission: SubmissionView }) {
   return (
     <>
       {submission.delivery &&
-      ['queued', 'sending', 'retry_wait'].includes(submission.delivery) ? (
-        <Body>{translate('documents.deliveryPending')}</Body>
+      ['queued', 'sending', 'retry_wait'].includes(submission.delivery) &&
+      ['approved', 'correction_requested'].includes(submission.status) ? (
+        <Body>
+          {translate(
+            submission.delivery === 'sending'
+              ? 'ui.sending'
+              : submission.delivery === 'retry_wait'
+                ? 'ui.retry'
+                : 'ui.saved',
+          )}
+        </Body>
       ) : null}
       {submission.delivery === 'failed_permanent' ? (
         <Body>
@@ -164,15 +200,15 @@ function SubmissionDetails({ submission }: { submission: SubmissionView }) {
   );
 }
 const styles = StyleSheet.create({
+  helper: { fontSize: 14, lineHeight: 21, color: tokens.colors.muted },
   card: {
-    padding: 16,
+    paddingVertical: 20,
     gap: 12,
-    borderWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: tokens.colors.border,
-    borderRadius: 12,
   },
-  title: { fontSize: 21, fontWeight: '700', color: tokens.colors.text },
-  status: { fontSize: 18, fontWeight: '700', color: tokens.colors.text },
+  title: { fontSize: 16, fontWeight: '700', color: tokens.colors.text },
+  status: { fontSize: 14, fontWeight: '700', color: tokens.colors.text },
   history: {
     gap: 12,
     borderTopWidth: 1,

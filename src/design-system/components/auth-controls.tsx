@@ -7,26 +7,65 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import type { ComponentProps, PropsWithChildren } from 'react';
+import type { ComponentProps, PropsWithChildren, ReactNode } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { tokens } from '../tokens';
-export function AuthPage({ children }: PropsWithChildren) {
+import { LanguageControl } from '../../core/i18n/language-control';
+export function AuthPage({
+  children,
+  footer,
+  headerTrailing,
+}: PropsWithChildren<{ footer?: ReactNode; headerTrailing?: ReactNode }>) {
   const insets = useSafeAreaInsets();
   return (
-    <ScrollView
-      style={styles.page}
-      contentInsetAdjustmentBehavior="automatic"
-      keyboardShouldPersistTaps="handled"
-      automaticallyAdjustKeyboardInsets
-      contentContainerStyle={[
-        styles.content,
-        { paddingBottom: Math.max(insets.bottom, 24) },
+    <View
+      style={[
+        styles.page,
+        { paddingTop: insets.top, paddingBottom: footer ? 0 : insets.bottom },
       ]}
     >
-      <Text style={styles.brand}>Temporada</Text>
-      <View style={styles.card}>{children}</View>
-    </ScrollView>
+      <ScrollView
+        style={styles.page}
+        contentInsetAdjustmentBehavior="automatic"
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: Math.max(16 - insets.top, 0),
+            paddingBottom: 24,
+          },
+        ]}
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 16,
+          }}
+        >
+          <Text style={styles.brand}>Temporada</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <LanguageControl />
+            {headerTrailing}
+          </View>
+        </View>
+        <View style={styles.stack}>{children}</View>
+      </ScrollView>
+      {footer ? (
+        <View
+          style={{
+            paddingHorizontal: 8,
+            paddingBottom: Math.max(insets.bottom, 8),
+            backgroundColor: tokens.colors.background,
+          }}
+        >
+          {footer}
+        </View>
+      ) : null}
+    </View>
   );
 }
 export function Heading({ children }: PropsWithChildren) {
@@ -49,12 +88,14 @@ export function Action({
   disabled = false,
   busy = false,
   secondary = false,
+  highlighted = false,
 }: {
   label: string;
   onPress(): void;
   disabled?: boolean;
   busy?: boolean;
   secondary?: boolean;
+  highlighted?: boolean;
 }) {
   return (
     <Pressable
@@ -67,6 +108,10 @@ export function Action({
       style={({ pressed }) => [
         styles.button,
         secondary && styles.secondary,
+        highlighted && {
+          backgroundColor: tokens.colors.highlighted,
+          borderWidth: 0,
+        },
         (disabled || busy) && { opacity: 0.65 },
         pressed &&
           !disabled &&
@@ -146,27 +191,19 @@ const styles = StyleSheet.create({
   brand: {
     color: tokens.colors.primary,
     fontSize: 22,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    fontWeight: '700',
   },
-  card: {
-    backgroundColor: tokens.colors.surface,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: tokens.colors.border,
-    padding: 24,
-    gap: 20,
-  },
-  heading: { color: tokens.colors.text, fontSize: 30, fontWeight: '700' },
-  body: { fontSize: 18, color: tokens.colors.muted, lineHeight: 27 },
-  label: { color: tokens.colors.text, fontSize: 17, fontWeight: '600' },
+  stack: { gap: 24 },
+  heading: { color: tokens.colors.text, fontSize: 28, fontWeight: '700' },
+  body: { fontSize: 16, color: tokens.colors.muted, lineHeight: 24 },
+  label: { color: tokens.colors.text, fontSize: 16, fontWeight: '600' },
   input: {
     minHeight: 56,
-    fontSize: 20,
+    fontSize: 18,
     color: tokens.colors.text,
     borderWidth: 1,
     borderColor: tokens.colors.muted,
-    borderRadius: 12,
+    borderRadius: 8,
     padding: 14,
     backgroundColor: '#FFFFFF',
   },
@@ -174,7 +211,7 @@ const styles = StyleSheet.create({
     minHeight: 56,
     padding: 16,
     backgroundColor: tokens.colors.primary,
-    borderRadius: 12,
+    borderRadius: 8,
     flexDirection: 'row',
     gap: 10,
     alignItems: 'center',
@@ -186,11 +223,11 @@ const styles = StyleSheet.create({
     borderColor: tokens.colors.primary,
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
     flexShrink: 1,
     textAlign: 'center',
   },
-  error: { color: tokens.colors.error, fontSize: 17, lineHeight: 25 },
+  error: { color: tokens.colors.error, fontSize: 16, lineHeight: 25 },
 });
