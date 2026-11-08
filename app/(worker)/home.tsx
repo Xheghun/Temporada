@@ -12,6 +12,7 @@ import {
   useAssignment,
   HomeContent,
   nextWorkerAction,
+  homeOverview,
 } from '@/features/assignment';
 import { PrimaryNavigation } from '@/design-system/components/primary-navigation';
 export default function Home() {
@@ -27,6 +28,10 @@ export default function Home() {
   return (
     <HomeContent
       state={state}
+      overview={homeOverview(
+        state.error === 'local_data_error' ? null : state.data,
+        documentsEnabled ? documentPresentationFacts(rows) : null,
+      )}
       workerName={identity.selectedWorker?.displayName ?? ''}
       nextAction={
         state.data

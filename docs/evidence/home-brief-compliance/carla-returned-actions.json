@@ -1,0 +1,51 @@
+{
+  "actions": [
+    {
+      "worker_id": "carla",
+      "client_action_id": "68215b3e-e14c-462b-b167-e6607b5e3366",
+      "action_type": "document_upload",
+      "status": "delivered",
+      "attempt_count": 1,
+      "last_error_code": null,
+      "payload": {
+        "kind": "document_upload",
+        "workerId": "carla",
+        "clientActionId": "68215b3e-e14c-462b-b167-e6607b5e3366",
+        "documentType": "passport",
+        "localSubmissionId": "68215b3e-e14c-462b-b167-e6607b5e3366",
+        "sha256": "d93cd2bb1a7f5e4f2b23f82baa7eab97e783635ee9c064881d91601746da9eb9",
+        "replacesSubmissionId": "seed-carla-passport"
+      },
+      "fileExists": true,
+      "fileBytes": 230,
+      "digestMatches": false
+    }
+  ],
+  "terms": [],
+  "documents": [
+    {
+      "worker_id": "carla",
+      "document_type": "passport",
+      "server_submission_id": "seed-carla-passport",
+      "server_status": "correction_requested",
+      "correction_reason": "Foto borrosa, vuelva a tomarla",
+      "server_revision": 1
+    },
+    {
+      "worker_id": "carla",
+      "document_type": "passport",
+      "server_submission_id": "c6f4c646-8561-4d73-b447-f6f899c6d5b8",
+      "server_status": "pending_review",
+      "correction_reason": null,
+      "server_revision": 5
+    },
+    {
+      "worker_id": "bruno",
+      "document_type": "passport",
+      "server_submission_id": "seed-bruno-passport",
+      "server_status": "approved",
+      "correction_reason": null,
+      "server_revision": 1
+    }
+  ]
+}

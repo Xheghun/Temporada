@@ -1,7 +1,7 @@
 # Requirements
 
 Status: worker features are implemented; all eight Android scenarios and a partial iOS run have dated integration evidence. Recording, release and remaining device/accessibility obligations remain incomplete. See docs/evidence/offline-integration.md and docs/recordings.md.
-Source: user-supplied master task, 2026-11-06. Original assessment not present; compare when available and record discrepancies. OpenSpec capability owners are split across the changes in tasks.md: mock-worker-api, offline-intent, offline-delivery, worker-identity, worker-home-and-terms, document-review, document-capture and worker-language. Cross-cutting assessment/governance requirements remain in this document and the programme reference.
+Source: user-supplied master task, 2026-11-06. The October 29, 2026 original assessment was subsequently supplied by the user; SDD-023 reconciles its Home contract below. Other audit findings remain separate. OpenSpec capability owners are split across the changes in tasks.md: mock-worker-api, offline-intent, offline-delivery, worker-identity, worker-home-and-terms, document-review, document-capture and worker-language. Cross-cutting assessment/governance requirements remain in this document and the programme reference.
 
 | ID | Contract | Priority |
 |---|---|---|
@@ -30,9 +30,9 @@ Acceptance requires implementation AND executed evidence. No queued upload is su
 
 Seed: JO-2026-0142; Valle Verde Farms; Yuma, Arizona; 2026-03-01 to 2026-07-31; terms v2. Required types passport, ds160_confirmation, signed_contract. +52 55 1000 0001: Ana López unconfirmed/no documents. +52 55 1000 0002: Bruno Díaz confirmed/passport approved; Carla Díaz passport correction reason “Foto borrosa, vuelva a tomarla”. No real people/data.
 
-Discrepancies/assumptions: supplied budgets sum to five hours, not four; decimal 1.5 MB is conservative; season year inferred from job order; original unavailable; X-Worker-Id proposed mock convention; SDD-001 is a provisional local ticket, not an externally created ticket.
+Discrepancies/assumptions: supplied budgets sum to five hours, not four; decimal 1.5 MB is conservative; season year inferred from job order; original subsequently supplied; X-Worker-Id proposed mock convention; SDD-001 is a provisional local ticket, not an externally created ticket.
 
-Clarifications: stale terms are resolved for ordering without supersession; old upload replay receipts resolve delivery without overwriting newer same-submission review revisions. Prepare Recording B before coding and capture during implementation; final editing/evidence checks remain late. Mobile is the focus, with a minimal supporting mock; original assessment comparison remains pending.
+Clarifications: stale terms are resolved for ordering without supersession; old upload replay receipts resolve delivery without overwriting newer same-submission review revisions. Prepare Recording B before coding and capture during implementation; final editing/evidence checks remain late. Mobile is the focus, with a minimal supporting mock; Home comparison is tracked by SDD-023; other assessment findings remain separate.
 
 Delivery clarification: scaffold includes linting (interpreting “LinkedIn” in context), GitHub Actions validation/build pipeline configuration, EAS profiles and quality/PR conventions from the start. Every feature has a separate branch/PR based on reviewed main; no single final application PR. Human review waits do not reset the coding ledger.
 

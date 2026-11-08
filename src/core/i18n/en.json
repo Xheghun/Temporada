@@ -90,7 +90,22 @@
     "noData": "Could not load your assignment. Refresh or try again later.",
     "noOfflineData": "No assignment is saved yet. Connect to download your data.",
     "documentsAvailable": "View requirements, review status and corrections.",
-    "openDocuments": "View documents"
+    "openDocuments": "View documents",
+    "online": "Online",
+    "queueLoading": "Loading pending actions…",
+    "queueUnavailable": "Pending action count unavailable",
+    "progressUnavailable": "Progress unavailable. Check for updates.",
+    "deliveryTitle": "Document delivery",
+    "reviewTitle": "Staff review",
+    "noRequired": "No required documents.",
+    "noReviewRequired": "No required documents to review.",
+    "delivered": "{{count}} of {{total}} required documents delivered",
+    "documentPending_one": "{{count}} document saved on this phone, waiting to send.",
+    "documentPending_other": "{{count}} documents saved on this phone, waiting to send.",
+    "documentFailed_one": "{{count}} document could not be sent. Open Documents to correct it.",
+    "documentFailed_other": "{{count}} documents could not be sent. Open Documents to correct them.",
+    "reviewCounts": "Approved: {{approved}} · Awaiting review: {{awaiting}} · Corrections: {{corrections}}",
+    "reviewHint": "Only staff can approve documents. Sending and review are separate."
   },
   "terms": {
     "version": "Version {{version}}",

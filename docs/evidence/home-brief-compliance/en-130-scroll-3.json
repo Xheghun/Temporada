@@ -1,0 +1,23 @@
+[
+  ["01", "[48,48][92,80]"],
+  ["Saved. We’ll try sending it again.", "[158,48][672,48]"],
+  ["02", "[48,112][92,418]"],
+  ["Document delivery", "[158,112][672,162]"],
+  ["0 of 3 required documents delivered", "[158,174][672,274]"],
+  ["1 document saved on this phone, waiting to send.", "[158,286][672,386]"],
+  ["03", "[48,450][92,806]"],
+  ["Staff review", "[158,450][672,500]"],
+  ["Approved: 0 · Awaiting review: 0 · Corrections: 0", "[158,512][672,612]"],
+  [
+    "Only staff can approve documents. Sending and review are separate.",
+    "[158,624][672,774]"
+  ],
+  ["Update pending. Your saved data remains available.", "[48,838][672,938]"],
+  [
+    "Could not update. Saved data is shown; try again when connected.",
+    "[48,970][672,1070]"
+  ],
+  ["Home", "[100,1154][186,1197]"],
+  ["Documents", "[304,1154][468,1197]"],
+  ["My Job", "[575,1154][680,1197]"]
+]

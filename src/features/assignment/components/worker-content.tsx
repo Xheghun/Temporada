@@ -1,3 +1,5 @@
+import { HomeSyncSummary, HomeProgress } from './home-overview-content';
+import { homeOverview, type HomeOverview } from '../domain/home-overview';
 import { formatSeasonDate } from './season-date';
 import {
   BrandHeader,
@@ -27,7 +29,6 @@ import {
   SectionHeading,
   ListRow,
   Disclosure,
-  StatusIndicator,
   WorkerAvatar,
 } from '../../../design-system/components/worker-controls';
 import type { NextAction } from '../domain/next-action';
@@ -95,6 +96,7 @@ export function HomeContent({
   onDocuments,
   onJob,
   onProfile,
+  overview: suppliedOverview,
   nextAction = 'refresh',
   documentRows = [],
   footer,
@@ -106,11 +108,17 @@ export function HomeContent({
   onDocuments?: (() => void) | undefined;
   onJob?: (() => void) | undefined;
   onProfile?: (() => void) | undefined;
+  overview?: HomeOverview;
   nextAction?: NextAction;
   documentRows?: { title: string; status: string }[];
   footer?: React.ReactNode;
 }) {
-  const { t: translate } = useTranslation();
+  const { t: translate, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage === 'es' ? 'es' : 'en';
+  const locale = language === 'es' ? 'es-MX' : 'en-US';
+  const overview =
+    suppliedOverview ??
+    homeOverview(state.error === 'local_data_error' ? null : state.data, null);
   const assignment = state.data?.assignment;
   const needsDocuments = ['correction', 'missing', 'failed'].includes(
     nextAction,
@@ -154,34 +162,15 @@ export function HomeContent({
       <View style={{ marginTop: 12 }}>
         <Body>{translate('ui.subtitle')}</Body>
       </View>
-      {!state.online ? (
-        <View
-          style={{
-            marginTop: 20,
-            flexDirection: 'row',
-            gap: 10,
-            alignItems: 'center',
-          }}
-        >
-          <View
-            style={{
-              width: 7,
-              height: 7,
-              borderRadius: 4,
-              backgroundColor: tokens.colors.accent,
-            }}
-          />
-          <View style={{ flex: 1 }}>
-            <StatusIndicator>{translate('home.offline')}</StatusIndicator>
-          </View>
-        </View>
-      ) : null}
+      <HomeSyncSummary
+        online={state.online}
+        overview={overview}
+        loading={state.loading}
+      />
       <ErrorNotice code={state.error} />
       {assignment ? (
         <>
-          <View
-            style={[styles.featured, { marginTop: state.online ? 28 : 20 }]}
-          >
+          <View style={[styles.featured, { marginTop: 20 }]}>
             <Text style={styles.taskEyebrow}>
               {translate('reference.upNext')}
             </Text>
@@ -256,8 +245,41 @@ export function HomeContent({
                 detail={assignment.assignment.worksite}
                 onPress={onJob}
               />
+              <Body>
+                {translate('home.season', {
+                  start: formatSeasonDate(
+                    assignment.assignment.seasonStart,
+                    locale,
+                  ),
+                  end: formatSeasonDate(
+                    assignment.assignment.seasonEnd,
+                    locale,
+                  ),
+                })}
+              </Body>
+              <Body>
+                {translate('home.order', { id: assignment.assignment.orderId })}
+              </Body>
             </InformationPanel>
           </View>
+          <View style={styles.termsSection}>
+            <SectionHeading>{translate('home.terms')}</SectionHeading>
+            <Body>
+              {translate('terms.version', {
+                version: assignment.terms.termsVersionId,
+              })}
+            </Body>
+            <Body>
+              {translate(
+                overview.termsStatus
+                  ? `terms.status.${overview.termsStatus}`
+                  : 'home.progressUnavailable',
+              )}
+            </Body>
+            <Body>{assignment.terms.summary[language]}</Body>
+            <TextAction label={translate('home.openTerms')} onPress={onTerms} />
+          </View>
+          <HomeProgress overview={overview} />
           {state.data?.refreshNeeded ? (
             <View style={{ marginTop: 16 }}>
               <Body>

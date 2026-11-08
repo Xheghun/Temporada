@@ -1,0 +1,20 @@
+[
+  ["temporada.", "[48,142][242,194]"],
+  ["EN / ES", "[592,151][672,184]"],
+  ["Your season\nstarts here.", "[48,392][672,560]"],
+  [
+    "Sign in to view your assignment and manage your documents.",
+    "[48,608][672,696]"
+  ],
+  ["Phone number", "[48,768][672,808]"],
+  ["+52 55 1000 0001", "[48,824][672,936]"],
+  ["Continue", "[295,1008][424,1051]"],
+  [
+    "Use your country code. A verification code lets you continue.",
+    "[48,1124][672,1212]"
+  ],
+  [
+    "Your session expired. Sign in again; your pending actions are kept.",
+    "[48,1212][672,1232]"
+  ]
+]

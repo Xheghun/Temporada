@@ -1,0 +1,380 @@
+[
+  {
+    "check": "Offline restart retains original action IDs",
+    "expected": [
+      "478791bf-5995-4121-974f-55c3264f07c2",
+      "ca1044f6-210e-4715-9c74-1b9c815c6843"
+    ],
+    "actual": [
+      "478791bf-5995-4121-974f-55c3264f07c2",
+      "ca1044f6-210e-4715-9c74-1b9c815c6843"
+    ],
+    "result": "PASS"
+  },
+  {
+    "check": "Private durable image digest matches",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "Measured image bytes",
+    "expected": 65649,
+    "actual": 65649,
+    "result": "PASS"
+  },
+  {
+    "check": "Stale Ana v2 never accepted",
+    "expected": false,
+    "actual": false,
+    "result": "PASS"
+  },
+  {
+    "check": "401 keeps original v3 queued",
+    "expected": "queued",
+    "actual": "queued",
+    "result": "PASS"
+  },
+  {
+    "check": "Reauthentication delivers same v3 action",
+    "expected": "delivered",
+    "actual": "delivered",
+    "result": "PASS"
+  },
+  {
+    "check": "Exactly one Ana v3 acceptance",
+    "expected": 1,
+    "actual": 1,
+    "result": "PASS"
+  },
+  {
+    "check": "Exactly one Ana passport effect",
+    "expected": 1,
+    "actual": 1,
+    "result": "PASS"
+  },
+  {
+    "check": "Ana passport stays Pending Review",
+    "expected": "pending_review",
+    "actual": "pending_review",
+    "result": "PASS"
+  },
+  {
+    "check": "Carla original action retained while Bruno selected",
+    "expected": "68215b3e-e14c-462b-b167-e6607b5e3366",
+    "actual": "68215b3e-e14c-462b-b167-e6607b5e3366",
+    "result": "PASS"
+  },
+  {
+    "check": "Carla action still queued under Bruno",
+    "expected": "queued",
+    "actual": "queued",
+    "result": "PASS"
+  },
+  {
+    "check": "Carla file digest retained under Bruno",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "Bruno shows zero own pending",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "Bruno shows no Carla data",
+    "expected": false,
+    "actual": false,
+    "result": "PASS"
+  },
+  {
+    "check": "Carla correction is a new submission",
+    "expected": "seed-carla-passport",
+    "actual": "seed-carla-passport",
+    "result": "PASS"
+  },
+  {
+    "check": "Carla correction has exactly one effect",
+    "expected": 1,
+    "actual": 1,
+    "result": "PASS"
+  },
+  {
+    "check": "Older Carla correction is preserved",
+    "expected": "correction_requested",
+    "actual": "correction_requested",
+    "result": "PASS"
+  },
+  {
+    "check": "Carla new action delivered",
+    "expected": "delivered",
+    "actual": "delivered",
+    "result": "PASS"
+  },
+  {
+    "check": "en-100 visible employer",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-100 visible worksite",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-100 visible season",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-100 visible reference",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-100 visible version",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-100 visible actual terms summary",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-100 visible progress",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-100 visible document delivery",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-100 visible staff review",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-100 visible network",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-100 visible pending count",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-130 visible employer",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-130 visible worksite",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-130 visible season",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-130 visible reference",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-130 visible version",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-130 visible actual terms summary",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-130 visible progress",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-130 visible document delivery",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-130 visible staff review",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-130 visible network",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "en-130 visible pending count",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-100 visible employer",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-100 visible worksite",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-100 visible season",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-100 visible reference",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-100 visible version",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-100 visible actual terms summary",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-100 visible progress",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-100 visible document delivery",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-100 visible staff review",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-100 visible network",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-100 visible pending count",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-130 visible employer",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-130 visible worksite",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-130 visible season",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-130 visible reference",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-130 visible version",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-130 visible actual terms summary",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-130 visible progress",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-130 visible document delivery",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-130 visible staff review",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-130 visible network",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  },
+  {
+    "check": "es-130 visible pending count",
+    "expected": true,
+    "actual": true,
+    "result": "PASS"
+  }
+]

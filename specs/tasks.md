@@ -29,3 +29,7 @@ PR descriptions state behavior/problem, requirements, significant decisions, act
 ## Subsequent work outside the original assessment
 
 SDD-022 [Temporada UI redesign](../openspec/changes/temporada-mobile-ui-redesign/tasks.md) uses `feature/SDD-022-temporada-mobile-ui-redesign`, based on reviewed main after PR #14 (merge `065cc9d`). This additional implementation and verification is outside the original 299.91-minute assessment record. It does not complete missing recordings or apply submission-documentation.
+
+SDD-023 [Restore Home brief compliance](../openspec/changes/restore-home-brief-compliance/tasks.md) uses `fix/SDD-023-home-brief-compliance` from reviewed main `0ff4087` (PR #16). Explicitly authorized subsequent work; original assessment ledger remains unchanged. The October 29, 2026 original assessment supplied by the user requires employer/worksite/season dates, current terms summary, timeline, online/offline and waiting count on Home itself. This scope restores those facts within the refactored design.
+
+Spec chronology: SDD-022 is merged but its completed delta remains active/unsynced; its timeline-removal requirement conflicts with this restoration. On a later explicit archive/sync request, sync/archive SDD-022 first, then sync/archive SDD-023 so this restoration wins while retaining the other redesign requirements. Do not archive or apply siblings as part of SDD-023.
