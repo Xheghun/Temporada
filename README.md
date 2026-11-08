@@ -154,3 +154,9 @@ EAS development, preview and production profiles are configured. See the [releas
 - [Data model](specs/data-model.md) and [API contract](specs/api-contract.md)
 - [Synchronization](docs/synchronization.md) and [document capture lifecycle](docs/capture.md)
 - [Mock API setup and controls](mock-server/README.md)
+
+## Project timeline
+
+The original core implementation and its recorded verification finished within the five-hour assessment limit, at 299.91 minutes. The [assessment snapshot](https://github.com/Xheghun/Temporada/tree/6db6a0960a913c957a208a656dd9b57e0829ab23) preserves that version.
+
+I continued in my own free time afterward: preparing and refining the documentation, recording the AI workflow, demonstrating the scenarios and walking through code examples. The later UI redesign, Home compliance fixes and additional testing also happened outside the original timebox. The current project includes that subsequent work; the [coding ledger](docs/coding-ledger.md) separates it from the original assessment.
