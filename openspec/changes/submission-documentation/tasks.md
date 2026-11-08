@@ -24,3 +24,7 @@ Apply-time status: PRs #11/#12 are merged. User confirmed no recordings exist (2
 SDD-020 checks: documentation formatting and strict OpenSpec validation passed; 47 local Markdown link targets exist; architecture answers are 120/115/117/131 words, DECISIONS 1,392 words, PROCESS 710 words and release plan 249 words. Claims were reconciled against existing integration/source evidence. No application test/build/emulator run was added. SDD-021 written outline/status is prepared, but both actual recordings remain absent.
 
 PR handoff: https://github.com/Xheghun/Temporada/pull/13. Written submission and scoped handoff are complete; SDD-021 remains unchecked because no recordings exist. Hosted CI/human review are separate. Do not archive this change as complete or infer recording acceptance from this PR.
+
+## Current status — 2026-11-08
+
+The absence notes above describe the original handoff. Both recordings are now published and linked from README and [recording status](../../../docs/recordings.md). Task 1.2 remains unchecked: requested recording lengths and genuine workflow-content acceptance are still unresolved. Availability alone does not establish completion. This change remains active; the completed UI redesign and Home restoration were synced and archived separately.
