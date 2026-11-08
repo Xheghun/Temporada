@@ -7,6 +7,8 @@ Planning/proposal time precedes this ledger. Setup and verification count; human
 | ---------------- | -------------------------------- | -------------------------------- | -------------- | ----------------------------------------------- |
 | project-scaffold | 2026-11-06T16:02:53.127966+00:00 | 2026-11-06T16:03:15.650588+00:00 | 0.38           | paused: managed filesystem denied .git creation |
 
+SDD-025 documentation-only update (2026-11-08): the user supplied the final Desktop recordings and selected GitHub release attachments for hosting. README adds Projects Recordings with AI Workflow Recordings and Scenarios and Code Walkthrough subheadings. Videos remain outside Git history; link/format/attachment verification is tracked in this handoff. No application code, application tests or emulator work is performed; original assessment timing remains unchanged. Recording availability does not establish full assessment acceptance or complete SDD-021.
+
 Recording preparation/capture overhead is outside coding; coding performed on camera counts. No earlier implementation session was recorded in the inspected workspace.
 
 Cumulative recorded coding/setup: 0.38 minutes. Next resume adds to this value; do not reset. Pause begins at 2026-11-06T16:03:15.650588+00:00.
