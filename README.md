@@ -4,6 +4,14 @@ Expo SDK 58, React Native 0.88.1/New Architecture and strict TypeScript. Workers
 
 English is the first-launch default, with an in-app Spanish toggle and a persisted choice. This is the user's explicit amendment to the original Spanish-first requirement.
 
+## Worker experience
+
+The redesigned app uses native system fonts, near-black headings, a warm palette and simple document lists. Home highlights the next meaningful action from actual terms and document state. Home, Documents and My Job are the primary destinations; terms review, capture and worker switching use contextual navigation.
+
+Workers can review cached job details, confirm the displayed terms version offline, preview and save document photos, and distinguish work saved on the phone from delivery and staff review. Correction requests show the actual staff reason, with previous submissions available in collapsed history. Features remain gated by the existing configuration.
+
+See the [eight-screen comparison and Android evidence](docs/evidence/ui-reference-reconciliation/README.md), [final polish and human TalkBack confirmation](docs/evidence/ui-final-polish/README.md), and [changed-file inventory](docs/ui-redesign-files.md). These redesign results are subsequent work, separate from the original assessment.
+
 ## Run locally
 
 Prerequisites: Node 24.11.1 (`nvm use`), npm, Android Studio/SDK with a running AVD, and an Expo Go build compatible with SDK 58. Xcode/Simulator is needed for iOS. Native dependencies have been checked against the installed Expo SDK. Development/EAS binaries are configured but have not been built.
@@ -92,22 +100,22 @@ npx expo export --platform android
 npx expo export --platform ios --output-dir /private/tmp/temporada-ios-export
 ```
 
-Last application verification: **138 tests passed** (36 Jest, 85 real SQLite/sync/file tests, 12 mock HTTP/storage tests, 5 architecture tests), including TEST-01–06 and replay-versus-review regressions. The saved Android observations also have 21 evidence assertions; those do not rerun the emulator. Literal dependency checks cannot validate computed imports and do not replace human review.
+The latest full redesign suite passed **161 tests** (59 Jest, 85 real SQLite/sync/file tests, 12 mock HTTP/storage tests and 5 architecture tests). Final arrow-weight polish then passed **34 affected UI/auth/navigation/accessibility tests**; it did not rerun the full domain suite. Typecheck, lint, formatting, architecture, Expo dependency/configuration checks and Android export passed. Expo Doctor previously passed 20/20 and was not rerun for final polish. See the dated evidence reports for which checks ran at each revision; saved assertions and historical passes do not constitute a new emulator run.
 
 ## Verification and remaining work
 
-| Area                   | Recorded outcome                                                                                                                                |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Android                | All eight manual scenarios passed on Android 16/API 36, 360dp, Expo Go; process/device restart and file digest/counts inspected                 |
-| Language/accessibility | English/Spanish rendering and key/contrast checks; Android 130% text inspection passed; spoken screen-reader audit not completed                |
-| iOS                    | Sign-in, language switching, backend-outage restart/file recovery, terms, dropped response, 413 replacement and 500 recovery passed on iOS 26.5 |
-| Remaining iOS          | Worker-switch isolation, expired-session recovery, real airplane mode, physical-camera capture, 422/review races and device reboot incomplete   |
-| Release readiness      | Signed/EAS builds, store submissions, real backend integration and Android 9/2GB performance unverified                                         |
-| Submission evidence    | Recordings A/B absent; original-assessment comparison pending                                                                                   |
+| Area                       | Recorded outcome                                                                                                                                                                                                        |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Android redesign           | Eight reference comparisons at 393dp/100%; 360dp English/Spanish and 130% text checks, auth keyboards, navigation and capture; all six mandatory sync cases and touched offline/restart/review/switch journeys verified |
+| Language/accessibility     | English default and persisted Spanish; large-text/focus checks passed. The user confirmed bilingual TalkBack listening; scope and unspecified device/version details are recorded in the final verification report      |
+| Earlier iOS implementation | Sign-in, language switching, backend-outage restart/file recovery, terms, dropped response, 413 replacement and 500 recovery passed on iOS 26.5 **before the redesign**                                                 |
+| Remaining iOS              | Redesigned screens have not been verified on iOS; earlier worker-switch, expired-session, airplane-mode, camera, 422/review-race and reboot gaps remain                                                                 |
+| Release readiness          | Physical-camera quality, signed/EAS builds, store submissions, real backend integration and Android 9/2GB performance unverified                                                                                        |
+| Submission evidence        | Original recordings A/B remain undocumented as complete; no recording or assessed-submission approval is claimed                                                                                                        |
 
-[Integration results](docs/evidence/offline-integration.md) contain the dated steps, screenshots, storage records and limits. iOS evidence does not inherit Android's passes. A Simulator camera attempt produced no image and was cancelled; gallery recovery worked.
+[Original integration results](docs/evidence/offline-integration.md) retain their dated steps, screenshots and storage records. [Redesign evidence](docs/evidence/ui-redesign/README.md), [reference reconciliation](docs/evidence/ui-reference-reconciliation/README.md) and [final verification](docs/evidence/ui-final-polish/README.md) document the subsequent work. Earlier iOS results do not establish redesign compatibility. A historical Simulator camera attempt produced no image and was cancelled; gallery recovery worked.
 
-The [coding ledger](docs/coding-ledger.md) stops at **299.91 minutes**. Final documentation does not reset that limit or add application tests. [PROCESS](PROCESS.md), [release plan](docs/release-plan.md), [architecture answers](docs/architecture-answers.md) and [recording status](docs/recordings.md) complete the written handoff.
+The [coding ledger](docs/coding-ledger.md) preserves the original assessment endpoint of **299.91 minutes** and separately records subsequent redesign implementation and verification. The redesign must not be represented as part of that original timebox. [PROCESS](PROCESS.md), [release plan](docs/release-plan.md), [architecture answers](docs/architecture-answers.md) and [recording status](docs/recordings.md) provide the remaining handoff context.
 
 Production requires HTTPS API/remote-flags URLs and separately approved `worker_authentication`, `worker_home_and_terms`, `worker_document_corrections` and `worker_document_capture` flags. Missing/invalid configuration fails closed; flags load at runtime creation, not continuously. Assessment mode requires `__DEV__` and is not a production bypass. No remote service is hosted by this repository.
 
