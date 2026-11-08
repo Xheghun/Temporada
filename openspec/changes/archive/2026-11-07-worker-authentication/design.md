@@ -35,4 +35,4 @@ Branch from current reviewed/merged main (scaffold establishes the initial basel
 
 ## Implementation evidence
 
-The baseline above describes the original planning inspection. The merged foundation/sync now supports this scoped auth implementation. Session/runtime contracts are in docs/authentication.md; executed tests/native evidence and limitations are in docs/evidence/worker-authentication.md. Home business content remains outside this change.
+The baseline above describes the original planning inspection. The merged foundation/sync now supports this scoped auth implementation. Session/runtime contracts are in docs/authentication.md; executed tests/native evidence and limitations are in [docs/evidence/worker-authentication.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/worker-authentication.md). Home business content remains outside this change.

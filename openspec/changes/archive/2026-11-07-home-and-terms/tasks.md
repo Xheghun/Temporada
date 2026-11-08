@@ -18,7 +18,7 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 - Only after review and a new explicit request may another named change be applied. Never treat completing this checklist as authorization for all siblings.
 - Archive/sync this change only through the appropriate later workflow; preserved programme reference is not an active or completed change.
 
-Scoped handoff: https://github.com/Xheghun/Temporada/pull/7. Implementation/evidence in docs/evidence/home-and-terms.md; human review/merge pending.
+Scoped handoff: https://github.com/Xheghun/Temporada/pull/7. Implementation/evidence in [docs/evidence/home-and-terms.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/home-and-terms.md); human review/merge pending.
 
 Review follow-up verified: explicit permanent-failure replacement of displayed v2/v3, atomic rollback, duplicate suppression and same-engine delivery. Five new tests; 103 total. Emulator replacement flow NOT RUN; see updated evidence.
 

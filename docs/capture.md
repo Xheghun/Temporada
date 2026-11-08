@@ -26,7 +26,7 @@ Filesystem and SQLite cannot share a transaction. This design compensates and re
 
 ## Verification
 
-See [executed tests and Android evidence](evidence/document-capture.md). `/dev/capture-inspection` is a read-only assessment-mode probe scoped to the selected worker. It reports action IDs/status, byte count/digest-match booleans and file/journal counts; no tokens, image data or private URIs. It is disabled outside development assessment mode.
+See [executed tests and Android evidence](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/document-capture.md). `/dev/capture-inspection` is a read-only assessment-mode probe scoped to the selected worker. It reports action IDs/status, byte count/digest-match booleans and file/journal counts; no tokens, image data or private URIs. It is disabled outside development assessment mode.
 
 ## Subsequent SDD-022 presentation
 

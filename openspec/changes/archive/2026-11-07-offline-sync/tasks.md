@@ -22,7 +22,7 @@ Recording B is assigned to this session by the user. Before coding, remind the u
 - Only after review and a new explicit request may another named change be applied. Never treat completing this checklist as authorization for all siblings.
 - Archive/sync this change only through the appropriate later workflow; preserved programme reference is not an active or completed change.
 
-Handoff: https://github.com/Xheghun/Temporada/pull/5. Local evidence: docs/evidence/offline-sync.md. Hosted CI and human review/merge remain separate gates. No sibling implementation or recording is claimed.
+Handoff: https://github.com/Xheghun/Temporada/pull/5. Local evidence: [docs/evidence/offline-sync.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/offline-sync.md). Hosted CI and human review/merge remain separate gates. No sibling implementation or recording is claimed.
 
 ## Review follow-up
 

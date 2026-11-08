@@ -10,21 +10,21 @@
 
 - [x] 2.1 Refactor `src/design-system/tokens/index.ts` and `components/auth-controls.tsx` for the specified warm palette, #171717 headings, native typography, spacing and card-free containers; verify representative heading/button/form rendering and measured contrast pairs, including secondary text.
 - [x] 2.2 Add the smallest shared header/row/status/avatar/empty/loading/error responsibilities needed across screens, with safe areas, keyboard access and 48/56dp targets; add interaction/accessibility regressions in `src/testing/` and verify them with targeted Jest runs.
-- [x] 2.3 Document visual tokens, component usage and presentation-only boundaries in `docs/ui-redesign.md`; verify documented components match exports and run typecheck, lint and architecture checks for this group.
+- [x] 2.3 Document visual tokens, component usage and presentation-only boundaries in [docs/ui-redesign.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/ui-redesign.md); verify documented components match exports and run typecheck, lint and architecture checks for this group.
 
 ## 3. Sign-in, OTP and worker selection
 
 - [x] 3.1 Redesign `app/(auth)/sign-in.tsx` with wordmark, persisted language selection, localized heading/helpers and existing phone validation/loading/errors; test invalid input, busy duplicate prevention, retained input after failure and language persistence using `auth-screens.test.tsx` and language tests.
 - [x] 3.2 Expose only the in-memory requested phone in the token-free auth snapshot while code_sent and redesign `verify.tsx` with six-digit input, phone explanation and working back; test clearing on phase exit, invalid-code recovery, loading and no persistence/logging or invented SMS/resend behavior.
 - [x] 3.3 Redesign `select-worker.tsx` with initials/name/chevron rows, selection feedback, isolation explanation and loading/empty/error states; verify switching clears old views and late results cannot restore them with auth/presentation tests.
-- [x] 3.4 Update `docs/authentication.md` and `docs/ui-redesign.md` with implemented behavior and actual group check results; verify all app-owned copy/accessibility keys exist in both dictionaries and no server free text is translated.
+- [x] 3.4 Update `docs/authentication.md` and [docs/ui-redesign.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/ui-redesign.md) with implemented behavior and actual group check results; verify all app-owned copy/accessibility keys exist in both dictionaries and no server free text is translated.
 
 ## 4. Home and primary navigation
 
 - [x] 4.1 Add typed public presentation facts and Home composition using assignment/document public exports; test priority/ties, pending background work, failed replacement, unavailable features, missing/mismatched cache and refresh-required state without altering existing selectors’ confirmation/replacement rules.
 - [x] 4.2 Redesign Home in `worker-content.tsx` and `app/(worker)/home.tsx` with actual-name local-time greeting, compact connectivity, one next-action panel, catalog document rows and job summary; test clock boundaries, state-derived actions and no invented completion or fixture details.
 - [x] 4.3 Add shared primary navigation to Home/Documents and the forthcoming job route while preserving the generation-keyed Stack and existing paths; test selected state, replace versus push, deep-link guards, secondary back fallback and disabled-feature behavior.
-- [x] 4.4 Update `docs/home-and-terms.md` and `docs/ui-redesign.md` for removed timeline, priority rules and navigation; run targeted Home/navigation tests, typecheck and arch:check and record actual results.
+- [x] 4.4 Update `docs/home-and-terms.md` and [docs/ui-redesign.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/ui-redesign.md) for removed timeline, priority rules and navigation; run targeted Home/navigation tests, typecheck and arch:check and record actual results.
 
 ## 5. My Job
 
@@ -60,7 +60,7 @@
 - Human review and merge gate any later explicitly requested change.
 - Archive only after a separate explicit archive request and completion review; keep incomplete verification visible.
 
-Verification note: task 9.3 has executed 360dp English/Spanish 100–130% layouts, keyboard/navigation/safe-area checks, actual screenshots and TalkBack focus traversal. Audible status announcements remain NOT RUN and await human verification; the task remains unchecked. See `docs/evidence/ui-redesign/README.md`. The native classification proof’s initial setup failure was corrected and rerun successfully without production sync changes.
+Verification note: task 9.3 has executed 360dp English/Spanish 100–130% layouts, keyboard/navigation/safe-area checks, actual screenshots and TalkBack focus traversal. Audible status announcements remain NOT RUN and await human verification; the task remains unchecked. See [docs/evidence/ui-redesign/README.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/ui-redesign/README.md). The native classification proof’s initial setup failure was corrected and rerun successfully without production sync changes.
 
 Scoped handoff: https://github.com/Xheghun/Temporada/pull/15 (draft). Local checks and Android evidence are recorded; task 9.3 remains open pending the user’s offered audible TalkBack check. Hosted CI is separate from local verification. No merge or release performed.
 
@@ -89,4 +89,4 @@ Close structural fidelity is established; these new unchecked tasks cover remain
 
 ## Human verification closure — 2026-11-08
 
-The user reported “talk back works” and explicitly confirmed both English and Spanish, including control names/focus order, errors and saved/sent/correction announcements. This is human-reported listening evidence, not an agent-observed native rerun or an automated speech test. Tasks 9.3 and 11.3 are closed on that confirmation together with the existing native layout/focus evidence. Earlier pending notes above describe the state before this report. See docs/evidence/ui-final-polish/README.md for provenance and limits. No recording, verbatim speech transcript, exact TalkBack version, device/settings of the human check, PR merge or release approval was supplied or inferred.
+The user reported “talk back works” and explicitly confirmed both English and Spanish, including control names/focus order, errors and saved/sent/correction announcements. This is human-reported listening evidence, not an agent-observed native rerun or an automated speech test. Tasks 9.3 and 11.3 are closed on that confirmation together with the existing native layout/focus evidence. Earlier pending notes above describe the state before this report. See [docs/evidence/ui-final-polish/README.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/ui-final-polish/README.md) for provenance and limits. No recording, verbatim speech transcript, exact TalkBack version, device/settings of the human check, PR merge or release approval was supplied or inferred.
