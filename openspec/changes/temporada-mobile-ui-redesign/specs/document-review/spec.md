@@ -30,3 +30,11 @@ Current correction requests SHALL show the actual staff reason and an obvious su
 #### Scenario: Replacement with historical correction
 - **WHEN** a new replacement is queued after staff request correction
 - **THEN** the current row shows saved locally, its prior correction remains in collapsed expandable history, and a late decision on the older submission cannot change the replacement’s status
+
+### Requirement: Compact reference document list
+Documents SHALL show the reference's prominent required submitted-count summary, compact numbered divider rows, localized state/action cues and tinted offline note. Ordinary rows SHALL avoid separate full-width action buttons; correction/error/history states MAY expand when needed. Submitted count and staff-decision semantics MUST remain unchanged.
+
+#### Scenario: Compact list with correction recovery
+- **WHEN** a mixed document catalog is compared against 03_documents.png
+- **THEN** the count summary and ordinary row density follow the reference, actionable rows open only supported capture flows, and a correction shows its verbatim reason with reachable replacement and collapsed history
+- **AND** visual simplification never hides a permanent delivery failure or implies approval from delivery

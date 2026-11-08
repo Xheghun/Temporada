@@ -1,3 +1,6 @@
+import { Text, View } from 'react-native';
+import { BrandHeader } from '@/design-system/components/screen-chrome';
+import { tokens } from '@/design-system/tokens';
 import { Redirect, Stack } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,7 +9,6 @@ import { useAuth, useAuthSnapshot } from '@/core/auth/auth-provider';
 import { phoneFormSchema } from '@/core/auth/validation';
 import {
   AuthPage,
-  Heading,
   Body,
   Field,
   Action,
@@ -29,43 +31,63 @@ export default function SignIn() {
     return <Redirect href="/(auth)/select-worker" />;
   if (state.phase === 'code_sent') return <Redirect href="/(auth)/verify" />;
   return (
-    <AuthPage>
+    <AuthPage
+      header={<BrandHeader showLanguage />}
+      headerGap={88}
+      contentGap={0}
+    >
       <Stack.Screen
         options={{ title: translate('signIn'), headerShown: false }}
       />
-      <Heading>{translate('welcome')}</Heading>
-      <Body>{translate('intro')}</Body>
-      <Controller
-        control={control}
-        name="phone"
-        render={({ field: { value, onChange, onBlur } }) => (
-          <Field
-            label={translate('phone')}
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            keyboardType="phone-pad"
-            autoComplete="tel"
-            textContentType="telephoneNumber"
-            autoCapitalize="none"
-            placeholder="+52 55 1000 0001"
-            editable={!state.busy}
-            error={errors.phone ? translate('errors.invalid_phone') : undefined}
-          />
-        )}
-      />
-      <Action
-        label={translate('requestCode')}
-        busy={state.busy}
-        onPress={() => {
-          void handleSubmit(async ({ phone }) => {
-            await auth.perform(() => auth.requestOtp(phone));
-          })();
+      <Text
+        accessibilityRole="header"
+        style={{
+          fontSize: 36,
+          lineHeight: 42,
+          fontWeight: '700',
+          color: tokens.colors.text,
         }}
-      />
-
-      <Body>{translate('phoneHint')}</Body>
-      <Body>{translate('ui.verificationHint')}</Body>
+      >
+        {translate('reference.signInTitle')}
+      </Text>
+      <View style={{ marginTop: 24, marginBottom: 36 }}>
+        <Body>{translate('reference.signInIntro')}</Body>
+      </View>
+      <View style={{ gap: 20 }}>
+        <Controller
+          control={control}
+          name="phone"
+          render={({ field: { value, onChange, onBlur } }) => (
+            <Field
+              label={translate('phone')}
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              keyboardType="phone-pad"
+              autoComplete="tel"
+              textContentType="telephoneNumber"
+              autoCapitalize="none"
+              placeholder="+52 55 1000 0001"
+              editable={!state.busy}
+              error={
+                errors.phone ? translate('errors.invalid_phone') : undefined
+              }
+            />
+          )}
+        />
+        <Action
+          label={translate('requestCode')}
+          busy={state.busy}
+          onPress={() => {
+            void handleSubmit(async ({ phone }) => {
+              await auth.perform(() => auth.requestOtp(phone));
+            })();
+          }}
+        />
+      </View>
+      <View style={{ marginTop: 20 }}>
+        <Body>{translate('reference.signInHelper')}</Body>
+      </View>
       <ErrorNotice code={state.error} />
     </AuthPage>
   );

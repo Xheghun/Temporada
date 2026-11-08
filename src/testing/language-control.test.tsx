@@ -23,7 +23,8 @@ test('language selector saves through the existing preference operation and repo
     screen.getByRole('button', { name: i18n.t('ui.language') }),
   );
   await waitFor(() => expect(save).toHaveBeenCalledWith('es'));
-  expect(screen.getByText('English')).toBeTruthy();
+  expect(screen.getByText(i18n.t('reference.languageCodes'))).toBeTruthy();
+  expect(i18n.resolvedLanguage).toBe('es');
   save.mockRejectedValueOnce(new Error('storage_unavailable'));
   await fireEvent.press(
     screen.getByRole('button', { name: i18n.t('ui.language') }),

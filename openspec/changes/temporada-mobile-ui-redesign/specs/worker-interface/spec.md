@@ -41,3 +41,24 @@ Capture SHALL offer camera and gallery, meaningful photo guidance, a real privat
 #### Scenario: Camera permission denied
 - **WHEN** camera access is denied
 - **THEN** the worker sees localized guidance, a working settings action where supported and gallery selection without a false success message
+
+### Requirement: Reference-based screen fidelity
+The eight individual PNGs from the user-supplied temporada_ui_reference_images.zip SHALL be the visual baseline. Authentication and capture SHALL follow the approved design matrix's section order, screen-specific compact headers, small black lowercase wordmark where shown, typography hierarchy, panel treatment and action hierarchy. Generic palette compliance alone MUST NOT establish fidelity. Actual identity, catalog and delivery facts MUST take precedence over illustrative data.
+
+#### Scenario: Authentication reference review
+- **WHEN** sign-in, OTP and worker selection are compared at a calibrated equivalent viewport and normal text scale
+- **THEN** sign-in retains the intended heading placement, OTP has its separate phone block and compact back/context header, and authorized worker choices use bordered avatar/name/chevron rows with a tinted isolation explanation
+- **AND** no illustrative worker is added and all validation/loading/error and keyboard behavior remains functional
+
+#### Scenario: Upload reference review
+- **WHEN** capture opens without a selected photo
+- **THEN** it shows the compact back/context header, catalog title, dashed document-illustration placeholder, camera/gallery actions and tinted local-storage explanation without a duplicate brand header
+- **AND** selecting a real photo replaces the placeholder, makes explicit Save primary and preserves durable-file and permission-recovery behavior
+
+### Requirement: Executed visual acceptance
+Each of the eight screens SHALL have a recorded reference/current comparison with viewport, density, language, state, font scale and commit metadata. Structural mismatches SHALL be fixed or explicitly accepted with a reason before visual completion is claimed. Reference assets SHALL be retained unchanged with checksums in a repository-owned location during implementation. Raster images MUST NOT be distorted to conceal differences.
+
+#### Scenario: Fidelity handoff
+- **WHEN** the reconciliation is reported complete
+- **THEN** eight comparisons identify fixed differences and justified adaptations, no unresolved structural mismatch is marked passed, and unavailable exact-geometry checks are labeled limited
+- **AND** both-language 360dp/130-percent checks preserve reachable actions and text scaling, with unexecuted spoken accessibility checks still explicit

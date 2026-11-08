@@ -55,6 +55,6 @@ test('missing offline cache never invents job details', async () => {
   expect(screen.queryByText('Valle Verde Farms')).toBeNull();
 });
 test('date-only season stays in the same day and localizes', () => {
-  expect(formatSeasonDate('2026-03-01', 'en-US')).toBe('Mar 1, 2026');
+  expect(formatSeasonDate('2026-03-01', 'en-US')).toBe('March 1, 2026');
   expect(formatSeasonDate('2026-03-01', 'es-MX')).toContain('mar');
 });

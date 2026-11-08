@@ -45,3 +45,11 @@ Terms SHALL present the current cached version, actual localized summary, confir
 #### Scenario: Pending confirmation and changed terms
 - **WHEN** a worker confirms the displayed version offline and later receives a stale-version result
 - **THEN** the first state says saved locally and waiting to send, duplicate pending confirmation is prevented, and the refreshed version requires explicit new confirmation without erasing history or claiming acceptance
+
+### Requirement: Home job and terms reference structure
+Home SHALL retain the reference's compact header, task-panel eyebrow and highlighted action, numbered document rows and View all control. My Job SHALL group employer/worksite in a tinted summary panel and use compact labeled details. Terms SHALL use the reference's introduction, version/status hierarchy, separated assignment and actual-summary sections, offline explanation panel and permitted confirmation action. Real state, cached content and exact-version behavior MUST remain authoritative.
+
+#### Scenario: Reference content and real state
+- **WHEN** cached Home, My Job and unconfirmed Terms are visually reviewed against their three PNG references
+- **THEN** their required sections and hierarchy match the approved matrix, the greeting and task follow actual worker state, and My Job shows actual cached values
+- **AND** terms remain an accurately labeled summary with version-specific confirmation, historical stale entries and explicit failed-action recovery

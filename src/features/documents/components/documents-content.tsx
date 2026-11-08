@@ -1,22 +1,27 @@
 import type { ReactNode } from 'react';
-import { Disclosure } from '../../../design-system/components/worker-controls';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
   AuthPage,
   Heading,
   Body,
-  Action,
   ErrorNotice,
 } from '../../../design-system/components/auth-controls';
+import {
+  ContextHeader,
+  Eyebrow,
+  InformationPanel,
+  TextAction,
+} from '../../../design-system/components/screen-chrome';
+import { Disclosure } from '../../../design-system/components/worker-controls';
 import { tokens } from '../../../design-system/tokens';
 import {
   documentViews,
   documentPresentationFacts,
   submissionStatusKey,
 } from '../domain/document-view';
-import type { DocumentsState } from '../documents-service';
 import type { SubmissionView } from '../domain/document-view';
+import type { DocumentsState } from '../documents-service';
 export function DocumentsContent({
   state,
   onRefresh,
@@ -33,28 +38,51 @@ export function DocumentsContent({
     | undefined;
 }) {
   const { t: translate, i18n } = useTranslation();
-  const language = i18n.resolvedLanguage === 'en' ? 'en' : 'es';
+  const language = i18n.resolvedLanguage === 'es' ? 'es' : 'en';
   const documents = state.data ? documentViews(state.data) : [];
+  const required = documentPresentationFacts(documents).filter(
+      (document) => document.required,
+    ),
+    sent = required.filter((document) => document.isSent).length;
   return (
-    <AuthPage footer={footer}>
+    <AuthPage
+      contentGap={0}
+      headerGap={24}
+      footer={footer}
+      header={
+        <ContextHeader
+          context={translate('reference.context.documents')}
+          onBack={onHome}
+        />
+      }
+    >
       <Heading>{translate('documents.title')}</Heading>
-      <View style={{ gap: 8 }}>
+      <View style={{ marginTop: 12, minHeight: 44 }}>
         <Body>{translate('ui.documentsIntro')}</Body>
-        {!state.online ? <Body>{translate('home.offline')}</Body> : null}
-        {state.data?.assignment ? (
-          <>
-            <Body>
-              {translate('ui.sentCount', {
-                sent: documentPresentationFacts(documents).filter(
-                  (document) => document.required && document.isSent,
-                ).length,
-                total: documents.filter((document) => document.required).length,
-              })}
-            </Body>
-            <Text style={styles.helper}>{translate('ui.sentDefinition')}</Text>
-          </>
-        ) : null}
       </View>
+      {state.data?.assignment ? (
+        <View style={styles.summary}>
+          <Eyebrow>{translate('reference.submitted')}</Eyebrow>
+          <View style={styles.countRow}>
+            <Text
+              accessibilityLabel={translate('ui.sentCount', {
+                sent,
+                total: required.length,
+              })}
+              style={styles.count}
+            >
+              {sent} / {required.length}
+            </Text>
+            <View style={{ flex: 1 }}>
+              <Body>
+                {translate('reference.sentExplanation', {
+                  remaining: required.length - sent,
+                })}
+              </Body>
+            </View>
+          </View>
+        </View>
+      ) : null}
       <ErrorNotice code={state.error} />
       {state.loading && !state.data?.assignment ? (
         <Body>{translate('home.loading')}</Body>
@@ -74,82 +102,100 @@ export function DocumentsContent({
           )}
         </Body>
       ) : null}
-      {documents.map((document) => (
-        <View
-          key={`${state.workerId}:${state.generation}:${document.documentType}`}
-          style={styles.card}
-        >
-          <Text accessibilityRole="header" style={styles.title}>
-            {document.label[language]}
-          </Text>
-          <Text style={styles.helper}>
-            {translate(
-              document.required ? 'documents.required' : 'documents.optional',
-            )}
-          </Text>
-          <Text
-            selectable
-            accessibilityLiveRegion="polite"
-            style={styles.status}
-          >
-            {translate(submissionStatusKey(document.current))}
-          </Text>
-          {document.current ? (
-            <SubmissionDetails submission={document.current} />
-          ) : null}
-          {document.canSubmit ? (
+      <View style={{ marginTop: 20 }}>
+        {documents.map((document, index) => {
+          const actionLabel = translate(
+            onCapture
+              ? document.current
+                ? 'capture.replaceDocument'
+                : 'capture.addDocument'
+              : document.current
+                ? 'documents.replace'
+                : 'documents.add',
+          );
+          const row = (
             <>
-              {!onCapture ? (
+              <Text style={styles.number}>
+                {String(index + 1).padStart(2, '0')}
+              </Text>
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text accessibilityRole="header" style={styles.title}>
+                  {document.label[language]}
+                </Text>
+                <Text
+                  selectable
+                  accessibilityLiveRegion="polite"
+                  style={styles.status}
+                >
+                  {translate(submissionStatusKey(document.current))}
+                </Text>
+              </View>
+              <Text accessible={false} style={styles.cue}>
+                {document.canSubmit ? '↗' : '✓'}
+              </Text>
+            </>
+          );
+          return (
+            <View
+              key={`${state.workerId}:${state.generation}:${document.documentType}`}
+              style={styles.document}
+            >
+              {document.canSubmit ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={actionLabel}
+                  accessibilityState={{ disabled: !onCapture }}
+                  disabled={!onCapture}
+                  onPress={() =>
+                    onCapture?.(
+                      document.documentType,
+                      document.current?.id ?? null,
+                    )
+                  }
+                  style={styles.row}
+                >
+                  {row}
+                </Pressable>
+              ) : (
+                <View style={styles.row}>{row}</View>
+              )}
+              {document.current ? (
+                <View style={{ gap: 8, paddingLeft: 34 }}>
+                  <SubmissionDetails submission={document.current} />
+                </View>
+              ) : null}
+              {document.canSubmit && !onCapture ? (
                 <Body>{translate('documents.captureUnavailable')}</Body>
               ) : null}
-              <Action
-                secondary
-                disabled={!onCapture}
-                label={translate(
-                  onCapture
-                    ? document.current
-                      ? 'capture.replaceDocument'
-                      : 'capture.addDocument'
-                    : document.current
-                      ? 'documents.replace'
-                      : 'documents.add',
-                )}
-                onPress={() =>
-                  onCapture?.(
-                    document.documentType,
-                    document.current?.id ?? null,
-                  )
-                }
-              />
-            </>
-          ) : null}
-          {document.history.length ? (
-            <Disclosure title={translate('documents.history')}>
-              {document.history.map((submission) => (
-                <View key={submission.id} style={styles.historyItem}>
-                  <Text style={styles.status}>
-                    {translate(`documents.status.${submission.status}`)}
-                  </Text>
-                  <SubmissionDetails submission={submission} />
-                </View>
-              ))}
-            </Disclosure>
-          ) : null}
-        </View>
-      ))}
-      <Action
-        secondary
+              {document.history.length ? (
+                <Disclosure title={translate('documents.history')}>
+                  {document.history.map((submission) => (
+                    <View key={submission.id} style={{ gap: 8 }}>
+                      <Text style={styles.status}>
+                        {translate(`documents.status.${submission.status}`)}
+                      </Text>
+                      <SubmissionDetails submission={submission} />
+                    </View>
+                  ))}
+                </Disclosure>
+              ) : null}
+            </View>
+          );
+        })}
+      </View>
+      <View style={{ marginTop: 20 }}>
+        <InformationPanel>
+          <Text style={styles.noteTitle}>
+            {translate('reference.offlineTitle')}
+          </Text>
+          <Body>{translate('reference.documentsOffline')}</Body>
+        </InformationPanel>
+      </View>
+      <TextAction
+        disabled={state.refreshing}
         label={translate('home.refresh')}
-        busy={state.refreshing}
         onPress={onRefresh}
       />
-      {!footer ? (
-        <Action
-          secondary
-          label={translate('terms.backHome')}
-          onPress={onHome}
-        />
-      ) : null}
     </AuthPage>
   );
 }
@@ -200,20 +246,44 @@ function SubmissionDetails({ submission }: { submission: SubmissionView }) {
   );
 }
 const styles = StyleSheet.create({
-  helper: { fontSize: 14, lineHeight: 21, color: tokens.colors.muted },
-  card: {
-    paddingVertical: 20,
-    gap: 12,
+  summary: {
+    marginTop: 28,
+    paddingBottom: 24,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: tokens.colors.border,
+    gap: 16,
+  },
+  countRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  count: {
+    fontSize: 34,
+    lineHeight: 42,
+    fontWeight: '700',
+    color: tokens.colors.primary,
+  },
+  document: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: tokens.colors.border,
   },
-  title: { fontSize: 16, fontWeight: '700', color: tokens.colors.text },
-  status: { fontSize: 14, fontWeight: '700', color: tokens.colors.text },
-  history: {
-    gap: 12,
-    borderTopWidth: 1,
-    borderColor: tokens.colors.border,
-    paddingTop: 16,
+  row: {
+    minHeight: 74,
+    paddingVertical: 16,
+    flexDirection: 'row',
+    gap: 14,
+    alignItems: 'center',
   },
-  historyItem: { gap: 8 },
+  number: { width: 20, fontSize: 12, color: tokens.colors.secondary },
+  title: {
+    fontSize: 16,
+    lineHeight: 20,
+    fontWeight: '700',
+    color: tokens.colors.text,
+  },
+  status: { fontSize: 12, lineHeight: 18, color: tokens.colors.secondary },
+  cue: { fontSize: 22, color: tokens.colors.secondary },
+  noteTitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '700',
+    color: tokens.colors.primary,
+  },
 });

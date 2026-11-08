@@ -206,5 +206,44 @@
       "job": "My Job"
     },
     "back": "Back"
+  },
+  "reference": {
+    "languageCodes": "EN / ES",
+    "context": {
+      "terms": "Job terms",
+      "documents": "Your paperwork",
+      "capture": "Add document",
+      "job": "Your assignment",
+      "verify": "Verify your number",
+      "selection": "Worker selection"
+    },
+    "signInTitle": "Your season\nstarts here.",
+    "signInIntro": "Sign in to view your assignment and manage your documents.",
+    "signInHelper": "Use your country code. A verification code lets you continue.",
+    "verifyIntro": "Enter the six-digit verification code for your phone number.",
+    "workerIntro": "Choose your profile. Each worker’s documents and pending uploads stay separate.",
+    "workerDetail": "View worker assignment",
+    "isolation": "Before switching, the app clears the previous worker’s visible information. Pending uploads remain saved to the right profile.",
+    "upNext": "Up next / Your job",
+    "yourDocuments": "Your documents",
+    "viewAll": "View all ↗",
+    "jobIntro": "Your assignment details for the season.",
+    "seasonalAssignment": "Seasonal assignment",
+    "location": "Location",
+    "beforeBegin": "Before you begin",
+    "termsIntro": "Review this summary before confirming the version shown here.",
+    "currentVersion": "Current version",
+    "assignmentTitle": "Your assignment",
+    "assignmentSummary": "{{employer}} in {{worksite}}, from {{start}} to {{end}}.",
+    "termsSummary": "Employment terms summary",
+    "termsOffline": "You can confirm while offline. Your confirmation stays on this phone until it can be sent.",
+    "submitted": "Submitted documents",
+    "sentExplanation": "Sent for staff review.\n{{remaining}} not yet sent.",
+    "offlineTitle": "No internet? No problem.",
+    "documentsOffline": "Your saved photos stay on this phone until they can be sent safely. Only delivered photos count above.",
+    "choosePhoto": "Choose a clear photo",
+    "photoHelper": "Avoid glare, shadows, and cut-off edges.",
+    "photoStorage": "Your photo is saved locally before upload, so you won’t lose it when your connection drops.",
+    "captureGuidance": "Make sure all four corners are visible and the text is easy to read."
   }
 }

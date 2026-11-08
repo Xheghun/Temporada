@@ -20,6 +20,7 @@ export default function WorkerLayout() {
         name="terms"
         options={{
           title: translate('home.terms'),
+          headerShown: false,
           headerBackVisible: true,
           headerBackTitle: translate('home.title'),
         }}
@@ -36,6 +37,7 @@ export default function WorkerLayout() {
         name="capture"
         options={{
           title: translate('capture.title'),
+          headerShown: false,
           headerBackTitle: translate('documents.title'),
         }}
       />

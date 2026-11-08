@@ -206,5 +206,44 @@
       "job": "Mi trabajo"
     },
     "back": "Atrás"
+  },
+  "reference": {
+    "languageCodes": "EN / ES",
+    "context": {
+      "terms": "Condiciones de trabajo",
+      "documents": "Tus documentos",
+      "capture": "Añadir documento",
+      "job": "Tu asignación",
+      "verify": "Verifica tu número",
+      "selection": "Selección de trabajador"
+    },
+    "signInTitle": "Tu temporada\nempieza aquí.",
+    "signInIntro": "Inicia sesión para ver tu asignación y gestionar tus documentos.",
+    "signInHelper": "Incluye el código del país. Un código de verificación te permite continuar.",
+    "verifyIntro": "Introduce el código de seis dígitos para tu número de teléfono.",
+    "workerIntro": "Elige tu perfil. Los documentos y envíos pendientes de cada trabajador se mantienen separados.",
+    "workerDetail": "Ver asignación de trabajo",
+    "isolation": "Al cambiar, la app borra la información visible del trabajador anterior. Los envíos pendientes siguen guardados en el perfil correcto.",
+    "upNext": "Tu próximo paso / Trabajo",
+    "yourDocuments": "Tus documentos",
+    "viewAll": "Ver todos ↗",
+    "jobIntro": "Los detalles de tu asignación para la temporada.",
+    "seasonalAssignment": "Asignación de temporada",
+    "location": "Ubicación",
+    "beforeBegin": "Antes de empezar",
+    "termsIntro": "Revisa este resumen antes de confirmar la versión que se muestra aquí.",
+    "currentVersion": "Versión actual",
+    "assignmentTitle": "Tu asignación",
+    "assignmentSummary": "{{employer}} en {{worksite}}, del {{start}} al {{end}}.",
+    "termsSummary": "Resumen de condiciones de trabajo",
+    "termsOffline": "Puedes confirmar sin conexión. Tu confirmación queda en este teléfono hasta que se pueda enviar.",
+    "submitted": "Documentos enviados",
+    "sentExplanation": "Enviados para revisión.\n{{remaining}} aún sin enviar.",
+    "offlineTitle": "¿Sin internet? No hay problema.",
+    "documentsOffline": "Tus fotos quedan en este teléfono hasta que se puedan enviar. Solo las fotos entregadas cuentan arriba.",
+    "choosePhoto": "Elige una foto clara",
+    "photoHelper": "Evita reflejos, sombras y bordes recortados.",
+    "photoStorage": "La foto se guarda en este teléfono antes de enviarse, para que no la pierdas si se corta la conexión.",
+    "captureGuidance": "Asegúrate de que se vean las cuatro esquinas y que el texto sea legible."
   }
 }

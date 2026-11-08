@@ -1,5 +1,7 @@
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,15 +13,25 @@ import type { ComponentProps, PropsWithChildren, ReactNode } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { tokens } from '../tokens';
-import { LanguageControl } from '../../core/i18n/language-control';
+import { BrandHeader } from './screen-chrome';
 export function AuthPage({
   children,
   footer,
   headerTrailing,
-}: PropsWithChildren<{ footer?: ReactNode; headerTrailing?: ReactNode }>) {
+  header,
+  contentGap = 24,
+  headerGap = 28,
+}: PropsWithChildren<{
+  footer?: ReactNode;
+  headerTrailing?: ReactNode;
+  header?: ReactNode;
+  contentGap?: number;
+  headerGap?: number;
+}>) {
   const insets = useSafeAreaInsets();
   return (
-    <View
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={[
         styles.page,
         { paddingTop: insets.top, paddingBottom: footer ? 0 : insets.bottom },
@@ -33,31 +45,19 @@ export function AuthPage({
         contentContainerStyle={[
           styles.content,
           {
-            paddingTop: Math.max(16 - insets.top, 0),
+            paddingTop: 36,
+            gap: headerGap,
             paddingBottom: 24,
           },
         ]}
       >
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 16,
-          }}
-        >
-          <Text style={styles.brand}>Temporada</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <LanguageControl />
-            {headerTrailing}
-          </View>
-        </View>
-        <View style={styles.stack}>{children}</View>
+        {header ?? <BrandHeader showLanguage trailing={headerTrailing} />}
+        <View style={[styles.stack, { gap: contentGap }]}>{children}</View>
       </ScrollView>
       {footer ? (
         <View
           style={{
-            paddingHorizontal: 8,
+            paddingHorizontal: 0,
             paddingBottom: Math.max(insets.bottom, 8),
             backgroundColor: tokens.colors.background,
           }}
@@ -65,7 +65,7 @@ export function AuthPage({
           {footer}
         </View>
       ) : null}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 export function Heading({ children }: PropsWithChildren) {
@@ -89,6 +89,8 @@ export function Action({
   busy = false,
   secondary = false,
   highlighted = false,
+  arrow = false,
+  compact = false,
 }: {
   label: string;
   onPress(): void;
@@ -96,6 +98,8 @@ export function Action({
   busy?: boolean;
   secondary?: boolean;
   highlighted?: boolean;
+  arrow?: boolean;
+  compact?: boolean;
 }) {
   return (
     <Pressable
@@ -108,6 +112,7 @@ export function Action({
       style={({ pressed }) => [
         styles.button,
         secondary && styles.secondary,
+        compact && { minHeight: 48, paddingVertical: 12 },
         highlighted && {
           backgroundColor: tokens.colors.highlighted,
           borderWidth: 0,
@@ -126,17 +131,31 @@ export function Action({
         <ActivityIndicator
           accessible={false}
           importantForAccessibility="no"
-          color={secondary ? tokens.colors.primary : '#FFFFFF'}
+          color={secondary || highlighted ? tokens.colors.primary : '#FFFFFF'}
         />
       ) : null}
       <Text
         style={[
           styles.buttonText,
-          secondary && { color: tokens.colors.primary },
+          (secondary || highlighted) && { color: tokens.colors.primary },
+          arrow && { textAlign: 'left', flex: 1 },
+          compact && { fontSize: 14, lineHeight: 20 },
         ]}
       >
         {label}
       </Text>
+      {arrow ? (
+        <Text
+          accessible={false}
+          style={{
+            fontSize: 22,
+            lineHeight: 22,
+            color: secondary || highlighted ? tokens.colors.primary : '#FFFFFF',
+          }}
+        >
+          ↗
+        </Text>
+      ) : null}
     </Pressable>
   );
 }
@@ -155,7 +174,7 @@ export function Field({
         {...props}
         accessibilityLabel={label}
         accessibilityHint={error ?? props.accessibilityHint}
-        style={styles.input}
+        style={[styles.input, props.style]}
       />
       {error ? (
         <Text
@@ -194,24 +213,35 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   stack: { gap: 24 },
-  heading: { color: tokens.colors.text, fontSize: 28, fontWeight: '700' },
-  body: { fontSize: 16, color: tokens.colors.muted, lineHeight: 24 },
-  label: { color: tokens.colors.text, fontSize: 16, fontWeight: '600' },
+  heading: {
+    color: tokens.colors.text,
+    fontSize: 30,
+    lineHeight: 36,
+    fontWeight: '700',
+  },
+  body: { fontSize: 14, color: tokens.colors.muted, lineHeight: 22 },
+  label: {
+    color: tokens.colors.text,
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '600',
+  },
   input: {
     minHeight: 56,
     fontSize: 18,
     color: tokens.colors.text,
     borderWidth: 1,
-    borderColor: tokens.colors.muted,
-    borderRadius: 8,
+    borderColor: tokens.colors.secondary,
+    borderRadius: 10,
     padding: 14,
     backgroundColor: '#FFFFFF',
   },
   button: {
-    minHeight: 56,
-    padding: 16,
+    minHeight: 54,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     backgroundColor: tokens.colors.primary,
-    borderRadius: 8,
+    borderRadius: 10,
     flexDirection: 'row',
     gap: 10,
     alignItems: 'center',

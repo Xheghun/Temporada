@@ -20,7 +20,8 @@ export function LanguageControl() {
         style={{
           minHeight: 48,
           justifyContent: 'center',
-          paddingHorizontal: 8,
+          minWidth: 48,
+          alignItems: 'flex-end',
         }}
         onPress={() => {
           if (!savePreference) return;
@@ -33,12 +34,12 @@ export function LanguageControl() {
       >
         <Text
           style={{
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: '600',
             color: tokens.colors.primary,
           }}
         >
-          {i18n.resolvedLanguage === 'es' ? 'English' : 'Español'}
+          {translate('reference.languageCodes')}
         </Text>
       </Pressable>
       {hasError ? (

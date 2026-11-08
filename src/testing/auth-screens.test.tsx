@@ -149,9 +149,7 @@ test('verification phone is memory-only and cleared after leaving verification',
   await mockAuth.requestOtp('+525510000001');
   expect(mockAuth.getSnapshot().verificationPhone).toBe('+525510000001');
   await render(<Verify />);
-  expect(
-    screen.getByText(i18n.t('verifyIntro', { phone: '+525510000001' })),
-  ).toBeTruthy();
+  expect(screen.getByText('+525510000001')).toBeTruthy();
   await mockAuth.verify('123456');
   expect(mockAuth.getSnapshot().verificationPhone).toBeNull();
 });
