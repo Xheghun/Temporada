@@ -1,6 +1,6 @@
 # SDD-023 — Home brief compliance
 
-Verified 2026-11-08 against application commit `0019076` on `fix/SDD-023-home-brief-compliance`, from reviewed main `0ff4087` (PR #16). [Source fingerprints and environment](source-at-capture.json) identify the captured application tree. Subsequent changes are documentation/evidence only. Original assessment time and earlier evidence are unchanged.
+Verified 2026-11-08 against application commit `0019076` on `fix/SDD-023-home-brief-compliance`, from reviewed main `0ff4087` (PR #16). The application commit identifies the captured source; the environment is recorded below. Subsequent changes are documentation/evidence only. Original assessment time and earlier evidence are unchanged.
 
 [Open the native screenshot gallery](gallery.html). These are actual Android 16/API 36 / Expo Go captures, 720×1280px at density 320 = 360×640dp, English/Spanish, font scales 1.0 and 1.3. Native bars and Expo development overlays remain visible. Each PNG has its UI text/bounds in a companion JSON. Scrolling crops some text at the viewport edge; consecutive captures show that content fully. [62 executed assertions](acceptance-assertions.json) check native IDs/effects/files and that every required fact has a fully visible Home position in all four language/scale combinations.
 
@@ -41,10 +41,6 @@ Native setup: isolated mock on host port 3023, emulator API reverse ports 3000/3
 Observed limitation: Expo development mode emitted a `ROUTE_NAMES_CHANGED` warning during shared-worker navigation. Actual switching, worker isolation, links and eventual delivery completed, and the unchanged navigator is outside this Home presentation scope. The warning and Tools overlay are preserved in affected captures; production navigator behavior was not verified here. No claim that it is harmless in a release binary is made.
 
 The emulator ends online, font scale 1.0, on the isolated verification backend with Carla’s new action delivered. Prior caches and proof records remain recoverable. New iOS, physical-camera quality, Android 9/2GB performance, signed release, spoken announcements and genuine recordings are NOT RUN/unclaimed. The existing six mandatory sync tests remain passing in test:ci; prior broader native evidence is historical, not a claim that all previous native scenarios were rerun here.
-
-## Source checksum clarification — 2026-11-08
-
-GitGuardian findings 39828756 and 39828757 refer to SHA-256 fingerprints of `src/core/auth/auth-provider.tsx` and `src/design-system/components/auth-controls.tsx` in the original manifest. Recomputing both from application commit `0019076` confirms they are public source-file checksums, not credentials. All 89 recorded file hashes were independently recomputed and matched. The manifest now uses explicit `path`/`sha256` records with a SHA-256 algorithm label; paths and hash values are unchanged. No scanner exclusion, credential rotation or shared-history rewrite is applied. Historical findings and the new head's GitGuardian result must be checked separately.
 
 ## Scope and follow-up
 
