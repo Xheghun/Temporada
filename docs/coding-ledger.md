@@ -99,6 +99,10 @@ Submission-documentation: work after the 299.91-minute cutoff is documentation/r
 
 Documentation handoff: https://github.com/Xheghun/Temporada/pull/13. Word limits, local links, Markdown formatting and strict OpenSpec validation checked; no new application coding/verification. Coding total remains 299.91 minutes. SDD-021 is incomplete because both recordings are absent.
 
+## Subsequent documentation reconciliation — SDD-026
+
+2026-11-08: the user requested reconciliation of DECISIONS.md, PROCESS.md and docs/recordings.md. Branch `chore/SDD-026-reconcile-submission-docs` starts at reviewed main `0ff4087`, independently of pending PRs #17–19. Current notes distinguish the supplied October 29 original brief, the 299.91-minute cutoff, subsequent authorized implementation and available release-hosted recordings. They retain the duration/content/provenance review gap, existing human-reported TalkBack scope and unverified new Home announcements. Original timing/history and the unchecked SDD-021 acceptance task are preserved. Formatting, 14 local file/heading links, diff whitespace and four-file scope checks passed; published release metadata was rechecked. No application code, tests, media editing or new device work was performed.
+
 ## Subsequent work — SDD-022 UI redesign
 
 This separately requested redesign is outside the original assessment. The original 299.91-minute endpoint above is unchanged. Additional implementation/verification must be disclosed if submitted with the assessment.

@@ -1,10 +1,10 @@
 # Development process: ticket to release
 
-This describes the workflow used for the assessment and the remaining human-controlled release stages. Feature PRs through integration are merged. Documentation/recordings are the current handoff; no production release has occurred.
+This describes the assessment workflow, subsequent project work and remaining human-controlled release stages. Feature PRs through integration and the UI redesign are merged. Home restoration and README disclosure/recording-link PRs #17–19 remain open as of 2026-11-08. The recordings-only GitHub release hosts videos; no production application release has occurred.
 
 ## Intake, context and planning
 
-A human defines the ticket, worker outcome and acceptance criteria. The supplied master brief became M1–M10 and the root specifications. The original assessment remains pending comparison. Explicit changes, including English as the default, are recorded rather than silently treated as the original requirement. SDD IDs are local work identifiers.
+A human defines the ticket, worker outcome and acceptance criteria. The supplied master brief became M1–M10 and the root specifications. The original assessment dated October 29, 2026 was subsequently supplied and reviewed. Initial planning references to its absence are historical. The Home comparison led to PR #17; other assessment findings remain explicit. Explicit changes, including English as the default, are recorded rather than silently treated as the original requirement. SDD IDs are local work identifiers.
 
 Before an agent task, load AGENTS.md, the named OpenSpec proposal/design/tasks, affected root specs and applicable React Native/Expo guidance. Give the agent fictional fixtures, interfaces and the relevant tests; exclude credentials and real worker data. OpenSpec reports checklist state, not proof that a requirement works.
 
@@ -18,7 +18,7 @@ Owning changes ship domain, repository, transport and UI tests. Deterministic cl
 
 Typecheck, lint, formatting, architecture boundaries, tests and Expo compatibility/configuration were run during implementation. Integration executed all eight Android scenarios and inspected action IDs, file digests and server counts. iOS has a smaller explicitly documented passing scope. Screenshots/storage snapshots are evidence, not substitutes for executed steps. Unrun builds, device classes and accessibility checks remain unverified.
 
-The cumulative ledger includes coding and verification across branches, including on-camera coding. It stopped at 299.91 minutes. Human review/permission waits are separate. Final documentation and recording work do not authorize more application coding or app verification after that stop.
+The original cumulative ledger includes coding and verification across branches, including any coding on camera. That assessment window stopped at **299.91 minutes**, preserved in [cutoff commit `6db6a09`](https://github.com/Xheghun/Temporada/tree/6db6a0960a913c957a208a656dd9b57e0829ab23). Human review/permission waits are separate; the brief excludes write-up and recording work from coding time. Later user-authorized redesign and follow-up coding/verification are recorded in separate subsequent-work sections of the [ledger](docs/coding-ledger.md). They are outside the original five-hour implementation, and the user's authorization does not waive the assessor's limit. The cutoff snapshot identifies the original implementation; current main includes additional work.
 
 ## CI, pull requests and human review
 
@@ -36,4 +36,6 @@ A human approves store submissions, review access, privacy disclosures and rollo
 
 ## Evidence and recordings
 
-[Integration evidence](docs/evidence/offline-integration.md) and [traceability](specs/traceability.md) connect requirements to executed checks. The user confirmed no recordings exist. Recording A can demonstrate the actual app; Recording B was intended to capture genuine implementation and cannot be recreated as if it happened. Both remain incomplete until their real artifacts meet [the recording criteria](docs/recordings.md). A missing mandatory artifact is reported, not hidden behind a completed code checklist.
+[Integration evidence](docs/evidence/offline-integration.md) and [traceability](specs/traceability.md) connect requirements to executed checks. The original 2026-11-07 missing-recording status is superseded by two [published recordings](docs/recordings.md). The scenarios/code walkthrough is 15:33 against the requested 5–8 minutes; the AI workflow is 19:16 against 10–15 minutes. Length reconciliation or explicit assessor acceptance and full workflow-content review remain pending. Genuine prompt, plan, human rejection/correction, implementation, emulator testing, PR and narration must be verified from the footage; a hosted file or merged PR cannot establish them. Do not stage missing events or label a retrospective explanation as original implementation capture. SDD-021 stays incomplete until those recording obligations are verified.
+
+The SDD-022 bilingual TalkBack flows have [human-reported confirmation](docs/evidence/ui-final-polish/README.md#subsequent-human-listening-confirmation--2026-11-08). That report does not cover the new Home announcements in PR #17. Production application builds/releases, remaining device checks and human review retain their separate gates. No application code, tests or new device verification were performed for this documentation reconciliation.
