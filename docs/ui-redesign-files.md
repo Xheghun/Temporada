@@ -113,3 +113,9 @@ The source diff is scoped to the subsequent redesign. Existing recording files a
 - [docs/evidence/ui-redesign/terms-v3-before-confirmation.png](../docs/evidence/ui-redesign/terms-v3-before-confirmation.png)
 - [docs/evidence/ui-redesign/worker-picker-english.png](../docs/evidence/ui-redesign/worker-picker-english.png)
 - [docs/evidence/ui-redesign/worker-picker-spanish-130.png](../docs/evidence/ui-redesign/worker-picker-spanish-130.png)
+
+## Reference reconciliation — 2026-11-08
+
+The later presentation pass adds [screen chrome](../src/design-system/components/screen-chrome.tsx) and extracts [localized season dates](../src/features/assignment/components/season-date.ts). It refines existing auth, Home/Terms, Job, Documents, Capture and shared controls without changing domain, persistence, transport or synchronization implementations. The affected source/tests are listed in the scoped commit diff.
+
+New review artifacts: [original references and calibration](design-reference/temporada-2026-11-08/calibration.md), [eight comparisons and verification](evidence/ui-reference-reconciliation/README.md), [side-by-side HTML](evidence/ui-reference-reconciliation/comparison.html), image/source metadata, accessibility captures and sanitized native snapshots. Existing evidence and assessment history remain intact.
