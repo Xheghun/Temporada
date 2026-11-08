@@ -62,3 +62,16 @@ Each of the eight screens SHALL have a recorded reference/current comparison wit
 - **WHEN** the reconciliation is reported complete
 - **THEN** eight comparisons identify fixed differences and justified adaptations, no unresolved structural mismatch is marked passed, and unavailable exact-geometry checks are labeled limited
 - **AND** both-language 360dp/130-percent checks preserve reachable actions and text scaling, with unexecuted spoken accessibility checks still explicit
+
+### Requirement: Final comparison and spoken accessibility evidence
+Final visual evidence SHALL include keyboard-hidden OTP at calibrated reference settings and recorded decisions for minor mismatches. Accessible contrast, touch targets and text scaling MUST remain intact. Spoken accessibility claims SHALL require human listening; non-auditory evidence MUST NOT establish an audible pass.
+
+#### Scenario: OTP final visual comparison
+- **WHEN** the final comparison is prepared
+- **THEN** the OTP header, phone block, six-digit field and verify action can be compared with 07_otp.png without keyboard displacement, with actual state and capture metadata recorded
+- **AND** keyboard-visible interaction evidence remains available and illustrative worker values are not substituted for authorized data
+
+#### Scenario: Spoken accessibility closure
+- **WHEN** TalkBack verification is reported complete
+- **THEN** human-observed focus order, localized control names, errors and relevant status announcements are recorded with expected and actual results
+- **AND** missing audible verification remains NOT RUN and keeps the existing task 9.3 obligation open

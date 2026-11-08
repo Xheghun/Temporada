@@ -55,3 +55,7 @@ Sanitized action snapshots are in `native/`; no tokens/session values/private UR
 The prior native cache was preserved by rename only after checking every action was resolved; the new isolated reference backend/cache avoided changing previous evidence. No pending bytes/actions were deleted. The subsequent reference actions are delivered and retained. No domain/sync/file/idempotency policy was changed.
 
 iOS, physical camera quality, low-end profiling, signed native release, new full spoken screen-reader audit, human review and genuine recording remain NOT RUN/unclaimed. Prior TalkBack focus evidence does not prove audible status delivery.
+
+## Section 11 evidence correction and final polish
+
+The later [final review](../ui-final-polish/README.md) supplies a genuine keyboard-hidden OTP comparison and refreshes the three screens with heavier action arrows. The prior `current/07_otp.png` includes the software keyboard and is retained as interaction evidence; it is superseded for geometry comparison. Original capture checksums and all historical evidence remain unchanged. Tasks 9.3 and 11.3 remain open pending human audible TalkBack results.
