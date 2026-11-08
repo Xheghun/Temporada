@@ -150,6 +150,7 @@ export function Action({
           style={{
             fontSize: 22,
             lineHeight: 22,
+            fontWeight: '700',
             color: secondary || highlighted ? tokens.colors.primary : '#FFFFFF',
           }}
         >

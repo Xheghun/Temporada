@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     color: tokens.colors.text,
   },
   status: { fontSize: 12, lineHeight: 18, color: tokens.colors.secondary },
-  cue: { fontSize: 22, color: tokens.colors.secondary },
+  cue: { fontSize: 22, fontWeight: '700', color: tokens.colors.secondary },
   noteTitle: {
     fontSize: 14,
     lineHeight: 20,
