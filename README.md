@@ -25,13 +25,13 @@ Home, Documents and My Job are the main destinations. Terms review and photo cap
 
 ### AI Workflow Recordings
 
-[Watch the AI workflow recording](https://github.com/Xheghun/Temporada/releases/download/project-recordings-2026-11-08/Temporada-AI-Workflow.mp4) · 19 minutes 16 seconds.
+[Watch the AI workflow recording](https://github.com/Xheghun/Temporada/releases/download/project-recordings-2026-11-08/Temporada-AI-Workflow.mp4)
 
 A walkthrough of the AI-assisted development workflow for Temporada.
 
 ### Scenarios and Code Walkthrough
 
-[Watch the scenarios and code walkthrough](https://github.com/Xheghun/Temporada/releases/download/project-recordings-2026-11-08/Temporada-Scenarios-and-Code.mp4) · 15 minutes 33 seconds.
+[Watch the scenarios and code walkthrough](https://github.com/Xheghun/Temporada/releases/download/project-recordings-2026-11-08/Temporada-Scenarios-and-Code.mp4)
 
 Demonstrates scenarios 2, 3 and 4, followed by discussion of code I am proud of and code I am less confident in. The scenarios segment plays at 1.7× speed; the code walkthrough retains its narration and original playback speed.
 
