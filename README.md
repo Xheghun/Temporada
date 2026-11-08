@@ -1,37 +1,60 @@
-# Temporada — seasonal worker mobile app
+# Temporada
 
-Expo SDK 58, React Native 0.88.1/New Architecture and strict TypeScript. Workers sign in by phone, choose their identity on shared phones, confirm an exact terms version and submit compressed document images. SQLite records intent before transmission; the network delivers that durable intent later. Staff review remains separate from delivery.
+Temporada helps seasonal workers manage their job information, employment terms and required documents from their phone—even when connectivity is unreliable.
 
-English is the first-launch default, with an in-app Spanish toggle and a persisted choice. This is the user's explicit amendment to the original Spanish-first requirement.
+Workers can sign in with a phone number, choose their identity on a shared device, review their assignment and submit document photos. Work is saved on the phone before it is sent, with clear feedback about delivery, staff review and corrections.
 
-## Worker experience
+## Features
 
-The redesigned app uses native system fonts, near-black headings, a warm palette and simple document lists. Home highlights the next meaningful action from actual terms and document state. Home, Documents and My Job are the primary destinations; terms review, capture and worker switching use contextual navigation.
+- **A clear next step:** Home highlights outstanding terms or documents and shows the current job at a glance.
+- **Job and terms:** View employer, worksite and season dates, then confirm the exact terms version displayed. Updated terms require a new confirmation.
+- **Document capture:** Take a photo or choose one from the gallery, preview it and save it for submission. Images are compressed and stored privately.
+- **Offline support:** Saved confirmations and document photos survive app restarts, sign-out and worker switching. Synchronization resumes when connectivity and authentication allow it.
+- **Shared phones:** Each authorized worker has a separate profile, documents and pending actions.
+- **English and Spanish:** English is the default; language choices are saved. The interface supports larger text and screen-reader controls.
 
-Workers can review cached job details, confirm the displayed terms version offline, preview and save document photos, and distinguish work saved on the phone from delivery and staff review. Correction requests show the actual staff reason, with previous submissions available in collapsed history. Features remain gated by the existing configuration.
+Home, Documents and My Job are the main destinations. Terms review and photo capture open as focused flows with back navigation. Document history remains available without crowding the current submission.
 
-See the [eight-screen comparison and Android evidence](docs/evidence/ui-reference-reconciliation/README.md), [final polish and human TalkBack confirmation](docs/evidence/ui-final-polish/README.md), and [changed-file inventory](docs/ui-redesign-files.md). These redesign results are subsequent work, separate from the original assessment.
+## How document status works
+
+Saving, delivery and staff approval are separate steps:
+
+| Status                    | Meaning                                                           |
+| ------------------------- | ----------------------------------------------------------------- |
+| Saved on this phone       | The photo is stored locally and waiting to send.                  |
+| Sending / retry scheduled | Delivery is in progress or will be retried automatically.         |
+| Sent / waiting for review | The server received the document; staff have not approved it yet. |
+| Approved                  | Staff approved the submission.                                    |
+| Correction requested      | A replacement is needed; the worker can read the staff reason.    |
+
+A queued upload never counts as delivered, and delivery never implies approval. Previous submissions and review decisions are preserved when a replacement is submitted.
+
+## Technology
+
+Expo SDK 58, React Native 0.88.1 with the New Architecture, Expo Router and strict TypeScript. SQLite stores cached assignments and the durable outbox; private files hold document images; SecureStore holds authentication tokens. The repository includes a local mock API with fictional workers and persistent records.
 
 ## Run locally
 
-Prerequisites: Node 24.11.1 (`nvm use`), npm, Android Studio/SDK with a running AVD, and an Expo Go build compatible with SDK 58. Xcode/Simulator is needed for iOS. Native dependencies have been checked against the installed Expo SDK. Development/EAS binaries are configured but have not been built.
+You need Node 24.11.1 (`nvm use`), npm and an Expo Go build compatible with SDK 58. For Android, install Android Studio/SDK and start an emulator. For iOS, use Xcode and Simulator on macOS.
 
-Install from the repository root:
+Install dependencies from the repository root:
 
 ```sh
 npm ci
 npm ci --prefix mock-server
 ```
 
-Start the fictional backend in one terminal:
+Start the mock API in one terminal:
 
 ```sh
-MOCK_ENABLE_CONTROLS=1 npm run mock:start
+npm run mock:start
 ```
 
-It binds to localhost:3000 and persists under `mock-server/.data`. Restarting does not reset terms, submissions or sessions. See [mock-server instructions](mock-server/README.md) for isolated fixtures, seed data and failure controls. Never delete a mobile database or pending images to reset a demo.
+It listens on `localhost:3000` and persists records under `mock-server/.data`. Restarting the server preserves terms, submissions and sessions. See the [mock API guide](mock-server/README.md) for isolated fixtures and development controls. Keep an existing mobile cache paired with its backend data; deleting a database or pending images can discard unsent work.
 
-For Android, start an emulator in Android Studio Device Manager, then use another terminal:
+### Android
+
+With an emulator running, use another terminal:
 
 ```sh
 adb reverse tcp:3000 tcp:3000
@@ -39,53 +62,51 @@ adb reverse tcp:8081 tcp:8081
 EXPO_PUBLIC_API_URL=http://127.0.0.1:3000 EXPO_PUBLIC_ASSESSMENT_MODE=1 npx expo start --go --localhost --clear
 ```
 
-Open the app from Expo's Android launcher. The direct Android-emulator host alternative is `http://10.0.2.2:3000`; localhost with ADB reverse was used for worker-flow verification. Reapply reverse mappings after an emulator/ADB restart.
+Open the app using Expo's Android launcher. Reapply the reverse mappings after an emulator or ADB restart. The Android emulator can also reach the host API at `http://10.0.2.2:3000`.
 
-For iOS, use the same running backend:
+### iOS
+
+With the same backend running:
 
 ```sh
 EXPO_PUBLIC_API_URL=http://127.0.0.1:3000 EXPO_PUBLIC_ASSESSMENT_MODE=1 npx expo start --go --ios --localhost --port 8082
 ```
 
-The iOS follow-up used this launch pattern with an isolated backend on port 3009. Do not point an existing cache at an unrelated reset backend; use a separate disposable fixture without removing unresolved actions. Expo Go may need its matching SDK build; `--go` avoids selecting an uninstalled development client.
+`--go` selects Expo Go rather than a development client. `EXPO_PUBLIC_ASSESSMENT_MODE=1` enables the local demo features in development only. Public configuration examples are in [.env.example](.env.example); bundled `EXPO_PUBLIC_*` values must never contain secrets.
 
-These commands are based on executed setup/launch evidence; a fresh-machine installation was not repeated during final documentation. If the shared npm cache is inaccessible, the previously used workaround is `npm ci --cache /private/tmp/seasonal-npm-cache`. Public configuration examples are in [.env.example](.env.example); `EXPO_PUBLIC_*` values are bundled and must never contain secrets.
+## Demo accounts
 
-## Fictional accounts
+Use verification code **123456**. The mock API does not send real SMS.
 
-Use OTP **123456**. No real SMS is sent.
+| Phone            | Worker     | Initial state                         |
+| ---------------- | ---------- | ------------------------------------- |
+| +52 55 1000 0001 | Ana López  | Terms v2 unconfirmed; no documents    |
+| +52 55 1000 0002 | Bruno Díaz | Terms v2 confirmed; passport approved |
+| +52 55 1000 0002 | Carla Díaz | Passport correction requested         |
 
-| Phone            | Worker / fresh seed                                                          |
-| ---------------- | ---------------------------------------------------------------------------- |
-| +52 55 1000 0001 | Ana López: v2 unconfirmed, no documents                                      |
-| +52 55 1000 0002 | Bruno Díaz: v2 confirmed, passport Approved                                  |
-| +52 55 1000 0002 | Carla Díaz: passport Correction Requested — `Foto borrosa, vuelva a tomarla` |
+The shared number opens a worker picker for Bruno and Carla. Their assignment is with Valle Verde Farms in Yuma, Arizona, from March 1 to July 31, 2026. Required documents are a passport, DS-160 confirmation and signed contract. These are fictional seed records; a persistent backend may contain later terms or submissions.
 
-Assignment: JO-2026-0142, Valle Verde Farms, Yuma, Arizona, March 1–July 31, 2026. Required documents: passport, DS-160 confirmation and signed contract. Existing persistent fixtures may have advanced to v3 or contain later submissions.
-
-## Offline behavior and architecture
+## Architecture
 
 ```mermaid
 flowchart LR
-  Screens[Router screens] --> Services[Worker-scoped services]
+  Screens[Expo Router screens] --> Services[Worker-scoped services]
   Services --> Local[SQLite cache and outbox]
-  Services --> Files[Private compressed images]
-  Engine[Injected sync engine] <--> Local
+  Services --> Files[Private document images]
+  Engine[Sync engine] <--> Local
   Engine <--> API[Authorized API transport]
-  API <--> Server[Mock business records and receipts]
+  API <--> Server[Mock API and durable receipts]
 ```
 
-Screens use hooks/services; domain/sync logic has no React/native/database imports. Repositories implement persistence contracts. Logout preserves pending intent and images; worker changes clear views and reject late results. Fresh authentication requires network; an existing saved session/cache can resume offline.
+Screens use hooks and services. Domain rules and synchronization logic are independent of React, native APIs and database implementations. Repositories implement persistence contracts.
 
-Pending Sync means local intent without an acknowledged delivery. Pending Review means server submission awaiting staff. Approved/Correction Requested require server review evidence. Refresh-known staff decisions survive older replay receipts. Stale terms require an explicit new confirmation. Transient errors use persisted backoff; 413/422 require a new corrected action, not blind retry. Background delivery is best effort; foreground/startup rebuild retry scheduling.
+Actions receive a stable identifier before transmission, and retries reuse it to prevent duplicate effects. Transient failures use persisted backoff. Upload-size and validation failures require worker correction. Newer staff decisions survive older delivery receipts, while worker ownership checks and session guards prevent data from appearing under another profile.
 
-See [DECISIONS](DECISIONS.md), [data model](specs/data-model.md), [sync contract](docs/synchronization.md), [capture lifecycle](docs/capture.md) and [API contract](specs/api-contract.md).
+Fresh sign-in requires a network connection. A previously authenticated session can use cached information offline. Background synchronization is best effort; startup and foreground activity resume pending delivery.
 
-## Failure controls and checks
+## Development
 
-With development controls enabled, the backend supports two-second latency, seeded random 500s, post-commit response loss, v3 publication, forced 413 and session expiry. Exact `curl` commands and submission-specific staff decisions are in [mock-server/README.md](mock-server/README.md#development-controls). Controls are loopback-only and disabled in production. The mock refuses production startup.
-
-Previously executed quality commands:
+Run the project checks from the repository root:
 
 ```sh
 npm run typecheck
@@ -95,28 +116,22 @@ npm run arch:check
 npm run test:ci
 npm run expo:check
 npm run config:check
-npx expo-doctor
-npx expo export --platform android
-npx expo export --platform ios --output-dir /private/tmp/temporada-ios-export
 ```
 
-The latest full redesign suite passed **161 tests** (59 Jest, 85 real SQLite/sync/file tests, 12 mock HTTP/storage tests and 5 architecture tests). Final arrow-weight polish then passed **34 affected UI/auth/navigation/accessibility tests**; it did not rerun the full domain suite. Typecheck, lint, formatting, architecture, Expo dependency/configuration checks and Android export passed. Expo Doctor previously passed 20/20 and was not rerun for final polish. See the dated evidence reports for which checks ran at each revision; saved assertions and historical passes do not constitute a new emulator run.
+The test suite covers presentation, navigation, authorization, mock HTTP behavior and persistence/synchronization against real SQLite and files. GitHub Actions runs validation for pull requests and main.
 
-## Verification and remaining work
+To exercise slow connections, server errors, lost responses, changed terms or upload failures, start the mock with `MOCK_ENABLE_CONTROLS=1 npm run mock:start`. Available controls and requests are documented in the [mock API guide](mock-server/README.md#development-controls).
 
-| Area                       | Recorded outcome                                                                                                                                                                                                        |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Android redesign           | Eight reference comparisons at 393dp/100%; 360dp English/Spanish and 130% text checks, auth keyboards, navigation and capture; all six mandatory sync cases and touched offline/restart/review/switch journeys verified |
-| Language/accessibility     | English default and persisted Spanish; large-text/focus checks passed. The user confirmed bilingual TalkBack listening; scope and unspecified device/version details are recorded in the final verification report      |
-| Earlier iOS implementation | Sign-in, language switching, backend-outage restart/file recovery, terms, dropped response, 413 replacement and 500 recovery passed on iOS 26.5 **before the redesign**                                                 |
-| Remaining iOS              | Redesigned screens have not been verified on iOS; earlier worker-switch, expired-session, airplane-mode, camera, 422/review-race and reboot gaps remain                                                                 |
-| Release readiness          | Physical-camera quality, signed/EAS builds, store submissions, real backend integration and Android 9/2GB performance unverified                                                                                        |
-| Submission evidence        | Original recordings A/B remain undocumented as complete; no recording or assessed-submission approval is claimed                                                                                                        |
+## Configuration and deployment
 
-[Original integration results](docs/evidence/offline-integration.md) retain their dated steps, screenshots and storage records. [Redesign evidence](docs/evidence/ui-redesign/README.md), [reference reconciliation](docs/evidence/ui-reference-reconciliation/README.md) and [final verification](docs/evidence/ui-final-polish/README.md) document the subsequent work. Earlier iOS results do not establish redesign compatibility. A historical Simulator camera attempt produced no image and was cancelled; gallery recovery worked.
+The included mock API is for local development. Production configuration requires HTTPS API and remote-feature-flag URLs. Authentication, job/terms, document review and capture are gated independently; missing or invalid configuration leaves them disabled. Development demo mode does not bypass production gates.
 
-The [coding ledger](docs/coding-ledger.md) preserves the original assessment endpoint of **299.91 minutes** and separately records subsequent redesign implementation and verification. The redesign must not be represented as part of that original timebox. [PROCESS](PROCESS.md), [release plan](docs/release-plan.md), [architecture answers](docs/architecture-answers.md) and [recording status](docs/recordings.md) provide the remaining handoff context.
+EAS development, preview and production profiles are configured. See the [release guide](docs/release-plan.md) for builds, environment setup and rollout. OTA updates are not configured; native dependency changes require a compatible app binary.
 
-Production requires HTTPS API/remote-flags URLs and separately approved `worker_authentication`, `worker_home_and_terms`, `worker_document_corrections` and `worker_document_capture` flags. Missing/invalid configuration fails closed; flags load at runtime creation, not continuously. Assessment mode requires `__DEV__` and is not a production bypass. No remote service is hosted by this repository.
+## Documentation
 
-GitHub Actions validates PRs/main; EAS development/preview/production profiles and a manual main-only build workflow exist. Credentials, protected environments, backend contract approval and rollout require authorized humans. OTA is not configured or published; native dependency changes require a compatible binary. No store or production approval is claimed.
+- [Architecture decisions](DECISIONS.md)
+- [Data model](specs/data-model.md) and [API contract](specs/api-contract.md)
+- [Synchronization](docs/synchronization.md) and [document capture lifecycle](docs/capture.md)
+- [UI design](docs/ui-redesign.md)
+- [Mock API setup and controls](mock-server/README.md)
