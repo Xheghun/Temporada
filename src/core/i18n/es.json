@@ -90,7 +90,22 @@
     "noData": "No se pudo cargar tu oferta. Actualiza o vuelve a intentarlo más tarde.",
     "noOfflineData": "Aún no hay una oferta guardada. Conéctate para descargar tus datos.",
     "documentsAvailable": "Consulta los requisitos, el estado de revisión y las correcciones.",
-    "openDocuments": "Ver documentos"
+    "openDocuments": "Ver documentos",
+    "online": "En línea",
+    "queueLoading": "Cargando acciones pendientes…",
+    "queueUnavailable": "Cantidad de acciones pendientes no disponible",
+    "progressUnavailable": "Progreso no disponible. Busca actualizaciones.",
+    "deliveryTitle": "Envío de documentos",
+    "reviewTitle": "Revisión del personal",
+    "noRequired": "No hay documentos obligatorios.",
+    "noReviewRequired": "No hay documentos obligatorios que revisar.",
+    "delivered": "{{count}} de {{total}} documentos obligatorios entregados",
+    "documentPending_one": "{{count}} documento guardado en este teléfono, esperando envío.",
+    "documentPending_other": "{{count}} documentos guardados en este teléfono, esperando envío.",
+    "documentFailed_one": "No se pudo enviar {{count}} documento. Abre Documentos para corregirlo.",
+    "documentFailed_other": "No se pudieron enviar {{count}} documentos. Abre Documentos para corregirlos.",
+    "reviewCounts": "Aprobados: {{approved}} · En revisión: {{awaiting}} · Correcciones: {{corrections}}",
+    "reviewHint": "Solo el personal puede aprobar documentos. El envío y la revisión son distintos."
   },
   "terms": {
     "version": "Versión {{version}}",

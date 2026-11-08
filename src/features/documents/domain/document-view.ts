@@ -140,6 +140,13 @@ export function documentPresentationFacts(
       current?.delivery === 'failed_permanent' || current?.status === 'failed';
     return {
       required: document.required,
+      // M4: review evidence is independent of an unresolved delivery receipt.
+      reviewStatus:
+        current?.status === 'approved' ||
+        current?.status === 'correction_requested' ||
+        current?.status === 'pending_review'
+          ? current.status
+          : null,
       needsCorrection: current?.status === 'correction_requested' && !isPending,
       isMissing: !current,
       hasPermanentFailure,
