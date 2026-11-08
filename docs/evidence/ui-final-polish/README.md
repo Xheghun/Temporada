@@ -57,3 +57,9 @@ When available, record device/Android/TalkBack version, language, text scale, wo
 | Correction / failed sending                     | Actual correction reason or actionable localized failure; no false success             | NOT RUN                   |
 
 The user's instruction explicitly reserves audible confirmation. Independent visual/evidence tasks can complete while these two obligations remain open. Stop at draft PR review handoff; do not archive or merge.
+
+## Subsequent human listening confirmation — 2026-11-08
+
+This update supersedes the earlier NOT RUN listening status; historical capture and test records remain unchanged. In this chat, the user reported “talk back works”. Asked whether both English and Spanish were verified, including control names/focus order, errors and saved/sent/correction announcements, the user answered “yes”.
+
+Result: PASS, human-reported, for the confirmed bilingual listening flows. Tasks 9.3 and 11.3 are closed using this report alongside the prior executed layout/focus evidence. No agent-observed speech rerun or new automated test was performed. The user did not provide verbatim announcements, a recording, exact TalkBack version, or the device/text-scale settings of this listening check; these details remain unspecified rather than copied from earlier emulator sessions. Selected/disabled/busy semantics retain prior automated coverage and were not separately itemized in the human reply. No production accessibility certification, human merge approval or release approval is implied.
