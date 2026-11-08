@@ -3,11 +3,14 @@ import { useEffect, useState } from 'react';
 import { ScrollView, Text } from 'react-native';
 import { runNativeSyncCheck } from '@/testing/native-sync-check';
 function DeveloperCheck() {
-  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const { mode, proof } = useLocalSearchParams<{
+    mode?: string;
+    proof?: string;
+  }>();
   const [result, setResult] = useState('Running sync check…');
   useEffect(() => {
     let visible = true;
-    runNativeSyncCheck(mode ?? 'seed').then(
+    runNativeSyncCheck(mode ?? 'seed', proof === 'redesign').then(
       (value) => {
         if (visible) setResult(value);
       },
@@ -21,7 +24,7 @@ function DeveloperCheck() {
     return () => {
       visible = false;
     };
-  }, [mode]);
+  }, [mode, proof]);
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"

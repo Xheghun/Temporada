@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { render, screen, fireEvent } from '@testing-library/react-native';
 import i18n from '../core/i18n';
 import { DocumentsContent } from '../features/documents/components/documents-content';
 import type { DocumentsState } from '../features/documents/documents-service';
@@ -33,7 +33,9 @@ test('Spanish catalog renders correction reason and honest unavailable capture a
     <DocumentsContent state={state()} onHome={() => {}} onRefresh={() => {}} />,
   );
   expect(screen.getByText('Pasaporte')).toBeTruthy();
-  expect(screen.getByText('Corrección solicitada')).toBeTruthy();
+  expect(
+    screen.getByText(i18n.t('documents.status.correction_requested')),
+  ).toBeTruthy();
   expect(
     screen.getByText('Motivo: Foto borrosa, vuelva a tomarla'),
   ).toBeTruthy();
@@ -73,12 +75,20 @@ test('new queued passport shows Pending Sync while the older correction remains 
   await render(
     <DocumentsContent state={value} onHome={() => {}} onRefresh={() => {}} />,
   );
-  expect(screen.getByText('Pendiente de sincronizar')).toBeTruthy();
+  expect(screen.getByText(i18n.t('ui.saved'))).toBeTruthy();
   expect(screen.getByText('Envíos anteriores')).toBeTruthy();
+  expect(
+    screen.queryByText('Motivo: Foto borrosa, vuelva a tomarla'),
+  ).toBeNull();
+  await fireEvent.press(
+    screen.getByRole('button', { name: i18n.t('documents.history') }),
+  );
   expect(
     screen.getByText('Motivo: Foto borrosa, vuelva a tomarla'),
   ).toBeTruthy();
-  expect(screen.queryByText('Pendiente de revisión')).toBeNull();
+  expect(
+    screen.queryByText(i18n.t('documents.status.pending_review')),
+  ).toBeNull();
 });
 test('English UI keeps free-text correction reason unchanged', async () => {
   await i18n.changeLanguage('en');
@@ -86,7 +96,9 @@ test('English UI keeps free-text correction reason unchanged', async () => {
     <DocumentsContent state={state()} onHome={() => {}} onRefresh={() => {}} />,
   );
   expect(screen.getByText('Passport')).toBeTruthy();
-  expect(screen.getByText('Correction Requested')).toBeTruthy();
+  expect(
+    screen.getByText(i18n.t('documents.status.correction_requested')),
+  ).toBeTruthy();
   expect(
     screen.getByText('Reason: Foto borrosa, vuelva a tomarla'),
   ).toBeTruthy();

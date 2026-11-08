@@ -68,12 +68,49 @@ test('measured preview needs an explicit save, and queued feedback never implies
     />,
   );
   expect(
-    screen.getByText(i18n.t('capture.bytes', { count: 1234 })),
-  ).toBeTruthy();
+    screen.queryByText(i18n.t('capture.bytes', { count: 1234 })),
+  ).toBeNull();
+  const { Image } = jest.requireMock('expo-image');
+  expect(Image.mock.calls.at(-1)[0].source.uri).toBe(value.preview.uri);
+  expect(Image.mock.calls.at(-1)[0].cachePolicy).toBe('none');
   expect(save).not.toHaveBeenCalled();
   await fireEvent.press(
     screen.getByRole('button', { name: i18n.t('capture.save') }),
   );
   expect(save).toHaveBeenCalledTimes(1);
   expect(screen.queryByText('Aprobado')).toBeNull();
+});
+
+test('saved capture feedback can advance to actual delivery evidence without claiming approval', async () => {
+  const value = state();
+  value.phase = 'saved';
+  value.savedActionId = 'saved-action';
+  const view = await render(
+    <CaptureContent
+      state={value}
+      label="Pasaporte"
+      savedStatus={i18n.t('ui.saved')}
+      onChoose={() => {}}
+      onSettings={() => {}}
+      onSave={() => {}}
+      onBack={() => {}}
+    />,
+  );
+  expect(screen.getByText(i18n.t('ui.saved'))).toBeTruthy();
+  await view.rerender(
+    <CaptureContent
+      state={value}
+      label="Pasaporte"
+      savedStatus={i18n.t('documents.status.pending_review')}
+      onChoose={() => {}}
+      onSettings={() => {}}
+      onSave={() => {}}
+      onBack={() => {}}
+    />,
+  );
+  expect(screen.queryByText(i18n.t('ui.saved'))).toBeNull();
+  expect(
+    screen.getByText(i18n.t('documents.status.pending_review')),
+  ).toBeTruthy();
+  expect(screen.queryByText(i18n.t('documents.status.approved'))).toBeNull();
 });

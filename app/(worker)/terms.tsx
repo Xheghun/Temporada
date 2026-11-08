@@ -7,6 +7,10 @@ export default function Terms() {
   return (
     <TermsContent
       state={state}
+      onBack={() => {
+        if (router.canGoBack()) router.back();
+        else router.replace('/(worker)/home');
+      }}
       onConfirm={(version, generation, replacesActionId) => {
         void service.confirm(version, generation, replacesActionId);
       }}

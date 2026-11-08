@@ -17,7 +17,7 @@ export default function WorkerIdentity() {
       <Stack.Screen
         options={{
           title: translate('identityTitle'),
-          headerBackVisible: false,
+          headerBackVisible: true,
         }}
       />
       <Body>{translate('signedInAs')}</Body>

@@ -9,13 +9,18 @@ export default function WorkerLayout() {
   return state.phase === 'ready' ? (
     <Stack key={state.generation}>
       <Stack.Screen
+        name="job"
+        options={{ title: translate('ui.job'), headerShown: false }}
+      />
+      <Stack.Screen
         name="home"
-        options={{ title: translate('home.title'), headerBackVisible: false }}
+        options={{ title: translate('home.title'), headerShown: false }}
       />
       <Stack.Screen
         name="terms"
         options={{
           title: translate('home.terms'),
+          headerShown: false,
           headerBackVisible: true,
           headerBackTitle: translate('home.title'),
         }}
@@ -24,6 +29,7 @@ export default function WorkerLayout() {
         name="documents"
         options={{
           title: translate('documents.title'),
+          headerShown: false,
           headerBackTitle: translate('home.title'),
         }}
       />
@@ -31,6 +37,7 @@ export default function WorkerLayout() {
         name="capture"
         options={{
           title: translate('capture.title'),
+          headerShown: false,
           headerBackTitle: translate('documents.title'),
         }}
       />

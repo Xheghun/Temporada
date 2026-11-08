@@ -1,3 +1,4 @@
+import { PrimaryNavigation } from '@/design-system/components/primary-navigation';
 import { Redirect, router } from 'expo-router';
 import { useCapture } from '@/features/capture';
 import { useDocuments, DocumentsContent } from '@/features/documents';
@@ -8,6 +9,12 @@ export default function Documents() {
   return (
     <DocumentsContent
       state={state}
+      footer={
+        <PrimaryNavigation
+          selected="documents"
+          documentsEnabled={service.isEnabled()}
+        />
+      }
       onCapture={
         capture.service.isEnabled()
           ? (documentType, expectedSubmissionId) => {

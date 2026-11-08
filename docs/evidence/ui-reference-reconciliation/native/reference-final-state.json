@@ -1,0 +1,23 @@
+{
+  "actions": [
+    {
+      "actionId": "49c1064b-f7a6-4bed-a008-99b6a3d48de8",
+      "workerId": "ana",
+      "kind": "document_upload",
+      "status": "delivered",
+      "attempts": 1
+    },
+    {
+      "actionId": "b34a6fa7-0aee-4902-a4da-d70560fecd29",
+      "workerId": "ana",
+      "kind": "terms_acceptance",
+      "status": "delivered",
+      "attempts": 1
+    }
+  ],
+  "refresh": [
+    ["ana", 0, 0],
+    ["carla", 0, 0],
+    ["bruno", 0, 0]
+  ]
+}

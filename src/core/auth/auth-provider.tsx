@@ -1,3 +1,4 @@
+import { LanguagePreferenceContext } from '../i18n/language-control';
 import { useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
@@ -50,15 +51,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, []);
   if (state.kind === 'ready')
     return (
-      <AuthContext.Provider value={state.runtime.auth}>
-        <AssignmentContext.Provider value={state.runtime.assignment}>
-          <DocumentsContext.Provider value={state.runtime.documents}>
-            <CaptureContext.Provider value={state.runtime.capture}>
-              {children}
-            </CaptureContext.Provider>
-          </DocumentsContext.Provider>
-        </AssignmentContext.Provider>
-      </AuthContext.Provider>
+      <LanguagePreferenceContext.Provider value={state.runtime.setLanguage}>
+        <AuthContext.Provider value={state.runtime.auth}>
+          <AssignmentContext.Provider value={state.runtime.assignment}>
+            <DocumentsContext.Provider value={state.runtime.documents}>
+              <CaptureContext.Provider value={state.runtime.capture}>
+                {children}
+              </CaptureContext.Provider>
+            </DocumentsContext.Provider>
+          </AssignmentContext.Provider>
+        </AuthContext.Provider>
+      </LanguagePreferenceContext.Provider>
     );
   return (
     <View style={{ flex: 1, justifyContent: 'center', padding: 24, gap: 16 }}>

@@ -27,3 +27,9 @@ Filesystem and SQLite cannot share a transaction. This design compensates and re
 ## Verification
 
 See [executed tests and Android evidence](evidence/document-capture.md). `/dev/capture-inspection` is a read-only assessment-mode probe scoped to the selected worker. It reports action IDs/status, byte count/digest-match booleans and file/journal counts; no tokens, image data or private URIs. It is disabled outside development assessment mode.
+
+## Subsequent SDD-022 presentation
+
+The shared page is card-free. The capture screen has photo guidance, an empty-photo area, the real cache-disabled private preview and one dominant action: camera before selection, explicit Use this photo after selection. Retake and gallery become secondary actions. Ordinary byte counts are removed; permission/settings and saving failures remain actionable. Service compression, measured byte limit, SHA-256, private file journal, commit, cleanup and worker guards are unchanged. Targeted preview/permission tests pass; native and file lifecycle results are recorded separately.
+
+Capture’s saved feedback now follows the existing document snapshot for its saved action, so it advances to sending, retry, review or failure when known. If the projection has not arrived, the fallback confirms local persistence and directs the worker to Documents without asserting delivery state. This changes presentation only; the added regression passed.

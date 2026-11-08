@@ -1,0 +1,90 @@
+{
+  "baseCommit": "b2f7d075d2f4465305c74e66b8e7d68cb42041e4",
+  "capturedFromWorkingTree": true,
+  "finalApplicationTreeSha256": "b44c2516d6700c92d45bc825f608befb673a36412ad8ccaaa2dd7c38801619c9",
+  "environment": "Android 16/API 36, emulator-5554, Expo Go, density 320; 393x852dp reference pass; 360x640dp/130% accessibility pass",
+  "sourceQualification": "Captures span the working-tree reconciliation. Final auth images include keyboard avoidance. Home precedes its large-text offline-wrap-only fix; Job/Terms/Documents/Capture precede keyboard avoidance. These later changes do not alter their shown keyboard-closed geometry. No screenshot is relabeled as captured at a later commit.",
+  "screens": [
+    {
+      "screen": "01_home",
+      "file": "current/01_home.png",
+      "sha256": "c2abab19a4b17322d37c48cb4d0e927c6162b83294829174cda200e4e382def9",
+      "pixels": [786, 1704],
+      "density": 320,
+      "fontScale": 1.0,
+      "language": "en",
+      "capturedAtFileMtimeUTC": "2026-11-08T12:11:58.207837+00:00"
+    },
+    {
+      "screen": "02_terms",
+      "file": "current/02_terms.png",
+      "sha256": "3978dffca002d6900e7fc65c09db5828d366c4e4e8f54a04048fa96d18c15d82",
+      "pixels": [786, 1704],
+      "density": 320,
+      "fontScale": 1.0,
+      "language": "en",
+      "capturedAtFileMtimeUTC": "2026-11-08T12:09:04.707955+00:00"
+    },
+    {
+      "screen": "03_documents",
+      "file": "current/03_documents.png",
+      "sha256": "e48e98893562d9c2ecf84f0a505515297ee06c53ec9012f98e61d28f1cd64246",
+      "pixels": [786, 1704],
+      "density": 320,
+      "fontScale": 1.0,
+      "language": "en",
+      "capturedAtFileMtimeUTC": "2026-11-08T12:11:47.647477+00:00"
+    },
+    {
+      "screen": "04_upload",
+      "file": "current/04_upload.png",
+      "sha256": "fd44378890f3d45abc03c6dd55e735184bf2f191cb683c93c3893d9211245323",
+      "pixels": [786, 1704],
+      "density": 320,
+      "fontScale": 1.0,
+      "language": "en",
+      "capturedAtFileMtimeUTC": "2026-11-08T12:10:10.062240+00:00"
+    },
+    {
+      "screen": "05_my_job",
+      "file": "current/05_my_job.png",
+      "sha256": "7117232a1ffbe1b14ed04bc3f8eae8c41b9b8a5342a807bc00a76ad7c69139e1",
+      "pixels": [786, 1704],
+      "density": 320,
+      "fontScale": 1.0,
+      "language": "en",
+      "capturedAtFileMtimeUTC": "2026-11-08T12:09:25.450081+00:00"
+    },
+    {
+      "screen": "06_sign_in",
+      "file": "current/06_sign_in.png",
+      "sha256": "3c9ccd0ab8cfe3978e74a806ed62a6605eac58d14253081d0ba66cc130d607e5",
+      "pixels": [786, 1704],
+      "density": 320,
+      "fontScale": 1.0,
+      "language": "en",
+      "capturedAtFileMtimeUTC": "2026-11-08T12:23:43.518712+00:00"
+    },
+    {
+      "screen": "07_otp",
+      "file": "current/07_otp.png",
+      "sha256": "05cc9791702acc27c9ef69afec8b83e4cdcf9d6e25f181360ff57c8073ff9f1c",
+      "pixels": [786, 1704],
+      "density": 320,
+      "fontScale": 1.0,
+      "language": "en",
+      "capturedAtFileMtimeUTC": "2026-11-08T12:24:17.465100+00:00"
+    },
+    {
+      "screen": "08_worker_selection",
+      "file": "current/08_worker_selection.png",
+      "sha256": "9c9e720ca537121811267f6ca6a9816dec87929f270750a477c426a2c2969136",
+      "pixels": [786, 1704],
+      "density": 320,
+      "fontScale": 1.0,
+      "language": "en",
+      "capturedAtFileMtimeUTC": "2026-11-08T12:24:45.886037+00:00"
+    }
+  ],
+  "finalSourceCommit": "bd9ab70dd66e5b45ef0cd327e9d1a222d1d8ca32"
+}

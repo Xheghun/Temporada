@@ -1,4 +1,18 @@
-import { ActivityIndicator, Text, View, StyleSheet } from 'react-native';
+import { formatSeasonDate } from './season-date';
+import {
+  BrandHeader,
+  ContextHeader,
+  Eyebrow,
+  InformationPanel,
+  TextAction,
+} from '../../../design-system/components/screen-chrome';
+import {
+  ActivityIndicator,
+  Pressable,
+  Text,
+  View,
+  StyleSheet,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
   AuthPage,
@@ -9,13 +23,31 @@ import {
 } from '../../../design-system/components/auth-controls';
 import type { AssignmentState } from '../assignment-service';
 import { assignmentFacts } from '../domain/view-state';
+import {
+  SectionHeading,
+  ListRow,
+  Disclosure,
+  StatusIndicator,
+  WorkerAvatar,
+} from '../../../design-system/components/worker-controls';
+import type { NextAction } from '../domain/next-action';
 import { tokens } from '../../../design-system/tokens';
 export function Card({ children }: { children: React.ReactNode }) {
   return <View style={styles.card}>{children}</View>;
 }
-function Status({ text }: { text: string }) {
+function Status({
+  text,
+  needsAttention = false,
+}: {
+  text: string;
+  needsAttention?: boolean;
+}) {
   return (
-    <Text selectable accessibilityLiveRegion="polite" style={styles.status}>
+    <Text
+      selectable
+      accessibilityLiveRegion="polite"
+      style={[styles.status, needsAttention && { color: '#9B4E31' }]}
+    >
       {text}
     </Text>
   );
@@ -29,7 +61,7 @@ export function CacheState({
 }) {
   const { t: translate } = useTranslation();
   if (
-    state.loading ||
+    (!state.data?.assignment && state.loading) ||
     (!state.data?.assignment &&
       state.online &&
       !state.data?.refreshError &&
@@ -60,160 +92,189 @@ export function HomeContent({
   workerName,
   onTerms,
   onRefresh,
-  onLanguage,
-  onSwitch,
-  onLogout,
-  shared,
   onDocuments,
+  onJob,
+  onProfile,
+  nextAction = 'refresh',
+  documentRows = [],
+  footer,
 }: {
   state: AssignmentState;
   workerName: string;
   onTerms(): void;
   onRefresh(): void;
-  onLanguage(): void;
-  onSwitch(): void;
-  onLogout(): void;
-  shared: boolean;
   onDocuments?: (() => void) | undefined;
+  onJob?: (() => void) | undefined;
+  onProfile?: (() => void) | undefined;
+  nextAction?: NextAction;
+  documentRows?: { title: string; status: string }[];
+  footer?: React.ReactNode;
 }) {
-  const { t: translate, i18n } = useTranslation();
-  const data = state.data,
-    assignment = data?.assignment,
-    facts = data ? assignmentFacts(data) : null;
-  const locale = i18n.resolvedLanguage === 'en' ? 'en-US' : 'es-MX';
+  const { t: translate } = useTranslation();
+  const assignment = state.data?.assignment;
+  const needsDocuments = ['correction', 'missing', 'failed'].includes(
+    nextAction,
+  );
+  const onNext =
+    nextAction === 'terms'
+      ? onTerms
+      : needsDocuments
+        ? onDocuments
+        : nextAction === 'refresh'
+          ? onRefresh
+          : undefined;
   return (
-    <AuthPage>
-      <Heading>{workerName}</Heading>
-      <Action
-        secondary
-        label={translate('home.changeLanguage')}
-        onPress={onLanguage}
-      />
-      <Status
-        text={translate(
-          state.online ? 'home.connectionAvailable' : 'home.offline',
-        )}
-      />
-      {assignment && facts ? (
+    <AuthPage
+      contentGap={0}
+      footer={footer}
+      header={
+        <BrandHeader
+          showLanguage
+          trailing={
+            onProfile ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={translate('ui.profile')}
+                onPress={onProfile}
+                style={{
+                  minWidth: 48,
+                  minHeight: 48,
+                  alignItems: 'flex-end',
+                  justifyContent: 'center',
+                }}
+              >
+                <WorkerAvatar name={workerName} />
+              </Pressable>
+            ) : null
+          }
+        />
+      }
+    >
+      <Heading>{translate('ui.greeting', { name: workerName })}</Heading>
+      <View style={{ marginTop: 12 }}>
+        <Body>{translate('ui.subtitle')}</Body>
+      </View>
+      {!state.online ? (
+        <View
+          style={{
+            marginTop: 20,
+            flexDirection: 'row',
+            gap: 10,
+            alignItems: 'center',
+          }}
+        >
+          <View
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: 4,
+              backgroundColor: tokens.colors.accent,
+            }}
+          />
+          <View style={{ flex: 1 }}>
+            <StatusIndicator>{translate('home.offline')}</StatusIndicator>
+          </View>
+        </View>
+      ) : null}
+      <ErrorNotice code={state.error} />
+      {assignment ? (
         <>
-          <Card>
-            <Text style={styles.overline}>{translate('home.assignment')}</Text>
-            <Heading>{assignment.assignment.employer}</Heading>
-            <Body>
-              {translate('home.order', { id: assignment.assignment.orderId })}
-            </Body>
-            <Body>{assignment.assignment.worksite}</Body>
-            <Body>
-              {translate('home.season', {
-                start: formatSeasonDate(
-                  assignment.assignment.seasonStart,
-                  locale,
-                ),
-                end: formatSeasonDate(assignment.assignment.seasonEnd, locale),
-              })}
-            </Body>
-          </Card>
-          <Card>
-            <Text style={styles.section}>{translate('home.syncTitle')}</Text>
-            <Status
-              text={translate('home.pending', { count: facts.pendingCount })}
-            />
-            <Body>
-              {translate('home.attention', { count: facts.attentionCount })}
-            </Body>
-            {data.cachedAt !== null ? (
-              <Body>
-                {translate('home.cachedAt', {
-                  date: new Intl.DateTimeFormat(locale, {
-                    dateStyle: 'medium',
-                    timeStyle: 'short',
-                  }).format(new Date(data.cachedAt)),
-                })}
-              </Body>
+          <View
+            style={[styles.featured, { marginTop: state.online ? 28 : 20 }]}
+          >
+            <Text style={styles.taskEyebrow}>
+              {translate('reference.upNext')}
+            </Text>
+            <Text accessibilityRole="header" style={styles.featuredTitle}>
+              {translate(`ui.next.${nextAction}`)}
+            </Text>
+            <Text style={styles.featuredBody}>
+              {translate(
+                needsDocuments
+                  ? 'ui.next.documentsHint'
+                  : `ui.next.${nextAction}Hint`,
+              )}
+            </Text>
+            {onNext ? (
+              <View style={{ marginTop: 8 }}>
+                <Action
+                  compact
+                  arrow
+                  highlighted
+                  secondary
+                  label={translate(
+                    nextAction === 'terms'
+                      ? 'ui.reviewTerms'
+                      : needsDocuments
+                        ? 'home.openDocuments'
+                        : 'home.refresh',
+                  )}
+                  onPress={onNext}
+                  busy={nextAction === 'refresh' && state.refreshing}
+                />
+              </View>
             ) : null}
-            {data.refreshNeeded ? (
+          </View>
+          <View style={{ marginTop: 16 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 16,
+                minHeight: 48,
+              }}
+            >
+              <SectionHeading>
+                {translate('reference.yourDocuments')}
+              </SectionHeading>
+              {onDocuments ? (
+                <TextAction
+                  label={translate('reference.viewAll')}
+                  onPress={onDocuments}
+                />
+              ) : null}
+            </View>
+            {documentRows.map((document, index) => (
+              <ListRow
+                key={document.title}
+                number={index + 1}
+                title={document.title}
+                detail={document.status}
+                onPress={onDocuments}
+              />
+            ))}
+            {!onDocuments ? (
+              <Body>{translate('home.documentsUnavailable')}</Body>
+            ) : null}
+          </View>
+          <View style={{ marginTop: 24 }}>
+            <InformationPanel>
+              <Eyebrow>{translate('ui.job')}</Eyebrow>
+              <ListRow
+                title={assignment.assignment.employer}
+                detail={assignment.assignment.worksite}
+                onPress={onJob}
+              />
+            </InformationPanel>
+          </View>
+          {state.data?.refreshNeeded ? (
+            <View style={{ marginTop: 16 }}>
               <Body>
                 {translate(
-                  data.refreshError
+                  state.data.refreshError
                     ? 'home.refreshFailed'
                     : 'home.refreshPending',
                 )}
               </Body>
-            ) : null}
-            <ErrorNotice code={state.error} />
-            <Action
-              secondary
-              label={translate('home.refresh')}
-              busy={state.refreshing}
-              onPress={onRefresh}
-            />
-          </Card>
-          <Card>
-            <Text style={styles.section}>{translate('home.terms')}</Text>
-            <Body>
-              {translate('terms.version', {
-                version: assignment.terms.termsVersionId,
-              })}
-            </Body>
-            <Status text={translate(`terms.status.${facts.termsStatus}`)} />
-            <Body>
-              {
-                assignment.terms.summary[
-                  i18n.resolvedLanguage === 'en' ? 'en' : 'es'
-                ]
-              }
-            </Body>
-            <Action label={translate('home.openTerms')} onPress={onTerms} />
-          </Card>
-          <Card>
-            <Text style={styles.section}>{translate('home.timeline')}</Text>
-            <Body>{translate('home.sessionFact')}</Body>
-            <Body>{translate('home.assignmentFact')}</Body>
-            <Body>
-              {translate('home.termsFact', {
-                status: translate(`terms.status.${facts.termsStatus}`),
-              })}
-            </Body>
-            <Body>
-              {translate('home.catalogFact', {
-                count: assignment.requiredDocuments.filter(
-                  (document) => document.required,
-                ).length,
-              })}
-            </Body>
-          </Card>
+            </View>
+          ) : null}
         </>
       ) : (
-        <CacheState state={state} onRefresh={onRefresh} />
+        <View style={{ marginTop: 24 }}>
+          <CacheState state={state} onRefresh={onRefresh} />
+        </View>
       )}
-      <Card>
-        <Text style={styles.section}>{translate('home.documents')}</Text>
-        <Body>
-          {translate(
-            onDocuments
-              ? 'home.documentsAvailable'
-              : 'home.documentsUnavailable',
-          )}
-        </Body>
-        <Action
-          disabled={!onDocuments}
-          secondary
-          label={translate(
-            onDocuments ? 'home.openDocuments' : 'home.documentsSoon',
-          )}
-          onPress={onDocuments ?? onTerms}
-        />
-      </Card>
-
-      {shared ? (
-        <Action
-          secondary
-          label={translate('switchWorker')}
-          onPress={onSwitch}
-        />
-      ) : null}
-      <Action secondary label={translate('logout')} onPress={onLogout} />
-      <Body>{translate('logoutHint')}</Body>
     </AuthPage>
   );
 }
@@ -222,6 +283,7 @@ export function TermsContent({
   onConfirm,
   onRefresh,
   onHome,
+  onBack,
 }: {
   state: AssignmentState;
   onConfirm(
@@ -231,24 +293,28 @@ export function TermsContent({
   ): void;
   onRefresh(): void;
   onHome(): void;
+  onBack?: () => void;
 }) {
   const { t: translate, i18n } = useTranslation();
   const data = state.data,
     assignment = data?.assignment;
+  const header = (
+    <ContextHeader
+      context={translate('reference.context.terms')}
+      onBack={onBack ?? onHome}
+    />
+  );
   if (!assignment || !data)
     return (
-      <AuthPage>
-        <Heading>{translate('home.terms')}</Heading>
-        <CacheState state={state} onRefresh={onRefresh} />
-        <Action
-          secondary
-          label={translate('terms.backHome')}
-          onPress={onHome}
-        />
+      <AuthPage header={header} headerGap={24} contentGap={0}>
+        <Heading>{translate('reference.beforeBegin')}</Heading>
+        <View style={{ marginTop: 24 }}>
+          <CacheState state={state} onRefresh={onRefresh} />
+        </View>
       </AuthPage>
     );
   const facts = assignmentFacts(data),
-    language = i18n.resolvedLanguage === 'en' ? 'en' : 'es';
+    language = i18n.resolvedLanguage === 'es' ? 'es' : 'en';
   const staleVersions = [
     ...new Set(
       data.actions
@@ -265,111 +331,177 @@ export function TermsContent({
     ),
   ];
   return (
-    <AuthPage>
-      <Heading>{translate('home.terms')}</Heading>
-      <Body>
-        {translate('terms.version', {
-          version: assignment.terms.termsVersionId,
-        })}
-      </Body>
-      <Status text={translate(`terms.status.${facts.termsStatus}`)} />
-      <Body>{assignment.terms.summary[language]}</Body>
+    <AuthPage header={header} headerGap={24} contentGap={0}>
+      <Heading>{translate('reference.beforeBegin')}</Heading>
+      <View style={{ marginTop: 12 }}>
+        <Body>{translate('reference.termsIntro')}</Body>
+      </View>
+      <View style={styles.version}>
+        <Eyebrow>{translate('reference.currentVersion')}</Eyebrow>
+        <Text selectable style={styles.versionValue}>
+          {translate('terms.version', {
+            version: assignment.terms.termsVersionId,
+          })}
+        </Text>
+        <Status
+          needsAttention={
+            facts.canConfirm || facts.termsStatus === 'update_required'
+          }
+          text={translate(`terms.status.${facts.termsStatus}`)}
+        />
+      </View>
+      <View style={styles.termsSection}>
+        <Text accessibilityRole="header" style={styles.section}>
+          {translate('reference.assignmentTitle')}
+        </Text>
+        <Body>
+          {translate('reference.assignmentSummary', {
+            employer: assignment.assignment.employer,
+            worksite: assignment.assignment.worksite,
+            start: formatSeasonDate(
+              assignment.assignment.seasonStart,
+              language === 'es' ? 'es-MX' : 'en-US',
+            ),
+            end: formatSeasonDate(
+              assignment.assignment.seasonEnd,
+              language === 'es' ? 'es-MX' : 'en-US',
+            ),
+          })}
+        </Body>
+      </View>
+      <View style={styles.termsSection}>
+        <Text accessibilityRole="header" style={styles.section}>
+          {translate('reference.termsSummary')}
+        </Text>
+        <Body>{assignment.terms.summary[language]}</Body>
+      </View>
       {facts.needsReconfirmation ? (
-        <Body>{translate('terms.reconfirm')}</Body>
+        <View style={{ marginTop: 16 }}>
+          <Body>{translate('terms.reconfirm')}</Body>
+        </View>
       ) : null}
       {facts.termsStatus === 'update_required' ? (
-        <Body>{translate('terms.updateRequired')}</Body>
-      ) : null}
-      {facts.termsStatus === 'pending_sync' ? (
-        <Body>{translate('terms.pendingHint')}</Body>
+        <View style={{ marginTop: 16 }}>
+          <Body>{translate('terms.updateRequired')}</Body>
+        </View>
       ) : null}
       {facts.termsStatus === 'failed' || facts.replacementActionId ? (
-        <Body>{translate('terms.failedHint')}</Body>
+        <View style={{ marginTop: 16 }}>
+          <Body>{translate('terms.failedHint')}</Body>
+        </View>
       ) : null}
+      <View style={{ marginTop: 20 }}>
+        <InformationPanel>
+          <Body>{translate('reference.termsOffline')}</Body>
+        </InformationPanel>
+      </View>
       <ErrorNotice code={state.error} />
-      {data.actions.some(
-        (action) =>
-          action.id === state.savedActionId &&
-          action.payload.kind === 'terms_acceptance' &&
-          action.payload.termsVersionId === assignment.terms.termsVersionId &&
-          !['stale', 'failed_permanent'].includes(action.status),
-      ) ? (
-        <Text
-          accessibilityRole="alert"
-          accessibilityLiveRegion="polite"
-          style={styles.status}
-        >
-          {translate('terms.saved')}
-        </Text>
-      ) : null}
-      <Action
-        label={translate(
-          facts.replacementActionId
-            ? 'terms.replaceFailed'
-            : facts.needsReconfirmation
-              ? 'terms.confirmNew'
-              : 'terms.confirm',
-          { version: assignment.terms.termsVersionId },
-        )}
-        disabled={!facts.canConfirm || state.generation === null}
-        busy={state.saving}
-        onPress={() => {
-          if (state.generation !== null)
-            onConfirm(
-              assignment.terms.termsVersionId,
-              state.generation,
-              facts.replacementActionId ?? undefined,
-            );
-        }}
-      />
+      <View style={{ marginTop: 20 }}>
+        <Action
+          label={translate(
+            facts.replacementActionId
+              ? 'terms.replaceFailed'
+              : facts.needsReconfirmation
+                ? 'terms.confirmNew'
+                : 'terms.confirm',
+            { version: assignment.terms.termsVersionId },
+          )}
+          disabled={!facts.canConfirm || state.generation === null}
+          busy={state.saving}
+          onPress={() => {
+            if (state.generation !== null)
+              onConfirm(
+                assignment.terms.termsVersionId,
+                state.generation,
+                facts.replacementActionId ?? undefined,
+              );
+          }}
+        />
+      </View>
       {data.refreshNeeded ||
       facts.termsStatus === 'update_required' ||
       facts.termsStatus === 'failed' ? (
-        <Action
-          secondary
+        <TextAction
           label={translate('home.refresh')}
-          busy={state.refreshing}
+          disabled={state.refreshing}
           onPress={onRefresh}
         />
       ) : null}
       {staleVersions.length ? (
-        <Card>
-          <Text style={styles.section}>{translate('terms.history')}</Text>
+        <Disclosure
+          key={`${state.workerId}:${state.generation}`}
+          title={translate('terms.history')}
+        >
           {staleVersions.map((version) => (
             <Body key={version}>
               {translate('terms.staleHistory', { version })}
             </Body>
           ))}
-        </Card>
+        </Disclosure>
       ) : null}
-      <Action secondary label={translate('terms.backHome')} onPress={onHome} />
+      <TextAction label={translate('terms.backHome')} onPress={onHome} />
     </AuthPage>
   );
 }
-function formatSeasonDate(value: string, locale: string) {
-  const parsed = new Date(value + 'T00:00:00Z');
-  return Number.isNaN(parsed.valueOf())
-    ? value
-    : new Intl.DateTimeFormat(locale, {
-        dateStyle: 'medium',
-        timeZone: 'UTC',
-      }).format(parsed);
-}
 const styles = StyleSheet.create({
+  featured: {
+    padding: 20,
+    gap: 12,
+    borderRadius: 16,
+    backgroundColor: tokens.colors.primary,
+  },
+  featuredTitle: {
+    fontSize: 26,
+    lineHeight: 32,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginTop: 12,
+  },
+  featuredBody: { fontSize: 14, lineHeight: 22, color: '#D1DED3' },
+  taskEyebrow: {
+    fontSize: 11,
+    lineHeight: 16,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: '#D1DED3',
+  },
   card: {
     gap: 12,
     padding: 16,
-    borderWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: tokens.colors.border,
-    borderRadius: 12,
-    backgroundColor: tokens.colors.surface,
   },
-  section: { fontSize: 21, fontWeight: '700', color: tokens.colors.text },
+  version: {
+    marginTop: 24,
+    paddingBottom: 24,
+    gap: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: tokens.colors.border,
+  },
+  versionValue: {
+    fontSize: 32,
+    lineHeight: 40,
+    fontWeight: '700',
+    color: tokens.colors.primary,
+  },
+  termsSection: {
+    paddingVertical: 24,
+    gap: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: tokens.colors.border,
+  },
+  section: {
+    fontSize: 16,
+    lineHeight: 22,
+    fontWeight: '700',
+    color: tokens.colors.text,
+  },
   overline: { fontSize: 16, fontWeight: '600', color: tokens.colors.muted },
   status: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: '700',
-    lineHeight: 26,
+    lineHeight: 20,
     color: tokens.colors.primary,
   },
 });

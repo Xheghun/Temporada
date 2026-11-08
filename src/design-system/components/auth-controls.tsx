@@ -1,5 +1,7 @@
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -7,26 +9,63 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import type { ComponentProps, PropsWithChildren } from 'react';
+import type { ComponentProps, PropsWithChildren, ReactNode } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { tokens } from '../tokens';
-export function AuthPage({ children }: PropsWithChildren) {
+import { BrandHeader } from './screen-chrome';
+export function AuthPage({
+  children,
+  footer,
+  headerTrailing,
+  header,
+  contentGap = 24,
+  headerGap = 28,
+}: PropsWithChildren<{
+  footer?: ReactNode;
+  headerTrailing?: ReactNode;
+  header?: ReactNode;
+  contentGap?: number;
+  headerGap?: number;
+}>) {
   const insets = useSafeAreaInsets();
   return (
-    <ScrollView
-      style={styles.page}
-      contentInsetAdjustmentBehavior="automatic"
-      keyboardShouldPersistTaps="handled"
-      automaticallyAdjustKeyboardInsets
-      contentContainerStyle={[
-        styles.content,
-        { paddingBottom: Math.max(insets.bottom, 24) },
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={[
+        styles.page,
+        { paddingTop: insets.top, paddingBottom: footer ? 0 : insets.bottom },
       ]}
     >
-      <Text style={styles.brand}>Temporada</Text>
-      <View style={styles.card}>{children}</View>
-    </ScrollView>
+      <ScrollView
+        style={styles.page}
+        contentInsetAdjustmentBehavior="automatic"
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: 36,
+            gap: headerGap,
+            paddingBottom: 24,
+          },
+        ]}
+      >
+        {header ?? <BrandHeader showLanguage trailing={headerTrailing} />}
+        <View style={[styles.stack, { gap: contentGap }]}>{children}</View>
+      </ScrollView>
+      {footer ? (
+        <View
+          style={{
+            paddingHorizontal: 0,
+            paddingBottom: Math.max(insets.bottom, 8),
+            backgroundColor: tokens.colors.background,
+          }}
+        >
+          {footer}
+        </View>
+      ) : null}
+    </KeyboardAvoidingView>
   );
 }
 export function Heading({ children }: PropsWithChildren) {
@@ -49,12 +88,18 @@ export function Action({
   disabled = false,
   busy = false,
   secondary = false,
+  highlighted = false,
+  arrow = false,
+  compact = false,
 }: {
   label: string;
   onPress(): void;
   disabled?: boolean;
   busy?: boolean;
   secondary?: boolean;
+  highlighted?: boolean;
+  arrow?: boolean;
+  compact?: boolean;
 }) {
   return (
     <Pressable
@@ -67,6 +112,11 @@ export function Action({
       style={({ pressed }) => [
         styles.button,
         secondary && styles.secondary,
+        compact && { minHeight: 48, paddingVertical: 12 },
+        highlighted && {
+          backgroundColor: tokens.colors.highlighted,
+          borderWidth: 0,
+        },
         (disabled || busy) && { opacity: 0.65 },
         pressed &&
           !disabled &&
@@ -81,17 +131,32 @@ export function Action({
         <ActivityIndicator
           accessible={false}
           importantForAccessibility="no"
-          color={secondary ? tokens.colors.primary : '#FFFFFF'}
+          color={secondary || highlighted ? tokens.colors.primary : '#FFFFFF'}
         />
       ) : null}
       <Text
         style={[
           styles.buttonText,
-          secondary && { color: tokens.colors.primary },
+          (secondary || highlighted) && { color: tokens.colors.primary },
+          arrow && { textAlign: 'left', flex: 1 },
+          compact && { fontSize: 14, lineHeight: 20 },
         ]}
       >
         {label}
       </Text>
+      {arrow ? (
+        <Text
+          accessible={false}
+          style={{
+            fontSize: 22,
+            lineHeight: 22,
+            fontWeight: '700',
+            color: secondary || highlighted ? tokens.colors.primary : '#FFFFFF',
+          }}
+        >
+          ↗
+        </Text>
+      ) : null}
     </Pressable>
   );
 }
@@ -110,7 +175,7 @@ export function Field({
         {...props}
         accessibilityLabel={label}
         accessibilityHint={error ?? props.accessibilityHint}
-        style={styles.input}
+        style={[styles.input, props.style]}
       />
       {error ? (
         <Text
@@ -146,35 +211,38 @@ const styles = StyleSheet.create({
   brand: {
     color: tokens.colors.primary,
     fontSize: 22,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    fontWeight: '700',
   },
-  card: {
-    backgroundColor: tokens.colors.surface,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: tokens.colors.border,
-    padding: 24,
-    gap: 20,
+  stack: { gap: 24 },
+  heading: {
+    color: tokens.colors.text,
+    fontSize: 30,
+    lineHeight: 36,
+    fontWeight: '700',
   },
-  heading: { color: tokens.colors.text, fontSize: 30, fontWeight: '700' },
-  body: { fontSize: 18, color: tokens.colors.muted, lineHeight: 27 },
-  label: { color: tokens.colors.text, fontSize: 17, fontWeight: '600' },
+  body: { fontSize: 14, color: tokens.colors.muted, lineHeight: 22 },
+  label: {
+    color: tokens.colors.text,
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '600',
+  },
   input: {
     minHeight: 56,
-    fontSize: 20,
+    fontSize: 18,
     color: tokens.colors.text,
     borderWidth: 1,
-    borderColor: tokens.colors.muted,
-    borderRadius: 12,
+    borderColor: tokens.colors.secondary,
+    borderRadius: 10,
     padding: 14,
     backgroundColor: '#FFFFFF',
   },
   button: {
-    minHeight: 56,
-    padding: 16,
+    minHeight: 54,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     backgroundColor: tokens.colors.primary,
-    borderRadius: 12,
+    borderRadius: 10,
     flexDirection: 'row',
     gap: 10,
     alignItems: 'center',
@@ -186,11 +254,11 @@ const styles = StyleSheet.create({
     borderColor: tokens.colors.primary,
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
     flexShrink: 1,
     textAlign: 'center',
   },
-  error: { color: tokens.colors.error, fontSize: 17, lineHeight: 25 },
+  error: { color: tokens.colors.error, fontSize: 16, lineHeight: 25 },
 });

@@ -31,3 +31,7 @@ Open the application and use mock code 123456:
 Development assessment mode requires **DEV** plus EXPO_PUBLIC_ASSESSMENT_MODE=1. Production defaults closed; an HTTPS EXPO_PUBLIC_FLAGS_URL must return worker_authentication: true and EXPO_PUBLIC_API_URL must be HTTPS. Flags are checked at runtime creation, not continuously. No production flag/release approval is implied. Public environment variables must contain no secrets.
 
 SecureStore is a new native dependency/config plugin. Build a compatible native binary before release; do not OTA this change onto a binary without it. Expo Go was used for actual Android verification; no EAS/iOS build is claimed. [Executed evidence](evidence/worker-authentication.md).
+
+## Subsequent SDD-022 presentation
+
+Authentication now uses the shared card-free page, persisted language selector and worker rows with initials. OTP explains the requested phone through a token-free in-memory snapshot value that clears when verification ends; it is not added to secure or ordinary persisted records. No SMS or resend contract changed. Eight targeted auth/shared-control tests, typecheck, lint and architecture checks passed. Native checks for the redesign are recorded separately, not inferred from previous evidence.

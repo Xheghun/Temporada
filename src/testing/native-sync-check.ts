@@ -15,7 +15,6 @@ import { TransportError } from '../core/sync/types.ts';
 import type { SyncSession } from '../core/sync/types.ts';
 import type { OutboxAction } from '../core/offline/domain/types.ts';
 
-const databaseName = 'sync-proof.sqlite';
 // Dedicated development backend, reached through adb reverse. Never used by production runtime.
 const base = 'http://127.0.0.1:3001';
 function check(condition: unknown, code: string): asserts condition {
@@ -78,7 +77,15 @@ async function fixture() {
   );
   return { workerId: 'ana', uri: file.uri, byteSize: file.size, sha256 };
 }
-export async function runNativeSyncCheck(mode: string): Promise<string> {
+export async function runNativeSyncCheck(
+  mode: string,
+  isRedesignProof = false,
+): Promise<string> {
+  const databaseName = isRedesignProof
+    ? mode === 'classification'
+      ? 'redesign-classification-proof.sqlite'
+      : 'redesign-sync-proof.sqlite'
+    : 'sync-proof.sqlite';
   if (!__DEV__) throw new Error('developer_probe_disabled');
   if (mode === 'reset') {
     const database = await openDatabaseAsync(databaseName, {
@@ -288,6 +295,96 @@ export async function runNativeSyncCheck(mode: string): Promise<string> {
       );
       return 'OFFLINE_DELIVERY_PASSED: same two IDs/payloads/files after restart, one server receipt each; passport Pending Review.';
     }
+    if (mode === 'classification') {
+      check(session, 'proof_session_missing');
+      await worker.cacheAssignment(await api.assignment(session));
+      online = true;
+      const sizeFailure = await worker.enqueueDocument(
+        'passport',
+        await fixture(),
+      );
+      await post('/__dev/failures', { force413: true, serverErrorRate: 0 });
+      await engine.request();
+      check(
+        (await worker.listActions()).find(
+          (candidate) => candidate.id === sizeFailure.id,
+        )?.status === 'failed_permanent',
+        '413_not_permanent',
+      );
+      await post('/__dev/failures', { force413: false, serverErrorRate: 1 });
+      const transient = await worker.enqueueDocument(
+        'signed_contract',
+        await fixture(),
+      );
+      await engine.request();
+      const retry = (await worker.listActions()).find(
+        (candidate) => candidate.id === transient.id,
+      );
+      check(
+        retry?.status === 'retry_wait' && retry.nextAttemptAt > Date.now(),
+        '500_backoff_not_persisted',
+      );
+      await post('/__dev/failures', { serverErrorRate: 0 });
+      const validationFailure = await worker.enqueueDocument(
+        'ds160_confirmation',
+        await fixture(),
+      );
+      const transmit = api.send;
+      // Deliberately malformed wire field against the real mock; local intent/file remain untouched.
+      api.send = (captured, queued) =>
+        transmit(
+          captured,
+          queued.id === validationFailure.id &&
+            queued.payload.kind === 'document_upload'
+            ? {
+                ...queued,
+                payload: {
+                  ...queued.payload,
+                  documentType: 'unsupported_for_native_422',
+                },
+              }
+            : queued,
+        );
+      try {
+        await engine.request();
+      } finally {
+        api.send = transmit;
+      }
+      const invalid = (await worker.listActions()).find(
+        (candidate) => candidate.id === validationFailure.id,
+      );
+      check(
+        invalid?.status === 'failed_permanent' &&
+          invalid.lastErrorCode === 'unknown_document_type',
+        '422_not_permanent',
+      );
+      const replacement = await worker.enqueueDocument(
+        'passport',
+        await fixture(),
+        undefined,
+        sizeFailure.id,
+      );
+      await engine.request();
+      check(
+        (await worker.listActions()).find(
+          (candidate) => candidate.id === replacement.id,
+        )?.status === 'delivered',
+        'failure_blocked_unrelated_work',
+      );
+      await engine.manualRetry();
+      const actions = await worker.listActions();
+      check(
+        actions.find((candidate) => candidate.id === transient.id)?.status ===
+          'delivered',
+        '500_not_recovered',
+      );
+      check(
+        actions.find((candidate) => candidate.id === validationFailure.id)
+          ?.attemptCount === 1,
+        '422_automatically_retried',
+      );
+      return 'CLASSIFICATION_PASSED: real HTTP 500 persisted backoff and recovered; 413/422 stopped, explicit new-ID replacement delivered without unrelated blocking.';
+    }
     if (mode === 'drop-review') {
       online = true;
       for (const decision of ['approved', 'correction_requested'] as const) {
@@ -311,8 +408,9 @@ export async function runNativeSyncCheck(mode: string): Promise<string> {
           api.send = transmit;
         }
         check(
-          (await worker.listActions()).find((action) => action.id === action.id)
-            ?.status === 'retry_wait',
+          (await worker.listActions()).find(
+            (candidate) => candidate.id === action.id,
+          )?.status === 'retry_wait',
           'drop_did_not_retry:' +
             (await worker.listActions())
               .map((action) => action.status + '/' + action.lastErrorCode)
