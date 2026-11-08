@@ -42,6 +42,10 @@ Observed limitation: Expo development mode emitted a `ROUTE_NAMES_CHANGED` warni
 
 The emulator ends online, font scale 1.0, on the isolated verification backend with Carla’s new action delivered. Prior caches and proof records remain recoverable. New iOS, physical-camera quality, Android 9/2GB performance, signed release, spoken announcements and genuine recordings are NOT RUN/unclaimed. The existing six mandatory sync tests remain passing in test:ci; prior broader native evidence is historical, not a claim that all previous native scenarios were rerun here.
 
+## Source checksum clarification — 2026-11-08
+
+GitGuardian findings 39828756 and 39828757 refer to SHA-256 fingerprints of `src/core/auth/auth-provider.tsx` and `src/design-system/components/auth-controls.tsx` in the original manifest. Recomputing both from application commit `0019076` confirms they are public source-file checksums, not credentials. All 89 recorded file hashes were independently recomputed and matched. The manifest now uses explicit `path`/`sha256` records with a SHA-256 algorithm label; paths and hash values are unchanged. No scanner exclusion, credential rotation or shared-history rewrite is applied. Historical findings and the new head's GitGuardian result must be checked separately.
+
 ## Scope and follow-up
 
 Changes are presentation projections, Home composition/content, localized resources, tests and documentation. Persistence, auth, retry scheduling, transport, schemas, file lifecycle, dependencies and next-action priority are unchanged. Existing feature flags still gate the screens. Repository privacy, default-language amendment and other assessment findings remain separate.
