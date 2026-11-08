@@ -4,6 +4,12 @@ Temporada helps seasonal workers manage their job information, employment terms 
 
 Workers can sign in with a phone number, choose their identity on a shared device, review their assignment and submit document photos. Work is saved on the phone before it is sent, with clear feedback about delivery, staff review and corrections.
 
+## Assessment scope and timebox
+
+The original assessment implementation and verification stopped at **299.91 minutes**, within the five-hour coding limit. The [cutoff snapshot (`6db6a09`)](https://github.com/Xheghun/Temporada/tree/6db6a0960a913c957a208a656dd9b57e0829ab23) preserves that application and its recorded limitations. The [coding ledger](docs/coding-ledger.md) records the cutoff and subsequent work separately.
+
+**Current `main` includes additional work outside that timebox**, including the UI redesign. Later coding, fixes and verification must not be presented as part of the five-hour implementation. Use the cutoff snapshot to assess the original implementation; later versions are additional work for the assessor to consider at their discretion. Post-cutoff documentation was prepared separately, as permitted by the brief.
+
 ## Features
 
 - **A clear next step:** Home highlights outstanding terms or documents and shows the current job at a glance.
