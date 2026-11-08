@@ -3,6 +3,12 @@
 Target: 240 minutes. Hard stop: 300 minutes across all changes; never reset per branch.
 Planning/proposal time precedes this ledger. Setup and verification count; human review waits are recorded separately.
 
+## SDD-024 assessment disclosure — documentation only
+
+The user requested a README disclosure of post-assessment work. Branch `chore/SDD-024-assessment-timebox-disclosure` starts from reviewed main `0ff4087`, independently of the Home PR. Verified reachable cutoff commit `6db6a09` contains the 299.91-minute endpoint; application/dependency paths are unchanged between that snapshot and the pre-redesign `065cc9d` base. README now links the cutoff snapshot and explicitly distinguishes current main/additional redesign and fixes from the original five-hour implementation. Original ledger totals remain unchanged. README/ledger formatting and diff whitespace checks passed. No application code, application tests, native verification or recording work performed for this documentation change.
+
+## Original assessment record
+
 | Change           | Start UTC                        | End UTC                          | Coding minutes | Status                                          |
 | ---------------- | -------------------------------- | -------------------------------- | -------------- | ----------------------------------------------- |
 | project-scaffold | 2026-11-06T16:02:53.127966+00:00 | 2026-11-06T16:03:15.650588+00:00 | 0.38           | paused: managed filesystem denied .git creation |
