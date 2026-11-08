@@ -1,0 +1,29 @@
+[
+  ["Not confirmed", "[48,48][672,22]"],
+  [
+    "Terms v3 for JO-2026-0142: Valle Verde Farms, Yuma, Arizona, March 1–July 31, 2026.",
+    "[48,48][672,126]"
+  ],
+  ["View terms", "[48,172][672,208]"],
+  ["Your progress", "[48,335][672,392]"],
+  ["01", "[48,424][92,656]"],
+  ["Employment terms", "[158,424][672,468]"],
+  ["Not confirmed", "[158,480][672,524]"],
+  [
+    "The terms have changed. Review this version and confirm again if you agree.",
+    "[158,536][672,624]"
+  ],
+  ["02", "[48,688][92,820]"],
+  ["Document delivery", "[158,688][672,732]"],
+  ["1 of 3 required documents delivered", "[158,744][672,788]"],
+  ["03", "[48,852][92,1118]"],
+  ["Staff review", "[158,852][672,896]"],
+  ["Approved: 0 · Awaiting review: 1 · Corrections: 0", "[158,908][672,996]"],
+  [
+    "Only staff can approve documents. Sending and review are separate.",
+    "[158,1008][672,1096]"
+  ],
+  ["Home", "[110,1159][175,1192]"],
+  ["Documents", "[324,1159][447,1192]"],
+  ["My Job", "[589,1159][667,1192]"]
+]

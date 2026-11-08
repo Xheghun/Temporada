@@ -1,0 +1,20 @@
+[
+  ["temporada.", "[48,140][280,196]"],
+  ["EN / ES", "[461,146][568,189]"],
+  ["AL", "[611,140][661,196]"],
+  ["Hola, Ana López", "[48,272][672,344]"],
+  ["Todo lo que necesitas para tu temporada.", "[48,368][672,468]"],
+  ["En línea", "[48,508][672,552]"],
+  ["2 acciones pendientes de sincronizar", "[48,560][672,604]"],
+  ["TU PRÓXIMO PASO / TRABAJO", "[88,717][632,758]"],
+  ["Añade tus documentos obligatorios", "[88,806][632,998]"],
+  [
+    "Revisa tus documentos para ver qué necesita atención.",
+    "[88,1022][632,1118]"
+  ],
+  ["Ver documentos", "[120,1187][542,1118]"],
+  ["↗", "[562,1186][600,1118]"],
+  ["Inicio", "[103,1154][182,1197]"],
+  ["Documentos", "[295,1154][477,1197]"],
+  ["Mi trabajo", "[556,1154][699,1197]"]
+]

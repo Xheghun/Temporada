@@ -25,7 +25,7 @@ Feature-local and Android integration verification are recorded in dated docs/ev
 | R-EVIDENCE | project-scaffold, offline-integration, submission-documentation | SDD-001/016/017/021 | pre-coding Recording B preparation, capture during implementation, final verification; eight manual records; two real recordings or incomplete |
 | R-TIME | all changes; single ledger | SDD-001/017/019 | cumulative ledger; target 240/hard 300 minutes |
 
-Planning artifacts: requirements, architecture, data-model, sync-engine, api-contract, ui-spec, testing, tasks and this matrix exist. Executed implementation tests are recorded in the feature and integration evidence below. Original-brief comparison and real-backend contract approval remain pending; no release sign-off is implied.
+Planning artifacts: requirements, architecture, data-model, sync-engine, api-contract, ui-spec, testing, tasks and this matrix exist. Executed implementation tests are recorded in the feature and integration evidence below. The original brief’s Home contract is reconciled by SDD-023; other assessment findings and real-backend contract approval remain separate; no release sign-off is implied.
 
 ## Exact task ownership
 

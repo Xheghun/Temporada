@@ -1,0 +1,30 @@
+[
+  ["temporada.", "[48,142][242,194]"],
+  ["EN / ES", "[488,151][568,184]"],
+  ["CD", "[615,146][657,189]"],
+  ["Hello, Carla Díaz", "[48,272][672,344]"],
+  ["Everything you need for your season.", "[48,368][672,412]"],
+  ["Online", "[48,452][672,488]"],
+  ["0 actions pending sync", "[48,496][672,532]"],
+  ["UP NEXT / YOUR JOB", "[88,645][632,677]"],
+  ["Review your job terms", "[88,725][632,789]"],
+  [
+    "Read the current version and confirm when you are ready.",
+    "[88,813][632,901]"
+  ],
+  ["Review terms", "[120,969][547,1009]"],
+  ["↗", "[567,967][600,1011]"],
+  ["Your documents", "[48,1128][357,1118]"],
+  ["View all ↗", "[563,1139][672,1118]"],
+  ["01", "[48,1262][88,1118]"],
+  ["DS-160 confirmation", "[120,1235][626,1118]"],
+  ["›", "[658,1246][672,1118]"],
+  ["Home", "[110,1159][175,1192]"],
+  ["Documents", "[324,1159][447,1192]"],
+  ["My Job", "[589,1159][667,1192]"],
+  ["!", "[56,1117][76,1153]"],
+  [
+    "The action 'ROUTE_NAMES_CHANGED' with payload {\"routeNames\":[\"job\",\"home\",\"terms\",\"documents\",\"capture\",\"identity\"]} was not handled by any navigator.\n\nThis is a development-only warning and won't be shown in production.",
+    "[122,1113][626,1157]"
+  ]
+]
