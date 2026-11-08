@@ -156,3 +156,5 @@ SDD-023 GitGuardian follow-up — 2026-11-08: both flagged values were verified 
 SDD-027 — 2026-11-08: removed the two unrequested recording durations from README; recording links and headings are unchanged. Documentation-only formatting and diff checks; no application tests or device work.
 
 SDD-027 cleanup follow-up — 2026-11-08: removed docs/design-reference, docs/evidence, docs/ui-redesign.md and docs/ui-redesign-files.md at the user’s request. Historical verification links now point to the pre-cleanup Git revision; no application code, tests or recordings changed. Documentation formatting, link-target and diff checks apply; application/device tests NOT RUN.
+
+SDD-028 timeline follow-up — 2026-11-08: added the requested bottom-of-README project timeline, distinguishing the original core implementation/verification from later documentation, recordings, scenario demonstrations, code walkthroughs, UI redesign, Home fixes and additional testing. Checked the APK profiles and runtime API/feature-flag requirements without changing configuration. Documentation formatting and diff checks apply; no build or application/device tests run.
