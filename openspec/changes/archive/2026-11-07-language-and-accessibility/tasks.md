@@ -18,4 +18,4 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 - Only after review and a new explicit request may another named change be applied. Never treat completing this checklist as authorization for all siblings.
 - Archive/sync this change only through the appropriate later workflow; preserved programme reference is not an active or completed change.
 
-PR handoff: https://github.com/Xheghun/Temporada/pull/10. Executed local checks and native evidence: docs/evidence/language-and-accessibility.md. Human review/merge and hosted CI remain separate gates.
+PR handoff: https://github.com/Xheghun/Temporada/pull/10. Executed local checks and native evidence: [docs/evidence/language-and-accessibility.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/language-and-accessibility.md). Human review/merge and hosted CI remain separate gates.

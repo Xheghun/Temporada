@@ -10,7 +10,7 @@ Terms renders the cached localized summary and version. Confirmation captures th
 
 English is the initial language when no preference exists (SDD-015 user amendment); existing saved choices are preserved. Home toggles Spanish/English; schema v3 stores the app-wide preference without identity data, tokens or queue deletion. Migration/reopen coverage verifies pending intent survives the upgrade. Layouts scroll and avoid fixed content heights. The complete accessibility audit belongs to its later change.
 
-See [executed verification](evidence/home-and-terms.md). Camera, document status/corrections and full integration scenarios remain separate changes.
+See [executed verification](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/home-and-terms.md). Camera, document status/corrections and full integration scenarios remain separate changes.
 
 ## Subsequent SDD-022 redesign
 

@@ -16,7 +16,7 @@ The caller must supply verified durable private image bytes/digest (M7). This sc
 
 Spanish/English resources cover app-owned statuses, errors, history and accessibility controls. Server correction reasons remain verbatim. Refresh failures do not hide cached history. Worker switch clears the view immediately and ignores late reads from the old generation.
 
-See [executed verification](evidence/document-corrections.md).
+See [executed verification](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/document-corrections.md).
 
 ## Subsequent SDD-022 presentation
 

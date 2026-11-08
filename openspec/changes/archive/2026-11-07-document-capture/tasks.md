@@ -18,6 +18,6 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 - Only after review and a new explicit request may another named change be applied. Never treat completing this checklist as authorization for all siblings.
 - Archive/sync this change only through the appropriate later workflow; preserved programme reference is not an active or completed change.
 
-Scoped PR: https://github.com/Xheghun/Temporada/pull/9. Evidence: docs/evidence/document-capture.md. Human review/merge pending; no sibling change started.
+Scoped PR: https://github.com/Xheghun/Temporada/pull/9. Evidence: [docs/evidence/document-capture.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/document-capture.md). Human review/merge pending; no sibling change started.
 
 P2 review verified: malformed journals are quarantined per worker without blocking valid journals or DB-aware file reconciliation; pending bytes remain intact across repeated recovery. 130 tests pass; emulator fault injection NOT RUN.

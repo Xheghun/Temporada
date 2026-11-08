@@ -18,4 +18,4 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 - Only after review and a new explicit request may another named change be applied. Never treat completing this checklist as authorization for all siblings.
 - Archive/sync this change only through the appropriate later workflow; preserved programme reference is not an active or completed change.
 
-Scoped PR: https://github.com/Xheghun/Temporada/pull/8. Evidence: docs/evidence/document-corrections.md. Human review/merge pending; no sibling change started.
+Scoped PR: https://github.com/Xheghun/Temporada/pull/8. Evidence: [docs/evidence/document-corrections.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/document-corrections.md). Human review/merge pending; no sibling change started.

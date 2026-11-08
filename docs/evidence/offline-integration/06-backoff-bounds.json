@@ -1,9 +1,0 @@
-{
-  "client_action_id": "ec488a6e-20ba-49a6-9df9-1a25d9642123",
-  "attempt_count": 2,
-  "next_attempt_at": 1794006454988,
-  "updated_at": 1794006453499,
-  "status": "retry_wait",
-  "last_error_code": "injected_failure",
-  "observedDelayMs": 1489
-}

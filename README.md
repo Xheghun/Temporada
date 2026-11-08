@@ -153,5 +153,4 @@ EAS development, preview and production profiles are configured. See the [releas
 - [Architecture decisions](DECISIONS.md)
 - [Data model](specs/data-model.md) and [API contract](specs/api-contract.md)
 - [Synchronization](docs/synchronization.md) and [document capture lifecycle](docs/capture.md)
-- [UI design](docs/ui-redesign.md)
 - [Mock API setup and controls](mock-server/README.md)

@@ -1,6 +1,6 @@
 # Requirements
 
-Status: worker features are implemented; all eight Android scenarios and a partial iOS run have dated integration evidence. Recording, release and remaining device/accessibility obligations remain incomplete. See docs/evidence/offline-integration.md and docs/recordings.md.
+Status: worker features are implemented; all eight Android scenarios and a partial iOS run have dated integration evidence. Recording, release and remaining device/accessibility obligations remain incomplete. See [docs/evidence/offline-integration.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/offline-integration.md) and docs/recordings.md.
 Source: user-supplied master task, 2026-11-06. The October 29, 2026 original assessment was subsequently supplied by the user; SDD-023 reconciles its Home contract below. Other audit findings remain separate. OpenSpec capability owners are split across the changes in tasks.md: mock-worker-api, offline-intent, offline-delivery, worker-identity, worker-home-and-terms, document-review, document-capture and worker-language. Cross-cutting assessment/governance requirements remain in this document and the programme reference.
 
 | ID | Contract | Priority |
