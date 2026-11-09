@@ -28,7 +28,10 @@ for (const language of ['en', 'es'] as const) {
         )?.language,
         language,
       );
-      assert.equal((await testContext.worker().listActions())[0]?.id, action.id);
+      assert.equal(
+        (await testContext.worker().listActions())[0]?.id,
+        action.id,
+      );
     } finally {
       await testContext.close();
     }
