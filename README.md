@@ -160,3 +160,9 @@ EAS development, preview and production profiles are configured. See the [releas
 The original core implementation and its recorded verification finished within the five-hour assessment limit, at 299.91 minutes. The [assessment snapshot](https://github.com/Xheghun/Temporada/tree/6db6a0960a913c957a208a656dd9b57e0829ab23) preserves that version.
 
 I continued in my own free time afterward: preparing and refining the documentation, recording the AI workflow, demonstrating the scenarios and walking through code examples. The later UI redesign, Home compliance fixes and additional testing also happened outside the original timebox. The current project includes that subsequent work; the [coding ledger](docs/coding-ledger.md) separates it from the original assessment.
+
+## Assessment use only
+
+All rights reserved. This repository is provided solely for assessment and evaluation. The assessing team may inspect, run and test the project for that purpose. Reuse, redistribution, publication, or incorporation of any original code or materials into another project or product requires my express written permission. Submission for assessment does not transfer ownership or grant permission for any other use.
+
+Third-party dependencies and materials remain subject to their respective licenses.
