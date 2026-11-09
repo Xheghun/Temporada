@@ -14,7 +14,7 @@ Screens SHALL use native system fonts, #FAF9F6 backgrounds and #171717 primary h
 - **THEN** primary headings use #171717, type follows the specified 26–30sp heading and 14–16sp body scale, and screen content has approximately 20–24dp horizontal padding with 4dp spacing increments
 
 ### Requirement: Accessible bilingual interaction
-Every app-owned label, error, helper and accessibility description SHALL support English and Spanish using the persisted preference with English default. Controls SHALL have at least 48dp targets, key actions preferably 56dp, non-color status cues, readable contrast, heading semantics, scalable text and reachable keyboard/safe-area layouts.
+Every app-owned label, error, helper and accessibility description SHALL support English and Spanish using the persisted preference with Spanish default. Controls SHALL have at least 48dp targets, key actions preferably 56dp, non-color status cues, readable contrast, heading semantics, scalable text and reachable keyboard/safe-area layouts.
 
 #### Scenario: Spanish large text and failure feedback
 - **WHEN** a worker uses Spanish at approximately 360dp width and at least 130% font scale, opens the keyboard and encounters an error

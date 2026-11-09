@@ -63,7 +63,7 @@ export async function createWorkerRuntime() {
   const preference = await database.first<{ language: string }>(
     'SELECT language FROM app_settings WHERE id=1',
   );
-  await i18n.changeLanguage(preference?.language === 'es' ? 'es' : 'en');
+  await i18n.changeLanguage(preference?.language === 'en' ? 'en' : 'es');
   const auth = new AuthService(
     createAuthApi(base, expoFetch),
     secureSessionVault,

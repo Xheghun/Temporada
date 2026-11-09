@@ -261,6 +261,14 @@ test('language preference survives v2 upgrade/reopen and repeat migrations witho
       'DROP TABLE app_settings; PRAGMA user_version=2',
     );
     await testContext.syncContext.reopen();
+    assert.equal(
+      (
+        await testContext.syncContext.database.first<{ language: string }>(
+          'SELECT language FROM app_settings WHERE id=1',
+        )
+      )?.language,
+      'es',
+    );
     await testContext.syncContext.database.run(
       "UPDATE app_settings SET language='en' WHERE id=1",
     );

@@ -30,9 +30,9 @@ function leaves(value: unknown, prefix = ''): Record<string, string> {
     );
   throw new Error('translation_must_be_string');
 }
-test('first launch and fallback are English, and both dictionaries have identical keys/interpolation fields', () => {
-  expect(i18n.language).toBe('en');
-  expect(i18n.options.fallbackLng).toEqual(['en']);
+test('first launch and fallback are Spanish, and both dictionaries have identical keys/interpolation fields', () => {
+  expect(i18n.language).toBe('es');
+  expect(i18n.options.fallbackLng).toEqual(['es']);
   const english = leaves(en),
     spanish = leaves(es);
   expect(Object.keys(english).sort()).toEqual(Object.keys(spanish).sort());
