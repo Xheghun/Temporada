@@ -13,7 +13,7 @@ Source: user-supplied master task, 2026-11-06. The October 29, 2026 original ass
 | M6 | Confirm displayed terms version only; stale terms require explicit reconfirmation | P0 |
 | M7 | Backend catalog, guided preview, actual compressed size <1,500,000 bytes, durable files | P0 |
 | M8 | Correction reason and immutable new submission/action | P0 |
-| M9 | English default, English/Spanish toggle with saved choice, every app-owned string localized | P1 |
+| M9 | Spanish default, English/Spanish toggle with saved choice, every app-owned string localized | P1 |
 | M10 | Authorized selected worker partitions local data, views, files and queues | P0 |
 | R-AUTH | Phone OTP 123456, invalid 401, secure token, conditional worker picker | P1 |
 | R-HOME | Cached identity, assignment, terms, timeline, connectivity and pending count | P1 |
@@ -36,4 +36,4 @@ Clarifications: stale terms are resolved for ordering without supersession; old 
 
 Delivery clarification: scaffold includes linting (interpreting “LinkedIn” in context), GitHub Actions validation/build pipeline configuration, EAS profiles and quality/PR conventions from the start. Every feature has a separate branch/PR based on reviewed main; no single final application PR. Human review waits do not reset the coding ledger.
 
-M9 amendment (2026-11-06): user explicitly changed the initial language from Spanish to English. Existing saved Spanish choices remain valid. This deliberate deviation is recorded; historical assessment/provenance documents are retained.
+M9 history: the user changed the initial language to English on 2026-11-06 and restored Spanish on 2026-11-09 (SDD-031). Existing saved English/Spanish choices remain valid; historical assessment/provenance documents are retained.

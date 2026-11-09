@@ -14,7 +14,7 @@ Implement only the explicitly requested OpenSpec change; read its proposal/desig
 - M6: accept the exact displayed terms version; stale is resolved for ordering; explicit new confirmation can proceed without superseding stale history.
 - M7: backend catalog; preview; measured compressed bytes below 1,500,000; private durable copy before transaction; safe orphan recovery.
 - M8: corrections create new submissions/action IDs; preserve historical decisions by submission identity.
-- M9: English default, Spanish available; preserve saved choices (user amendment to original Spanish-first requirement); localize app-owned strings and accessibility text, never invent translations of server free text.
+- M9: Spanish default, English available; preserve saved choices (user restored Spanish-first on 2026-11-09); localize app-owned strings and accessibility text, never invent translations of server free text.
 - M10: worker ownership in every query/action/file/API request; server validates membership; clear view state immediately on switch and guard late results.
 
 ## Boundaries

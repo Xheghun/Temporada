@@ -1,6 +1,6 @@
 # Worker authentication
 
-The phone/OTP forms call AuthService through React Hook Form/Zod. English is the initial default per the SDD-015 user amendment; saved Spanish preferences remain unchanged and both languages are covered by rendering tests. Home's language toggle and business content remain separate work. Single-worker phone authentication selects Ana; the shared phone requires explicit Bruno/Carla selection. The protected identity landing screen provides switch/sign-out without inventing assignment or review content.
+The phone/OTP forms call AuthService through React Hook Form/Zod. Spanish is the initial default per the SDD-031 user request; saved English and Spanish preferences remain unchanged and both languages are covered by rendering tests. Home's language toggle and business content remain separate work. Single-worker phone authentication selects Ana; the shared phone requires explicit Bruno/Carla selection. The protected identity landing screen provides switch/sign-out without inventing assignment or review content.
 
 AuthService exposes token-free subscribed snapshots and implements the sync SessionProvider. Tokens and the authorized worker roster/selected identity are stored as one validated SecureStore record with WHEN_UNLOCKED_THIS_DEVICE_ONLY. Nothing writes a token to SQLite, navigation parameters, errors or logs. Runtime worker cache initialization writes only the selected authorized ID/display name and durable refresh intent; assignment data comes from the backend.
 

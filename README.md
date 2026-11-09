@@ -17,7 +17,7 @@ The original assessment implementation and verification stopped at **299.91 minu
 - **Document capture:** Take a photo or choose one from the gallery, preview it and save it for submission. Images are compressed and stored privately.
 - **Offline support:** Saved confirmations and document photos survive app restarts, sign-out and worker switching. Synchronization resumes when connectivity and authentication allow it.
 - **Shared phones:** Each authorized worker has a separate profile, documents and pending actions.
-- **English and Spanish:** English is the default; language choices are saved. The interface supports larger text and screen-reader controls.
+- **English and Spanish:** Spanish is the default; language choices are saved. The interface supports larger text and screen-reader controls.
 
 Home, Documents and My Job are the main destinations. Terms review and photo capture open as focused flows with back navigation. Document history remains available without crowding the current submission.
 

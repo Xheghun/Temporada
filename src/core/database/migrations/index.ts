@@ -38,7 +38,7 @@ export async function migrateDatabase(database: Database): Promise<void> {
     if (current.user_version < 3)
       await transaction.exec(`
       CREATE TABLE app_settings(id INTEGER PRIMARY KEY CHECK(id=1),language TEXT NOT NULL CHECK(language IN('es','en')));
-      INSERT INTO app_settings(id,language) VALUES(1,'en');
+      INSERT INTO app_settings(id,language) VALUES(1,'es');
       PRAGMA user_version=3;
     `);
   });
