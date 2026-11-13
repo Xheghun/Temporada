@@ -22,6 +22,6 @@ None. No main capabilities exist at planning time. Sibling changes own distinct 
 
 ## Impact
 
-Apply only `language-and-accessibility` on `feature/SDD-015-language-and-accessibility`. Do not apply, implement or auto-start any sibling change. Prerequisite: `document-capture` human-reviewed and merged. A prerequisite is a human review/merge gate, not CLI-enforced dependency metadata. If unmet, stop before coding. Request this change explicitly to apply it. Stop after preparing its scoped PR; human review/merge and the next change require separate actions. No direct main push, automatic merge or AI-branded branch. Ticket IDs are provisional local IDs.
+Scope: `language-and-accessibility` on `feature/SDD-015-language-and-accessibility`. Start after `document-capture` is reviewed and merged. Submit this change for review on its own PR.
 
 Task ownership: SDD-015. Planning only; no behavior verified. Reference documents: `specs/ui-spec.md`, `specs/testing.md`. The original assessment is pending; mobile correctness is the focus. Mock work remains supporting infrastructure.

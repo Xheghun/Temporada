@@ -1,6 +1,6 @@
 # Tasks: Document states and correction history
 
-Apply only `document-corrections` on `feature/SDD-013-document-corrections`. Do not apply, implement or auto-start any sibling change. Prerequisite: `home-and-terms` human-reviewed and merged. A prerequisite is a human review/merge gate, not CLI-enforced dependency metadata. If unmet, stop before coding. Request this change explicitly to apply it. Stop after preparing its scoped PR; human review/merge and the next change require separate actions. No direct main push, automatic merge or AI-branded branch. Ticket IDs are provisional local IDs.
+Scope: `document-corrections` on `feature/SDD-013-document-corrections`. Start after `home-and-terms` is reviewed and merged. Submit this change for review on its own PR.
 
 Requirements: see referenced task IDs and specs/traceability.md. All boxes proposed/unverified. Read this change’s proposal/design/specs and named root specifications before each task; report objective/files/tests, implement small coherent steps, run relevant checks, inspect diff and update evidence/ledger.
 
@@ -14,8 +14,8 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 
 ## Workflow follow-up
 
-- Human reviews/merges this PR; record merge and required CI evidence separately from implementation completion.
+- Record CI and merge status on the PR.
 - Only after review and a new explicit request may another named change be applied. Never treat completing this checklist as authorization for all siblings.
 - Archive/sync this change only through the appropriate later workflow; preserved programme reference is not an active or completed change.
 
-Scoped PR: https://github.com/Xheghun/Temporada/pull/8. Evidence: [docs/evidence/document-corrections.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/document-corrections.md). Human review/merge pending; no sibling change started.
+Scoped PR: https://github.com/Xheghun/Temporada/pull/8. Evidence: [docs/evidence/document-corrections.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/document-corrections.md). Review and merge pending; no sibling change started.

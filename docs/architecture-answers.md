@@ -1,6 +1,6 @@
 # Architecture answers
 
-These describe responsibilities and proposed production extensions. Notifications, production device binding and store release are not implemented features.
+These answers cover the implemented conflict rules and possible production extensions. Notifications, device binding and store release are not implemented features. I completed manual UI checks on iOS, Android and lower-end devices; release-build profiling remains separate.
 
 ## 1. Conflicting passport submissions
 

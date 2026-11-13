@@ -29,7 +29,7 @@ Temporada already has working authentication, durable offline actions and docume
 
 Presentation changes affect `app/`, `src/design-system/`, assignment/documents/capture components, their public exports, `src/core/i18n/` and presentation tests. New pure presentation selectors may compose existing facts through public feature interfaces; routes remain composition boundaries. No backend contracts, database schema, authentication delivery, sync engine, idempotency, retry policy or file lifecycle changes are planned. Existing fail-closed remote flags remain authoritative. No new visual dependencies are expected.
 
-Implementation branch: `feature/SDD-022-temporada-mobile-ui-redesign`, from verified human-reviewed merged main. Submission documentation remains a separate change; neither its completion nor recording evidence is assumed. Future implementation updates the change index and records subsequent work without rewriting assessed history. No source implementation, screenshots or PR are delivered by this planning workflow.
+Implementation branch: `feature/SDD-022-temporada-mobile-ui-redesign`, from verified reviewed merged main. Submission documentation remains a separate change; neither its completion nor recording evidence is assumed. Future implementation updates the change index and records subsequent work without rewriting assessed history. No source implementation, screenshots or PR are delivered by this planning workflow.
 
 ## Approved visual-fidelity reconciliation — 2026-11-08
 

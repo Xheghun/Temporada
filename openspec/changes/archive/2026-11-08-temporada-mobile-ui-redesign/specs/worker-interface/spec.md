@@ -43,7 +43,7 @@ Capture SHALL offer camera and gallery, meaningful photo guidance, a real privat
 - **THEN** the worker sees localized guidance, a working settings action where supported and gallery selection without a false success message
 
 ### Requirement: Reference-based screen fidelity
-The eight individual PNGs from the user-supplied temporada_ui_reference_images.zip SHALL be the visual baseline. Authentication and capture SHALL follow the approved design matrix's section order, screen-specific compact headers, small black lowercase wordmark where shown, typography hierarchy, panel treatment and action hierarchy. Generic palette compliance alone MUST NOT establish fidelity. Actual identity, catalog and delivery facts MUST take precedence over illustrative data.
+The eight individual PNGs from the provided temporada_ui_reference_images.zip SHALL be the visual baseline. Authentication and capture SHALL follow the approved design matrix's section order, screen-specific compact headers, small black lowercase wordmark where shown, typography hierarchy, panel treatment and action hierarchy. Generic palette compliance alone MUST NOT establish fidelity. Actual identity, catalog and delivery facts MUST take precedence over illustrative data.
 
 #### Scenario: Authentication reference review
 - **WHEN** sign-in, OTP and worker selection are compared at a calibrated equivalent viewport and normal text scale
@@ -64,7 +64,7 @@ Each of the eight screens SHALL have a recorded reference/current comparison wit
 - **AND** both-language 360dp/130-percent checks preserve reachable actions and text scaling, with unexecuted spoken accessibility checks still explicit
 
 ### Requirement: Final comparison and spoken accessibility evidence
-Final visual evidence SHALL include keyboard-hidden OTP at calibrated reference settings and recorded decisions for minor mismatches. Accessible contrast, touch targets and text scaling MUST remain intact. Spoken accessibility claims SHALL require human listening; non-auditory evidence MUST NOT establish an audible pass.
+Final visual evidence SHALL include keyboard-hidden OTP at calibrated reference settings and recorded decisions for minor mismatches. Accessible contrast, touch targets and text scaling MUST remain intact. Spoken accessibility claims SHALL require manual listening; non-auditory evidence MUST NOT establish an audible pass.
 
 #### Scenario: OTP final visual comparison
 - **WHEN** the final comparison is prepared
@@ -73,5 +73,5 @@ Final visual evidence SHALL include keyboard-hidden OTP at calibrated reference 
 
 #### Scenario: Spoken accessibility closure
 - **WHEN** TalkBack verification is reported complete
-- **THEN** human-observed focus order, localized control names, errors and relevant status announcements are recorded with expected and actual results
+- **THEN** manually checked focus order, localized control names, errors and relevant status announcements are recorded with expected and actual results
 - **AND** missing audible verification remains NOT RUN and keeps the existing task 9.3 obligation open

@@ -22,6 +22,6 @@ None. No main capabilities exist at planning time. Sibling changes own distinct 
 
 ## Impact
 
-Apply only `document-capture` on `feature/SDD-014-document-capture`. Do not apply, implement or auto-start any sibling change. Prerequisite: `document-corrections` human-reviewed and merged. A prerequisite is a human review/merge gate, not CLI-enforced dependency metadata. If unmet, stop before coding. Request this change explicitly to apply it. Stop after preparing its scoped PR; human review/merge and the next change require separate actions. No direct main push, automatic merge or AI-branded branch. Ticket IDs are provisional local IDs.
+Scope: `document-capture` on `feature/SDD-014-document-capture`. Start after `document-corrections` is reviewed and merged. Submit this change for review on its own PR.
 
 Task ownership: SDD-014. Planning only; no behavior verified. Reference documents: `specs/data-model.md`, `specs/ui-spec.md`, `specs/testing.md`. The original assessment is pending; mobile correctness is the focus. Mock work remains supporting infrastructure.

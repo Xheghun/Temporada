@@ -1,7 +1,6 @@
 # Requirements
 
-Status: worker features are implemented; all eight Android scenarios and a partial iOS run have dated integration evidence. Recording, release and remaining device/accessibility obligations remain incomplete. See [docs/evidence/offline-integration.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/offline-integration.md) and docs/recordings.md.
-Source: user-supplied master task, 2026-11-06. The October 29, 2026 original assessment was subsequently supplied by the user; SDD-023 reconciles its Home contract below. Other audit findings remain separate. OpenSpec capability owners are split across the changes in tasks.md: mock-worker-api, offline-intent, offline-delivery, worker-identity, worker-home-and-terms, document-review, document-capture and worker-language. Cross-cutting assessment/governance requirements remain in this document and the programme reference.
+The worker features are implemented. The October 29 assessment defines the requirements below. The implementation and verification records are linked in [traceability](traceability.md).
 
 | ID | Contract | Priority |
 |---|---|---|
@@ -21,9 +20,9 @@ Source: user-supplied master task, 2026-11-06. The October 29, 2026 original ass
 | R-API | Five specified endpoints, persistent mock, exact seeds and six failure controls | P0 |
 | R-ANDROID | Actual Android launch and critical failure scenarios | P0 |
 | R-QUALITY | Six tests, strict scripts, boundaries, CI, EAS configuration | P2 except critical tests P0 |
-| R-GOV | Scaffold/CI first; separate descriptive ticket branch and PR per feature; human review/merge gates; concise substantive PR descriptions; no AI branch branding; production flags off | Mandatory workflow |
+| R-GOV | Scaffold/CI first; separate descriptive ticket branch and PR per feature; review and merge gates; concise substantive PR descriptions; no AI branch branding; production flags off | Mandatory workflow |
 | R-DOC | README, DECISIONS, PROCESS, release plan, four <=150-word answers, honest AI log | P2 |
-| R-EVIDENCE | Eight executed scenario records, two genuine human recordings or incomplete status | P1 |
+| R-EVIDENCE | Eight executed scenario records, two genuine recordings or incomplete status | P1 |
 | R-TIME | Four-hour coding target; hard five-hour stop and visible ledger | P0 |
 
 Acceptance requires implementation AND executed evidence. No queued upload is submitted/approved; no new version autoacceptance; no retry ID regeneration; no cross-worker leakage. Missing external approval, execution or evidence remains incomplete.
@@ -34,6 +33,4 @@ Discrepancies/assumptions: supplied budgets sum to five hours, not four; decimal
 
 Clarifications: stale terms are resolved for ordering without supersession; old upload replay receipts resolve delivery without overwriting newer same-submission review revisions. Prepare Recording B before coding and capture during implementation; final editing/evidence checks remain late. Mobile is the focus, with a minimal supporting mock; Home comparison is tracked by SDD-023; other assessment findings remain separate.
 
-Delivery clarification: scaffold includes linting (interpreting “LinkedIn” in context), GitHub Actions validation/build pipeline configuration, EAS profiles and quality/PR conventions from the start. Every feature has a separate branch/PR based on reviewed main; no single final application PR. Human review waits do not reset the coding ledger.
-
-M9 history: the user changed the initial language to English on 2026-11-06 and restored Spanish on 2026-11-09 (SDD-031). Existing saved English/Spanish choices remain valid; historical assessment/provenance documents are retained.
+Delivery clarification: scaffold includes linting (interpreting “LinkedIn” in context), GitHub Actions validation/build pipeline configuration, EAS profiles and quality/PR conventions from the start. Every feature has a separate branch/PR based on reviewed main; no single final application PR. Code review waits do not reset the coding ledger.

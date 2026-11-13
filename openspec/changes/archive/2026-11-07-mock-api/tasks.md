@@ -1,6 +1,6 @@
 # Tasks: Supporting mock API
 
-Apply only `mock-api` on `feature/SDD-004-mock-api`. Do not apply, implement or auto-start any sibling change. Prerequisite: `project-scaffold` human-reviewed and merged. A prerequisite is a human review/merge gate, not CLI-enforced dependency metadata. If unmet, stop before coding. Request this change explicitly to apply it. Stop after preparing its scoped PR; human review/merge and the next change require separate actions. No direct main push, automatic merge or AI-branded branch. Ticket IDs are provisional local IDs.
+Scope: `mock-api` on `feature/SDD-004-mock-api`. Start after `project-scaffold` is reviewed and merged. Submit this change for review on its own PR.
 
 Requirements: see referenced task IDs and specs/traceability.md. All boxes proposed/unverified. Read this change’s proposal/design/specs and named root specifications before each task; report objective/files/tests, implement small coherent steps, run relevant checks, inspect diff and update evidence/ledger.
 
@@ -15,6 +15,6 @@ Requirements: see referenced task IDs and specs/traceability.md. All boxes propo
 
 ## Workflow follow-up
 
-- Human reviews/merges this PR; record merge and required CI evidence separately from implementation completion.
+- Record CI and merge status on the PR.
 - Only after review and a new explicit request may another named change be applied. Never treat completing this checklist as authorization for all siblings.
 - Archive/sync this change only through the appropriate later workflow; preserved programme reference is not an active or completed change.

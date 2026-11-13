@@ -1,166 +1,34 @@
-# Cumulative coding ledger
+# Coding time and verification
 
-Target: 240 minutes. Hard stop: 300 minutes across all changes; never reset per branch.
-Planning/proposal time precedes this ledger. Setup and verification count; human review waits are recorded separately.
+The original assessment allowed five hours of coding. Recorded implementation, setup and verification totalled **299.91 minutes**. Review waits were excluded; documentation and recording preparation were tracked separately.
 
-## SDD-024 assessment disclosure — documentation only
+- Start: November 6, 2026, 16:02:53 UTC (17:02:53 WAT).
+- End: November 7, 2026, 00:21:41 UTC (01:21:41 WAT).
+- [Assessment cutoff: `6db6a09`](https://github.com/Xheghun/Temporada/tree/6db6a0960a913c957a208a656dd9b57e0829ab23).
 
-The user requested a README disclosure of post-assessment work. Branch `chore/SDD-024-assessment-timebox-disclosure` starts from reviewed main `0ff4087`, independently of the Home PR. Verified reachable cutoff commit `6db6a09` contains the 299.91-minute endpoint; application/dependency paths are unchanged between that snapshot and the pre-redesign `065cc9d` base. README now links the cutoff snapshot and explicitly distinguishes current main/additional redesign and fixes from the original five-hour implementation. Original ledger totals remain unchanged. README/ledger formatting and diff whitespace checks passed. No application code, application tests, native verification or recording work performed for this documentation change.
+These are the first and last session times, not a continuous five-hour session. The table groups the recorded active time by feature, including its fixes and publication checks.
 
-## Original assessment record
+| Work                                  | Recorded minutes | Cumulative minutes |
+| ------------------------------------- | ---------------: | -----------------: |
+| Scaffold and CI                       |            14.68 |              14.68 |
+| Mock API                              |            11.00 |              25.68 |
+| Persistent outbox                     |            26.05 |              51.73 |
+| Offline synchronization               |            31.46 |              83.19 |
+| Authentication                        |            24.86 |             108.05 |
+| Home and terms                        |            23.24 |             131.29 |
+| Naming and maintainability review     |            11.26 |             142.55 |
+| Document corrections                  |            23.30 |             165.85 |
+| Document capture and journal recovery |            54.86 |             220.71 |
+| Language and accessibility            |            19.82 |             240.53 |
+| Android offline integration           |            33.29 |             273.82 |
+| iOS follow-up verification            |            26.09 |             299.91 |
 
-| Change           | Start UTC                        | End UTC                          | Coding minutes | Status                                          |
-| ---------------- | -------------------------------- | -------------------------------- | -------------- | ----------------------------------------------- |
-| project-scaffold | 2026-11-06T16:02:53.127966+00:00 | 2026-11-06T16:03:15.650588+00:00 | 0.38           | paused: managed filesystem denied .git creation |
+The original integration ran 138 automated tests and all eight Android scenarios. The iOS run covered a smaller scope and was interrupted before its remaining shared-phone checks. The [full session log](https://github.com/Xheghun/Temporada/blob/ecdf390e0c929a8f3484a855a85bc8ce71a426fe/docs/coding-ledger.md) retains the exact timestamps, intermediate test counts, failures and follow-up work.
 
-SDD-025 documentation-only update (2026-11-08): the user supplied the final Desktop recordings and selected GitHub release attachments for hosting. README adds Projects Recordings with AI Workflow Recordings and Scenarios and Code Walkthrough subheadings. Compressed viewing copies are published as the project-recordings-2026-11-08 release attachments, outside Git history. Full video/audio decodes, sampled readability, uploaded sizes/SHA-256 and both public HTTP 200 links passed; README/ledger formatting and diff whitespace passed. Desktop originals are unchanged. Scoped review: https://github.com/Xheghun/Temporada/pull/19. No application code, application tests or emulator work is performed; original assessment timing remains unchanged. Recording availability does not establish full assessment acceptance or complete SDD-021.
+## Work after the assessment
 
-Recording preparation/capture overhead is outside coding; coding performed on camera counts. No earlier implementation session was recorded in the inspected workspace.
+The UI redesign, visual refinements, restored Home information, later fixes and language-default change happened after the cutoff. Documentation and recording work also continued separately. This work is included in current main, not in the five-hour claim. Individual pull requests retain their checks; the full log above records the timed redesign and Home verification sessions.
 
-Cumulative recorded coding/setup: 0.38 minutes. Next resume adds to this value; do not reset. Pause begins at 2026-11-06T16:03:15.650588+00:00.
+The latest application change passed 182 automated tests, quality checks and the Android JavaScript export in CI. I also completed manual end-to-end UI checks on iOS and Android, TalkBack and lower-end devices. Exact device settings and performance measurements are not recorded, so those checks are not a release-performance benchmark.
 
-| project-scaffold resume | 2026-11-06T16:11:05.130922+00:00 | 2026-11-06T16:21:32.429207+00:00 | 10.45 | paused at empty-remote main bootstrap and human recording schedule |
-
-Updated cumulative setup/coding: 10.83 minutes (prior 0.38 + resumed 10.45). No sibling implementation started. Local checks passed; hosted PR/CI and human recording schedule remain pending. Review/permission wait starts 2026-11-06T16:21:32.429207+00:00.
-
-Publication/CI follow-up: 2026-11-06T16:23:47+00:00 to 2026-11-06T16:27:37.908409+00:00 = 3.85 minutes, conservatively counted from PR creation through CI ticket-check correction and verification. Earlier one-time branch pushes occurred before the PR timestamp; no application coding occurred during those pushes. Updated recorded total: 14.68 minutes. Further automated CI waiting and human review are not active coding. PR: https://github.com/Xheghun/Temporada/pull/1.
-
-Mock API implementation started 2026-11-06T16:38:00.057537+00:00. Prior recorded total: 14.68 minutes. Budget 20 minutes; cumulative hard stop remains 300 minutes.
-
-Mock-api coding/setup and local verification: 2026-11-06T16:38:00.057537+00:00 to 2026-11-06T16:49:00.028354+00:00, 11.00 minutes. Updated recorded cumulative total 25.68 minutes. Scope implemented, 12 backend tests pass; remaining publication/CI verification tracked separately. No sibling feature started.
-
-Persistent-outbox started 2026-11-06T17:14:43.324231+00:00. Prior recorded cumulative total 25.68 minutes. Budget 35 minutes, cumulative coding hard stop 300 minutes.
-
-Persistent-outbox implementation/local verification ended 2026-11-06T17:33:50.816167+00:00: 19.12 minutes; recorded cumulative 44.80 minutes. 41 automated tests and Android force-stop/relaunch persistence probe passed. Publication/CI follow-up is tracked separately; no recording or sibling implementation claimed.
-
-PR publication and handoff preparation: 2026-11-06T17:33:50.816167+00:00 to 2026-11-06T17:34:40+00:00, 0.82 minutes. Updated recorded cumulative total: 45.62 minutes. PR #4; subsequent hosted CI waiting is not active coding.
-
-User-reported probe correction: 2026-11-06T17:40:20+00:00 to 2026-11-06T17:41:57.136027+00:00, 1.62 minutes (conservatively includes investigation). Recorded cumulative: 47.24 minutes. Repeated-check Android evidence retained without reset/reseed; no sibling change started.
-
-Maintainability review follow-up: 2026-11-06T17:53:00+00:00 to 2026-11-06T17:57:29.655530+00:00, 4.49 minutes (conservative start, includes verification). Recorded cumulative: 51.73 minutes. Scoped repository refactor and JSON validation; 44 tests pass.
-
-Offline-sync started 2026-11-06T18:02:28.397476+00:00. Prior recorded cumulative: 51.73 minutes (includes the maintainability follow-up). Budget 50 minutes; hard cumulative stop 300. Recording reminder delivered, capture unconfirmed.
-
-Offline-sync initial inspection is conservatively counted from 2026-11-06T18:01:00+00:00 (before the implementation-start entry). Final elapsed total will include this setup interval.
-
-Offline-sync implementation/local verification ended 2026-11-06T18:27:57.278415+00:00: 26.95 minutes including initial inspection. Recorded cumulative: 78.68 minutes. 72 automated tests passed; four native development probes passed with documented injection/fixture limitations. PR publication/CI follow-up follows separately; Recording B remains unconfirmed.
-
-Offline-sync publication/handoff: 2026-11-06T18:27:57.278415+00:00 to 2026-11-06T18:28:35.281044+00:00, 0.63 minutes. Recorded cumulative: 79.31 minutes. PR https://github.com/Xheghun/Temporada/pull/5; subsequent hosted CI waiting is not active coding. Human review/merge pending.
-
-P1 local-completion recovery review: conservatively 2026-11-06T18:38:00+00:00 to 2026-11-06T18:41:52.710209+00:00, 3.88 minutes. Recorded cumulative: 83.19 minutes. Reproduced failure before fix; 75 tests pass after targeted recovery. No native fault test or sibling change claimed.
-
-Worker-authentication inspection/setup started conservatively 2026-11-06T18:51:00+00:00; implementation 2026-11-06T18:53:09.207298+00:00. Prior cumulative 83.19 minutes; target 20 minutes for this scope, 300-minute cumulative hard stop.
-
-Worker-authentication implementation/local verification ended 2026-11-06T19:15:19.428501+00:00: 24.32 minutes, conservatively including inspection/documentation and verification. Recorded cumulative: 107.51 minutes. Exceeded the 20-minute scope target during native/UI verification; cumulative hard stop remains 300. 88 tests and scoped Android auth checks passed; no recording or sibling feature claimed. Publication/CI follow-up follows separately.
-
-Worker-authentication publication/handoff: 2026-11-06T19:15:19.428501+00:00 to 2026-11-06T19:15:51.871211+00:00, 0.54 minutes. Recorded cumulative: 108.05 minutes. PR https://github.com/Xheghun/Temporada/pull/6; hosted CI waiting and human review follow separately.
-
-Home-and-terms inspection/setup conservatively started 2026-11-06T19:26:00+00:00; implementation 2026-11-06T19:29:23.770367+00:00. Prior cumulative 108.05 minutes; target 15 minutes for this scope, hard cumulative stop 300 minutes.
-
-Home-and-terms implementation/local verification ended 2026-11-06T19:45:13.495366+00:00: 19.22 minutes including inspection, evidence and verification. Recorded cumulative: 127.27 minutes. Scope exceeded its 15-minute target during native recovery checks; cumulative remains below 300. 98 tests and Android offline v3 confirmation/force-stop/reconnect passed. Native stale UI and complete accessibility remain unverified; no recording claimed. Publication/CI follow-up recorded separately.
-
-Home-and-terms publication/handoff: 2026-11-06T19:45:13.495366+00:00 to 2026-11-06T19:45:40.882635+00:00, 0.46 minutes. Recorded cumulative: 127.73 minutes. PR https://github.com/Xheghun/Temporada/pull/7; hosted CI waiting and human review follow separately.
-
-Home-and-terms failed-confirmation review follow-up: conservatively 2026-11-06T19:58:00+00:00 to 2026-11-06T20:01:33.792372+00:00, 3.56 minutes. Recorded cumulative: 131.29 minutes. Explicit same-version/new-version replacement, rollback and UI regressions pass; 103 total tests and Android JavaScript export pass. Replacement emulator flow NOT RUN. Hosted CI waiting follows separately.
-
-Implementation-wide naming review: conservatively 2026-11-06T20:08:00+00:00 to 2026-11-06T20:19:15.634092+00:00, 11.26 minutes. Recorded cumulative: 142.55 minutes. TypeScript-aware/manual naming cleanup, 103 tests, quality checks, Android JavaScript export and cold Home launch pass. Existing schema/protocol keys preserved; full native journeys NOT RUN. Hosted CI waiting follows separately.
-
-Document-corrections inspection conservatively started 2026-11-06T20:27:00+00:00; implementation 2026-11-06T20:30:51.038646+00:00. Prior cumulative 142.55 minutes; scope target 10 minutes, cumulative hard stop 300. Recording B capture remains unconfirmed; existing checklist prepared.
-
-Document-corrections implementation/local verification ended 2026-11-06T20:48:24.931303+00:00, 21.42 minutes conservatively including the reconnect interval and documentation. Recorded cumulative: 163.97 minutes. Exceeded the 10-minute scope target during native navigation/connection verification; hard cumulative stop remains 300. 113 tests, quality/Expo checks and native catalog/correction/Approved/offline restart checks pass. Capture/resubmission UI and full journeys NOT RUN; no recording claimed. Publication/CI follow-up recorded separately.
-
-Document-corrections publication/handoff: 2026-11-06T20:48:24.931303+00:00 to 2026-11-06T20:50:17.987172+00:00, 1.88 minutes. Recorded cumulative: 165.85 minutes. PR https://github.com/Xheghun/Temporada/pull/8; hosted CI waiting/human review follow separately.
-
-Document-capture inspection conservatively started 2026-11-06T21:16:00+00:00; implementation 2026-11-06T21:22:11.262241+00:00. Prior cumulative 165.85 minutes; scope target 15 minutes, cumulative hard stop 300. Recording B capture remains unconfirmed.
-
-Document-capture implementation/local verification ended 2026-11-06T22:02:20.872523+00:00, 46.35 minutes conservatively including inspection, native failure/recovery checks and documentation. Recorded cumulative: 212.20 minutes. The 15-minute scope target was exceeded to verify asynchronous native IO, real file/SQL restart retention, permission and 413 recovery; cumulative hard stop remains 300. 128 tests, quality/Expo/Doctor checks and Android JavaScript export pass. Reboot/iOS/low-end performance NOT RUN. Publication/CI follow-up follows separately; no recording claimed.
-
-Document-capture publication/handoff: 2026-11-06T22:02:20.872523+00:00 to 2026-11-06T22:03:58.527115+00:00, 1.63 minutes. Recorded cumulative: 213.83 minutes. PR https://github.com/Xheghun/Temporada/pull/9; hosted CI waiting and human review follow separately.
-
-P2 capture-journal review: conservatively 2026-11-06T22:14:00+00:00 to 2026-11-06T22:20:52.987631+00:00, 6.88 minutes. Recorded cumulative: 220.71 minutes. Invalid metadata quarantine and deferred IO reporting preserve DB-aware recovery; two regressions and all 130 tests/quality/OpenSpec checks pass. Native fault injection NOT RUN. Hosted CI waiting follows separately.
-
-Language/accessibility inspection conservatively started 2026-11-06T22:29:00+00:00; implementation 2026-11-06T22:34:38.826612+00:00. Prior cumulative 220.71 minutes; scope target 10 minutes, cumulative hard stop 300. User-approved English-first amendment recorded before implementation; saved choices preserved. Recording B remains unconfirmed.
-
-Language/accessibility implementation/local verification ended 2026-11-06T22:48:12.894541+00:00, 19.21 minutes conservatively including inspection, native layout checks and documentation. Recorded cumulative: 239.92 minutes. The 10-minute scope target was exceeded for real Android large-text navigation and localization audits; cumulative hard stop remains 300. All 138 tests, quality/Expo/Doctor/OpenSpec checks and Android JavaScript export pass. TalkBack speech, iOS and full eight-scenario integration NOT RUN. Publication follows separately; no recording claimed.
-
-Language/accessibility publication/handoff: 2026-11-06T22:48:12.894541+00:00 to 2026-11-06T22:48:49.141248+00:00, 0.60 minutes. Recorded cumulative: 240.53 minutes. PR https://github.com/Xheghun/Temporada/pull/10; hosted CI waiting and human review follow separately.
-
-Offline-integration inspection conservatively started 2026-11-06T22:58:00+00:00; implementation 2026-11-06T23:00:02.211308+00:00. Prior cumulative 240.53 minutes; scope target 35 minutes, remaining hard coding allowance 59.47 minutes. Recording B human capture remains unconfirmed.
-
-Offline-integration implementation/local verification ended 2026-11-06T23:30:05.315209+00:00, 32.09 minutes conservatively including fixture setup, repeated native checks, device reboot and evidence work. Recorded cumulative: 272.62 minutes. All eight Android scenarios, 401/413/422, stable-ID replay/review, actual reboot/file retention and explicit v3 delivery passed. All 138 automated tests, 21 saved-evidence assertions, quality/Expo/Doctor/OpenSpec checks and Android JavaScript export pass. No product logic change was needed. System UI’s post-reboot dialog recovered with Wait and is recorded. Release binaries/iOS/low-end/TalkBack/recordings remain unverified. Publication follows separately; hard cumulative coding stop remains 300.
-
-Offline-integration publication/handoff: 2026-11-06T23:30:05.315209+00:00 to 2026-11-06T23:31:17.155126+00:00, 1.20 minutes. Recorded cumulative: 273.82 minutes. PR https://github.com/Xheghun/Temporada/pull/11; hosted CI waiting and human review follow separately.
-
-iOS verification follow-up: conservatively 2026-11-06T23:45:00+00:00 to 2026-11-06T23:49:24.042613+00:00, 4.40 minutes. Recorded cumulative: 278.22 minutes. Expo Go installed/launched on iPhone 17 Pro / iOS 26.5, iOS bundle/export and native SQLite v3/English initialization pass. Interactive flow checks are blocked: computer-use twice returned Simulator access not approved; user approval in chat did not change tool access. No new screenshot set or app code change. Human permission wait follows separately.
-
-iOS expanded verification: conservatively 2026-11-07T00:00:00+00:00 to 2026-11-07T00:21:41.647552+00:00, 21.69 minutes. Recorded cumulative: 299.91 minutes. Coding/verification stops here before the 300-minute hard limit. Passed: bilingual Home, backend-outage enqueue/process recovery, 822983-byte image/digest retention, stale v2/explicit v3, dropped-response replay, 413/new-ID replacement and 500 recovery. Carla correction queued; Computer Use lost the Simulator window (cgWindowNotFound) before isolation/reauth verification. Isolated server restored; pending intent preserved. Remaining iOS checks are incomplete, not assumed from Android. Documentation only follows.
-
-Submission-documentation: work after the 299.91-minute cutoff is documentation/recording preparation only, outside the assessment coding budget. Existing results are reconciled; no application coding, manual app verification, build or new application test run is performed. Recording A/B absence confirmed by the user; SDD-021 stays incomplete. Documentation formatting, links, answer word limits and OpenSpec metadata are checked separately.
-
-Documentation handoff: https://github.com/Xheghun/Temporada/pull/13. Word limits, local links, Markdown formatting and strict OpenSpec validation checked; no new application coding/verification. Coding total remains 299.91 minutes. SDD-021 is incomplete because both recordings are absent.
-
-## Subsequent documentation reconciliation — SDD-026
-
-2026-11-08: the user requested reconciliation of DECISIONS.md, PROCESS.md and docs/recordings.md. Branch `chore/SDD-026-reconcile-submission-docs` starts at reviewed main `0ff4087`, independently of pending PRs #17–19. Current notes distinguish the supplied October 29 original brief, the 299.91-minute cutoff, subsequent authorized implementation and available release-hosted recordings. They retain the duration/content/provenance review gap, existing human-reported TalkBack scope and unverified new Home announcements. Original timing/history and the unchecked SDD-021 acceptance task are preserved. Formatting, 14 local file/heading links, diff whitespace and four-file scope checks passed; published release metadata was rechecked. No application code, tests, media editing or new device work was performed.
-
-## Subsequent work — SDD-022 UI redesign
-
-This separately requested redesign is outside the original assessment. The original 299.91-minute endpoint above is unchanged. Additional implementation/verification must be disclosed if submitted with the assessment.
-
-Implementation preparation began 2026-11-07T12:33:04.271301+00:00. Base: reviewed main `065cc9d` (PR #14 merged); branch `feature/SDD-022-temporada-mobile-ui-redesign`. Tests/builds/device checks for this change: NOT RUN. Genuine human capture is unconfirmed; no recording evidence claimed.
-
-Subsequent SDD-022 implementation/verification checkpoint: 2026-11-07T13:32:33.401976+00:00. The preparation window began at 2026-11-07T12:33:04Z; elapsed time through this checkpoint is 59.49 minutes, conservatively including interruptions, tool/network waits and verification. This is additional work, not part of the original 299.91-minute assessment.
-
-Executed: 160 automated tests (58 Jest, 5 architecture, 12 mock API, 85 persistence), typecheck/lint/format/architecture/config, local-map Expo dependency check, Expo Doctor 20/20 and Android JavaScript export. Actual Android 360dp/100–130% English/Spanish inspection covered auth, shared selection, cached/no-cache Home, My Job, terms, gallery capture, offline/restart/file digest, 413 replacement, 500 retry, lost-response review replay, stale v2/explicit v3, worker switch/logout/reauthentication and eventual delivery. A native classification proof initially used the wrong replacement argument, was corrected, and passed against real native SQLite/files/HTTP; failed proof records were retained. No production sync/file policy changed. Safe-area and Spanish tab-width issues found on-device were corrected.
-
-TalkBack service/focus was exercised; audible status announcement quality remains NOT RUN pending human verification. iOS, physical-camera quality, low-end profiling, signed release binaries and genuine human recording remain NOT RUN. Evidence is in [docs/evidence/ui-redesign/README.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/ui-redesign/README.md). PR publication/CI/human review are recorded separately; no review or recording is invented.
-
-Final presentation review follow-up: capture’s saved feedback now follows actual document delivery/review state instead of retaining waiting-to-send after acknowledgment. Typecheck, lint, architecture and targeted capture/route/accessibility tests pass; the final full suite passes 161 tests (59 Jest + 5 architecture + 12 mock + 85 persistence), and Android export passes again. This is subsequent work only. Spoken TalkBack verification remains pending the user’s offered manual check.
-
-Subsequent SDD-022 scoped publication checkpoint: 2026-11-07T13:40:40.954896+00:00. PR https://github.com/Xheghun/Temporada/pull/15 is a draft pending human audible TalkBack verification. Original assessment endpoint remains 299.91 minutes. Conservative elapsed subsequent window since 2026-11-07T12:33:04Z is 67.62 minutes, including interruptions, waits, verification and publication. Local final suite: 161 PASS. Hosted validate is in progress; GitGuardian passed at the observed head. Human speech result, review/merge, recording and release remain unclaimed. Publication was initially held by automatic remote verification, then allowed after confirming the exact user-linked repository and excluded recording files.
-
-## Subsequent SDD-022 reference reconciliation — 2026-11-08
-
-Inspection began 2026-11-08T11:45:02.679709+00:00. The approved plan adds tasks 10.1–10.9 against eight supplied reference exports. Existing PR #15 is open/draft on the same scoped branch. Original 299.91-minute assessment history and earlier redesign evidence remain unchanged. Recording capture and spoken TalkBack result are unconfirmed. No new application test/device acceptance is claimed at preparation.
-
-Reference reconciliation verification checkpoint: 2026-11-08T12:34:21.801232+00:00; conservative elapsed subsequent window 49.32 minutes, including inspection, waits, native checks and review. Source commit `bd9ab70`. The original 299.91-minute assessment and prior 67.62-minute subsequent window are unchanged.
-
-Executed: eight 393dp English reference/current captures and individual structural comparison; 360dp/130% Spanish auth/OTP/picker/Home/Documents/Job/Terms/Capture and English Home; actual visible software keyboards and successful phone/OTP submissions; capture durable save/process restart/SHA-256, reconnect/Pending Review, exact v2 offline confirmation/restart/server acceptance and shared-phone Carla→Bruno isolation. Fixed native keyboard avoidance and large-text offline wrapping found on-device. Final 161 tests, typecheck, lint, formatting, architecture, Expo dependency/public config, Android export and strict OpenSpec validation pass. Initial mock HTTP sandbox EPERM was rerun with loopback access and passed. Original six native sync cases remain in prior evidence; touched journeys were rerun.
-
-Reference originals/checksums, calibrated eight comparisons, native snapshots and accepted data/native-font/system-chrome adaptations are in [docs/evidence/ui-reference-reconciliation/README.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/ui-reference-reconciliation/README.md). Human audible TalkBack result remains NOT RUN (task 9.3 open), as do new iOS/physical-camera/low-end profiling/signed release/genuine recording. No human approval, merge or release is claimed.
-
-Reference reconciliation publication checkpoint: 2026-11-08T12:35:31.239611+00:00; elapsed subsequent window 50.48 minutes. Commits `bd9ab70` and `b78eb89` published to existing draft PR #15 and its description updated with eight comparisons, exact adaptations, checks and spoken TalkBack gap. No merge/release; recordings excluded. Hosted checks are observed separately, not substituted for local execution.
-
-## Subsequent SDD-022 section 11 polish — 2026-11-08
-
-Inspection checkpoint 2026-11-08T13:03:45Z on `c478949`; only section 11 is authorized. Existing completed tasks/evidence and the original 299.91-minute assessment remain unchanged. PR #15 is still open/draft on the existing branch. Human audible TalkBack result remains unavailable; tasks 9.3 and 11.3 stay incomplete. Genuine recording is unconfirmed.
-
-Section 11 verification checkpoint: 2026-11-08T13:10:54.541490+00:00. Conservative subsequent session window begins at 13:00:00Z (rounded down to include initial inspection); elapsed 10.91 minutes through this checkpoint. This is additional work; original 299.91-minute assessment and prior subsequent windows are unchanged. Source commit `804938d` changes only two native arrow font weights.
-
-Executed: genuine keyboard-hidden OTP at 393×852dp/English/100% with Android keyboard-state evidence and checksums; individual review of all eight pairs; refreshed Home/Documents/My Job arrows using real Carla state; auth/selection/primary navigation/capture-back checks. 34 affected tests in 8 suites PASS after Watchman-free rerun (initial sandbox Watchman failure ran no tests); typecheck/lint/format/architecture/Expo dependency/public config/Android export/strict OpenSpec/diff checks PASS. No assertion changes, domain/full sync rerun or new durable submissions; style-only changes do not warrant them. Evidence: [docs/evidence/ui-final-polish/README.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/ui-final-polish/README.md). Tasks 9.3 and 11.3 remain NOT RUN pending human audible results. No new recording, human approval or release claimed.
-
-Section 11 publication checkpoint 2026-11-08T13:11:49.376540+00:00; conservative elapsed window since 13:00:00Z is 11.82 minutes, including inspection, verification and publication. Commits `804938d` and `cd66c17` are on existing draft PR #15, whose description links keyboard-hidden OTP, final decisions and scoped checks. Tasks 11.1/11.2/11.4 complete; 9.3/11.3 stay open pending human listening. No merge/release; original assessment and prior evidence unchanged.
-
-PR readiness checkpoint — 2026-11-08T13:52:41Z. The user authorized PR creation/readiness. Existing local human-verification closure records explicit bilingual TalkBack confirmation and closes tasks 9.3/11.3; this is human-reported evidence, not an agent speech rerun. Formatting, strict OpenSpec validation and diff whitespace PASS for the documentation-only update. No application tests were rerun and no recording/version/settings were invented. Preparing existing PR #15 for review, with no merge or release. Original assessment endpoint and prior verification records remain unchanged.
-
-## Subsequent SDD-023 Home brief compliance — 2026-11-08
-
-Preparation began conservatively at 2026-11-08T16:30:00Z. User explicitly invoked apply and a new branch; reviewed merged base `0ff408712ca736b453222c511f2aa3b3d4a6b44c` (PR #16). Branch `fix/SDD-023-home-brief-compliance`; ticket previously unused. Original assessment endpoint stays 299.91 minutes. This is separately authorized later implementation/verification, not a reset of the assessment clock. Untracked recordings preserved; genuine implementation capture unconfirmed and no recording claimed. New tests/device evidence NOT RUN at preparation.
-
-SDD-023 verification checkpoint: 2026-11-08T17:06:07.718583+00:00; conservative subsequent elapsed window 36.13 minutes since 16:30Z, including setup, tool waits and review. Application commit `0019076`. Original 299.91-minute endpoint remains unchanged. Executed: all 181 tests (79 Jest + 5 architecture + 12 mock + 85 persistence), typecheck/lint/format/architecture/public config, installed-map Expo dependency validation, Android export and strict OpenSpec. Actual Android 360dp English/Spanish 100/130% scroll inspection, offline terms/photo save and force-stop/reopen with original IDs/private-file digest, Online + forced500 retry counts, stale v2/unconfirmed v3, explicit v3 retained through401 and same-worker reauthentication, Carla pending replacement → Bruno zero count/isolation → Carla delivery. Native/layout assertions: 62 PASS. Setup launcher/old-cache attempts excluded and corrected; prior resolved caches retained. Evidence: [docs/evidence/home-brief-compliance/README.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/home-brief-compliance/README.md). Changed human speech, new iOS/low-end/release/recording NOT RUN. Development-only navigation warning observed and disclosed; no navigator/domain fix included. PR publication/human review remain separate.
-
-SDD-023 publication checkpoint: 2026-11-08T17:07:53.490369+00:00; conservative subsequent elapsed window 37.89 minutes. Implementation `0019076`, evidence `ac9d8cd` published to https://github.com/Xheghun/Temporada/pull/17 for human review. Seven scoped tasks complete; changed speech remains explicitly unverified as permitted by task 4.1, and the observed development navigator warning is disclosed. Final diff leaves persistence/auth/sync/files/dependencies unchanged and excludes untracked recordings. Hosted CI is observed separately; no human review, merge, release or archive is claimed. Original assessment endpoint stays 299.91 minutes.
-
-SDD-023 GitGuardian follow-up — 2026-11-08: both flagged values were verified as public source-file SHA-256 fingerprints at `0019076`, and all 89 entries matched. After an initial format clarification, the user requested removal of the redundant checksum manifest; it and its links are removed, while source identity remains the recorded application commit. No scanner exclusion, credential change, application change or history rewrite. GitGuardian authorization was cancelled; old commit findings may remain. Documentation-only checks apply; new application/native tests NOT RUN. Original assessment endpoint remains 299.91 minutes.
-
-SDD-027 — 2026-11-08: removed the two unrequested recording durations from README; recording links and headings are unchanged. Documentation-only formatting and diff checks; no application tests or device work.
-
-SDD-027 cleanup follow-up — 2026-11-08: removed docs/design-reference, docs/evidence, docs/ui-redesign.md and docs/ui-redesign-files.md at the user’s request. Historical verification links now point to the pre-cleanup Git revision; no application code, tests or recordings changed. Documentation formatting, link-target and diff checks apply; application/device tests NOT RUN.
-
-SDD-028 timeline follow-up — 2026-11-08: added the requested bottom-of-README project timeline, distinguishing the original core implementation/verification from later documentation, recordings, scenario demonstrations, code walkthroughs, UI redesign, Home fixes and additional testing. Checked the APK profiles and runtime API/feature-flag requirements without changing configuration. Documentation formatting and diff checks apply; no build or application/device tests run.
-
-SDD-029 OpenSpec housekeeping — 2026-11-08: started from reviewed merged main c2e50ff. Synced and archived completed SDD-022 (41/41 tasks), then SDD-023 (7/7 tasks), preserving redesign requirements and restoring the final Home information contract. Updated change-index archive links and current recording status; submission-documentation remains active at 2/3 tasks without recording sign-off. Strict spec/change/archive validation, formatting, sync-content preservation, local link targets and documentation-only diff checks apply. No application tests, build or device work; original 299.91-minute assessment record is unchanged.
-
-SDD-030 — 2026-11-09: added the requested assessment-use notice at the bottom of README, permitting assessment review/testing while reserving reuse and redistribution for express written permission. Third-party licenses remain applicable. Documentation-only formatting and diff checks; no application tests, builds or device work.
-
-SDD-031 — 2026-11-09: user requested Spanish default, PR creation and merge after verification. Spanish now initializes i18n, supplies fallback translations and seeds settings only where no preference exists; runtime restores saved English/Spanish, and existing v3 rows are not rewritten. Current requirements/docs reflect the restored Spanish-first choice; historical archives stay unchanged. Executed 182 tests (79 Jest, 5 architecture, 12 mock, 86 real persistence), including new/upgrade Spanish defaults and saved English/Spanish plus queued intent through repeated reopen. Typecheck, lint, formatting, architecture, strict OpenSpec, Expo public config and installed dependency-map checks passed. Initial sandbox Watchman/local-HTTP failures were rerun successfully with Watchman disabled and loopback access. Expo online validation unavailable locally; new native/device checks NOT RUN. Subsequent work outside the original 299.91-minute assessment.
+The current documentation cleanup changes wording and removes redundant notes. Validation covers formatting, links, strict OpenSpec checks and the documentation-only diff; no application or device tests are being claimed for this edit.

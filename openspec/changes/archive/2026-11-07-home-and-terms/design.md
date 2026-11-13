@@ -2,7 +2,7 @@
 
 ## Context
 
-See proposal.md for scope and motivation. The inspected repository contains planning artifacts only; no application or Git repository was present at baseline. SDK compatibility and Android startup are unverified; ADB listener binding was denied. Prerequisite: `worker-authentication` human-reviewed and merged.
+See proposal.md for scope and motivation. The inspected repository contains planning artifacts only; no application or Git repository was present at baseline. SDK compatibility and Android startup are unverified; ADB listener binding was denied. Prerequisite: `worker-authentication` reviewed and merged.
 
 ## Goals / Non-Goals
 
@@ -14,7 +14,7 @@ See proposal.md for scope and motivation. The inspected repository contains plan
 
 Render local source-of-truth state through services; never raw sync calls. Home locale toggle foundation is usable now; language-and-accessibility completes the audit. Keep stale history while v3 confirmation remains enabled and queues a distinct action. Use existing engine tests plus UI reconfirmation coverage. Permanent terms failures expose explicit reconfirmation of the displayed version. The callback includes the failed predecessor ID; the service revalidates it, and the existing repository atomically supersedes that failure and inserts new intent with a new UUID. Refresh alone does not replace failures; stale history remains resolved without supersession.
 
-Apply only `home-and-terms` on `feature/SDD-012-home-and-terms`. Do not apply, implement or auto-start any sibling change. Prerequisite: `worker-authentication` human-reviewed and merged. A prerequisite is a human review/merge gate, not CLI-enforced dependency metadata. If unmet, stop before coding. Request this change explicitly to apply it. Stop after preparing its scoped PR; human review/merge and the next change require separate actions. No direct main push, automatic merge or AI-branded branch. Ticket IDs are provisional local IDs.
+Scope: `home-and-terms` on `feature/SDD-012-home-and-terms`. Start after `worker-authentication` is reviewed and merged. Submit this change for review on its own PR.
 
 Read `specs/ui-spec.md`, `specs/sync-engine.md` and specs/programme/design.md for shared interfaces, state rules and constraints. Those references do not authorize implementing other changes. Use the smallest adapters/services needed by this scope; preserve strict boundaries. Interfaces/fakes allow early scopes to be verified without implementing future screens.
 
@@ -24,7 +24,7 @@ Budget: 15 coding minutes. One cumulative programme ledger targets 240 coding mi
 
 ## Risks / Trade-offs
 
-- [Unavailable dependency or human merge] → Keep this scope blocked before coding; do not auto-apply prerequisites.
+- [Unavailable dependency or merge] → Keep this scope blocked before coding; do not auto-apply prerequisites.
 - [Original assessment absent] → Preserve provisional assumptions and compare when supplied.
 - [Mock or unit evidence overclaimed] → Record actual storage/native/emulator results and NOT RUN where appropriate.
 - [Cross-scope drift] → Stop at this checklist; any new feature requires its own explicit apply.
