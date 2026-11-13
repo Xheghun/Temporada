@@ -20,6 +20,6 @@ The original assessment implementation and verification stopped at **299.91 minu
 
 Changes go through ticketed branches and pull requests. Descriptions explain the behaviour changed, checks performed and any relevant limitations. CI results and review are separate: a passing check is evidence about that check, not approval of a release.
 
-The app uses a local mock backend for the assessment. The production sequence covers signing, staging QA, store submission and rollout. See the [release plan](docs/release-plan.md).
+This submission uses a local mock backend. Production integration would need an agreed backend contract, HTTPS endpoints, feature-flag configuration, signing and privacy review. Internal builds, staging and production rollout are described in the [release plan](docs/release-plan.md); they are future deployment work, not completed assessment features. No store release or OTA deployment has been performed.
 
-Both recordings are listed in the [README](README.md#projects-recordings).
+Both submission recordings are linked in the [README](README.md#projects-recordings). Recording details and the distinction between the original implementation and later demonstrations are in [docs/recordings.md](docs/recordings.md).
