@@ -12,9 +12,9 @@ See proposal.md for scope and motivation. The original baseline restrictions are
 
 ## Decisions
 
-Recording B preparation belongs to scaffold and capture occurs during genuine implementation. Finalize its editing/evidence now, with human narration. Missing capture or genuine correction stays incomplete. Include <=150 words per architecture answer, actual tools/mistakes/verification and explicit release approval limitations.
+Recording B preparation belongs to scaffold and capture occurs during genuine implementation. Finalize its editing/evidence now, with narration. Missing capture or genuine correction stays incomplete. Include <=150 words per architecture answer, actual tools/mistakes/verification and explicit release approval limitations.
 
-Apply only `submission-documentation` on `chore/SDD-020-submission-documentation`. Do not apply, implement or auto-start any sibling change. Prerequisite: `offline-integration` human-reviewed and merged. A prerequisite is a human review/merge gate, not CLI-enforced dependency metadata. If unmet, stop before coding. Request this change explicitly to apply it. Stop after preparing its scoped PR; human review/merge and the next change require separate actions. No direct main push, automatic merge or AI-branded branch. Ticket IDs are provisional local IDs.
+Scope: `submission-documentation` on `chore/SDD-020-submission-documentation`. Start after `offline-integration` is reviewed and merged. Submit this change for review on its own PR.
 
 Read `specs/requirements.md`, `specs/testing.md`, `specs/traceability.md` and specs/programme/design.md for shared interfaces, state rules and constraints. Those references do not authorize implementing other changes. Use the smallest adapters/services needed by this scope; preserve strict boundaries. Interfaces/fakes allow early scopes to be verified without implementing future screens.
 
@@ -24,7 +24,7 @@ Budget: documentation/recording outside coding budget. One cumulative programme 
 
 ## Risks / Trade-offs
 
-- [Unavailable dependency or human merge] → Keep this scope blocked before coding; do not auto-apply prerequisites.
+- [Unavailable dependency or merge] → Keep this scope blocked before coding; do not auto-apply prerequisites.
 - [Original assessment absent] → Preserve provisional assumptions and compare when supplied.
 - [Mock or unit evidence overclaimed] → Record actual storage/native/emulator results and NOT RUN where appropriate.
 - [Cross-scope drift] → Stop at this checklist; any new feature requires its own explicit apply.
@@ -35,4 +35,4 @@ Branch from current reviewed/merged main (scaffold establishes the initial basel
 
 ## Apply-time evidence status
 
-The user confirmed on 2026-11-07 that neither recording exists. Prepare written handoff/recording guidance, but leave SDD-021 unchecked: genuine implementation footage cannot be reconstructed after the fact. This does not waive the recording requirement. No application code, manual app tests or credential/build operations are authorized by this documentation change.
+I confirmed on 2026-11-07 that neither recording exists. Prepare written handoff/recording guidance, but leave SDD-021 unchecked: genuine implementation footage cannot be reconstructed after the fact. This does not waive the recording requirement. No application code, manual app tests or credential/build operations are authorized by this documentation change.

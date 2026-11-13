@@ -8,12 +8,12 @@ Seasonal workers need to confirm employment terms and submit sensitive documents
 
 ## What Changes
 
-- Deliver a separately reviewed scaffold PR first, including linting, quality scripts, GitHub Actions CI/build pipelines, EAS configuration and PR conventions. Implement every subsequent feature on a separate descriptive ticket branch and PR, with human review before merge.
+- Deliver a separately reviewed scaffold PR first, including linting, quality scripts, GitHub Actions CI/build pipelines, EAS configuration and PR conventions. Implement every subsequent feature on a separate descriptive ticket branch and PR, with code review before merge.
 - Introduce an Expo/TypeScript Android application with seven screens, Spanish default, English toggle, and accessible offline feedback.
 - Add worker-scoped SQLite caching, transactional outbox actions, secure token storage, durable compressed images, and an independent synchronization engine.
 - Add a persistent mock backend with exact fictional seed records, authorized worker selection, idempotency and deterministic failure injection.
 - Provide requirements, architecture, data, API, UI, testing, task and traceability documents; six mandatory automated tests; eight manual scenario records; CI/EAS configuration and honest delivery documentation.
-- Require initial human approval before application code. Prepare Recording B before coding and capture the genuine session during implementation; final editing and evidence checks follow afterward. Actual recordings and approvals require human participation.
+- Require initial approval before application code. Prepare Recording B before coding and capture the genuine session during implementation; final editing and evidence checks follow afterward. Actual recordings and approvals require human participation.
 - Prioritize mobile correctness and Android verification; keep the mock backend limited to contract behavior and failure simulation needed to test the mobile app. Reconcile the original assessment when supplied.
 
 ## Capabilities

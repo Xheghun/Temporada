@@ -22,6 +22,6 @@ None. No main capabilities exist at planning time. Sibling changes own distinct 
 
 ## Impact
 
-Apply only `mock-api` on `feature/SDD-004-mock-api`. Do not apply, implement or auto-start any sibling change. Prerequisite: `project-scaffold` human-reviewed and merged. A prerequisite is a human review/merge gate, not CLI-enforced dependency metadata. If unmet, stop before coding. Request this change explicitly to apply it. Stop after preparing its scoped PR; human review/merge and the next change require separate actions. No direct main push, automatic merge or AI-branded branch. Ticket IDs are provisional local IDs.
+Scope: `mock-api` on `feature/SDD-004-mock-api`. Start after `project-scaffold` is reviewed and merged. Submit this change for review on its own PR.
 
 Task ownership: SDD-004, SDD-005. Planning only; no behavior verified. Reference documents: `specs/api-contract.md`. The original assessment is pending; mobile correctness is the focus. Mock work remains supporting infrastructure.

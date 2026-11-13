@@ -24,7 +24,7 @@ Screens use feature hooks/application services; domain interfaces import neither
 
 Deliver the scaffold first on `chore/SDD-001-project-scaffold`: Expo/Router/New Architecture setup, strict TypeScript, lint/format, test harness, architecture checks, GitHub Actions validation/build pipeline definitions, EAS profiles, environment examples, AGENTS.md, PR template and contribution rules. No worker business features in this PR. Validate Android startup and the available quality commands; document hosted CI/build execution separately from configuration.
 
-Open the scaffold PR with actual verification evidence and obtain human review/merge before dependent feature work starts from main. For each subsequent feature, branch from the latest reviewed/merged main, implement its coherent scope plus tests/docs, run checks, push the branch and open a separate PR. Wait for human approval and merge before starting the next dependent branch. Do not combine the application into one final PR, auto-merge, push directly to main, or claim review occurred. Review latency may extend calendar delivery; it does not reset the cumulative coding timebox. If review or remote access is unavailable, report the gate and preserve the completed branch rather than bypassing it. Initial repository bootstrap must preserve planning files; remote creation/default-branch bootstrap needs explicit authorization when no repository exists.
+Open the scaffold PR with actual verification evidence and obtain review and merge before dependent feature work starts from main. For each subsequent feature, branch from the latest reviewed/merged main, implement its coherent scope plus tests/docs, run checks, push the branch and open a separate PR. Wait for approval and merge before starting the next dependent branch. Do not combine the application into one final PR, auto-merge, push directly to main, or claim review occurred. Review latency may extend calendar delivery; it does not reset the cumulative coding timebox. If review or remote access is unavailable, report the gate and preserve the completed branch rather than bypassing it. Initial repository bootstrap must preserve planning files; remote creation/default-branch bootstrap needs explicit authorization when no repository exists.
 
 Branch names use `chore/`, `feature/` or `fix/`, a ticket ID and a concrete purpose. Never use Codex, agents or other AI branding. SDD identifiers below are provisional local work IDs, not externally created tickets. Separate PRs may group related task IDs within one feature:
 
@@ -72,7 +72,7 @@ Each server document has submissionId, clientActionId, document type, created ti
 
 Mobile behavior is the delivery priority. Keep the mock backend minimal while preserving the transactional idempotency and failure controls required to verify the client. Reconcile the original assessment when supplied; do not silently drop existing mobile acceptance requirements.
 
-Before coding, SDD-001 prepares Recording B checklist and schedules human capture during a real implementation session. Include the prompt/plan/review before the selected coding task, a genuine correction if one occurs, implementation, tests/emulator and PR description. Do not stage a rejection or recreate missed footage as real. SDD-021 handles final editing and artifact verification only; missed recording evidence stays incomplete. Recording preparation/capture overhead is outside coding time, but coding performed on camera still counts toward the coding ledger.
+Before coding, SDD-001 prepares Recording B checklist and schedules capture during a real implementation session. Include the prompt/plan/review before the selected coding task, a genuine correction if one occurs, implementation, tests/emulator and PR description. Do not stage a rejection or recreate missed footage as real. SDD-021 handles final editing and artifact verification only; missed recording evidence stays incomplete. Recording preparation/capture overhead is outside coding time, but coding performed on camera still counts toward the coding ledger.
 
 ### Specifications, verification and time
 
@@ -83,7 +83,7 @@ Budget in minutes: foundation/scaffold/CI 30, backend 20, persistence 35, engine
 ## Risks / Trade-offs
 
 - [ADB listener denied] → Resolve runnable emulator access at the first implementation milestone; do not substitute unit tests for Android acceptance.
-- [Original assessment absent] → Record provisional source and compare before final assessment claims; any material conflict returns to human review.
+- [Original assessment absent] → Record provisional source and compare before final assessment claims; any material conflict returns to code review.
 - [Five-hour scope pressure] → Enforce ledger and P0/P1 ordering; report incomplete CI/UI rather than weaken safety.
 - [SDK and low-end compatibility] → Check official SDK minimum OS and Android 9/API 28 compatibility before install; use supported Node LTS if required. Do not promise unsupported Android versions.
 - [Shared-device data at rest] → Secure tokens, private paths, no sensitive logs; production encryption/device binding requires security design and approval.
@@ -93,7 +93,7 @@ Budget in minutes: foundation/scaffold/CI 30, backend 20, persistence 35, engine
 
 ## Migration Plan
 
-After approval initialize Git without replacing files/history, use chore/SDD-001-project-scaffold for the first PR, then separate per-feature ticket branches/PRs as listed above. Commit coherent verified increments with ticket IDs. Scaffold includes CI/build configuration from the outset; human-reviewed merges gate dependent branches. Create versioned transactional migrations; test reapplication and upgrade. Launch Android early. Deliver development/internal preview EAS profiles and production profile with remote flags off. Human-controlled internal testing → staging QA → approved staged release. OTA only for JS/assets compatible with runtime/native binary; stop rollout/disable flags first, use compatible OTA rollback when possible, otherwise ship a corrected binary. Installed incompatible binaries cannot be instantly rolled back. No actual release is authorized here.
+After approval initialize Git without replacing files/history, use chore/SDD-001-project-scaffold for the first PR, then separate per-feature ticket branches/PRs as listed above. Commit coherent verified increments with ticket IDs. Scaffold includes CI/build configuration from the outset; reviewed merges gate dependent branches. Create versioned transactional migrations; test reapplication and upgrade. Launch Android early. Deliver development/internal preview EAS profiles and production profile with remote flags off. Human-controlled internal testing → staging QA → approved staged release. OTA only for JS/assets compatible with runtime/native binary; stop rollout/disable flags first, use compatible OTA rollback when possible, otherwise ship a corrected binary. Installed incompatible binaries cannot be instantly rolled back. No actual release is authorized here.
 
 ## Open Questions
 

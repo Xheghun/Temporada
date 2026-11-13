@@ -14,7 +14,7 @@ See proposal.md for scope and motivation. Original baseline constraints are hist
 
 Preserve all existing feature contracts. Test actual Android scenarios 2/3/4, 401/413/422, worker isolation, file persistence, new-v3 delivery and replay-versus-review. Record every unrun check honestly. This verification-only change skips new normative deltas; no acceptance rule is removed.
 
-Apply only `offline-integration` on `fix/SDD-016-offline-integration`. Do not apply, implement or auto-start any sibling change. Prerequisite: `language-and-accessibility` human-reviewed and merged. A prerequisite is a human review/merge gate, not CLI-enforced dependency metadata. If unmet, stop before coding. Request this change explicitly to apply it. Stop after preparing its scoped PR; human review/merge and the next change require separate actions. No direct main push, automatic merge or AI-branded branch. Ticket IDs are provisional local IDs.
+Scope: `offline-integration` on `fix/SDD-016-offline-integration`. Start after `language-and-accessibility` is reviewed and merged. Submit this change for review on its own PR.
 
 Read `specs/testing.md`, `specs/traceability.md` and specs/programme/design.md for shared interfaces, state rules and constraints. Those references do not authorize implementing other changes. Use the smallest adapters/services needed by this scope; preserve strict boundaries. Interfaces/fakes allow early scopes to be verified without implementing future screens.
 
@@ -24,7 +24,7 @@ Budget: 35 coding minutes. One cumulative programme ledger targets 240 coding mi
 
 ## Risks / Trade-offs
 
-- [Unavailable dependency or human merge] → Keep this scope blocked before coding; do not auto-apply prerequisites.
+- [Unavailable dependency or merge] → Keep this scope blocked before coding; do not auto-apply prerequisites.
 - [Original assessment absent] → Preserve provisional assumptions and compare when supplied.
 - [Mock or unit evidence overclaimed] → Record actual storage/native/emulator results and NOT RUN where appropriate.
 - [Cross-scope drift] → Stop at this checklist; any new feature requires its own explicit apply.

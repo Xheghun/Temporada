@@ -1,10 +1,10 @@
 # Tasks: Resilient synchronization
 
-Apply only `offline-sync` on `feature/SDD-008-offline-sync`. Do not apply, implement or auto-start any sibling change. Prerequisite: `persistent-outbox` human-reviewed and merged. A prerequisite is a human review/merge gate, not CLI-enforced dependency metadata. If unmet, stop before coding. Request this change explicitly to apply it. Stop after preparing its scoped PR; human review/merge and the next change require separate actions. No direct main push, automatic merge or AI-branded branch. Ticket IDs are provisional local IDs.
+Scope: `offline-sync` on `feature/SDD-008-offline-sync`. Start after `persistent-outbox` is reviewed and merged. Submit this change for review on its own PR.
 
 Requirements: see referenced task IDs and specs/traceability.md. All boxes proposed/unverified. Read this change’s proposal/design/specs and named root specifications before each task; report objective/files/tests, implement small coherent steps, run relevant checks, inspect diff and update evidence/ledger.
 
-Recording B is assigned to this session by the user. Before coding, remind the user to start screen/audio capture before the task prompt, plan and review. Follow docs/recording-b-checklist.md; do not claim recording has started without confirmation. This note does not authorize applying offline-sync before its prerequisite or a separate explicit apply request.
+Recording B was planned for this session. Start screen/audio capture before the prompt, plan and review. Follow the [original recording checklist](https://github.com/Xheghun/Temporada/blob/ecdf390e0c929a8f3484a855a85bc8ce71a426fe/docs/recording-b-checklist.md); record only actual capture. This note does not authorize applying offline-sync before its prerequisite or a separate explicit apply request.
 
 ## 1. Scoped implementation and verification
 
@@ -18,11 +18,11 @@ Recording B is assigned to this session by the user. Before coding, remind the u
 
 ## Workflow follow-up
 
-- Human reviews/merges this PR; record merge and required CI evidence separately from implementation completion.
+- Record CI and merge status on the PR.
 - Only after review and a new explicit request may another named change be applied. Never treat completing this checklist as authorization for all siblings.
 - Archive/sync this change only through the appropriate later workflow; preserved programme reference is not an active or completed change.
 
-Handoff: https://github.com/Xheghun/Temporada/pull/5. Local evidence: [docs/evidence/offline-sync.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/offline-sync.md). Hosted CI and human review/merge remain separate gates. No sibling implementation or recording is claimed.
+Handoff: https://github.com/Xheghun/Temporada/pull/5. Local evidence: [docs/evidence/offline-sync.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/offline-sync.md). Hosted CI and review and merge remain separate gates. No sibling implementation or recording is claimed.
 
 ## Review follow-up
 

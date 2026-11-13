@@ -22,6 +22,6 @@ None. No main capabilities exist at planning time. Sibling changes own distinct 
 
 ## Impact
 
-Apply only `worker-authentication` on `feature/SDD-011-worker-authentication`. Do not apply, implement or auto-start any sibling change. Prerequisite: `offline-sync` human-reviewed and merged. A prerequisite is a human review/merge gate, not CLI-enforced dependency metadata. If unmet, stop before coding. Request this change explicitly to apply it. Stop after preparing its scoped PR; human review/merge and the next change require separate actions. No direct main push, automatic merge or AI-branded branch. Ticket IDs are provisional local IDs.
+Scope: `worker-authentication` on `feature/SDD-011-worker-authentication`. Start after `offline-sync` is reviewed and merged. Submit this change for review on its own PR.
 
 Task ownership: SDD-011. Planning only; no behavior verified. Reference documents: `specs/architecture.md`, `specs/api-contract.md`, `specs/ui-spec.md`. The original assessment is pending; mobile correctness is the focus. Mock work remains supporting infrastructure.

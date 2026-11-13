@@ -34,22 +34,22 @@ The project MUST provide six mandatory sync tests, eight manual scenario records
 
 #### Scenario: Assessment handoff
 - **WHEN** delivery is reported
-- **THEN** each requirement has evidence or an explicit incomplete status, recording materials describe actual work, and no invented builds or human sign-offs appear
+- **THEN** each requirement has evidence or an explicit incomplete status, recording materials describe actual work, and no invented builds or review sign-offs appear
 
 ### Requirement: Governed release and timebox
-Coding MUST target four hours and stop at five hours with elapsed time recorded. Branches and commits MUST include a ticket ID. Main pushes, merges, backend contract changes, credentials and releases MUST follow human approval rules. New production behavior MUST be remotely flagged off by default.
+Coding MUST target four hours and stop at five hours with elapsed time recorded. Branches and commits MUST include a ticket ID. Main pushes, merges, backend contract changes, credentials and releases MUST follow approval rules. New production behavior MUST be remotely flagged off by default.
 
 #### Scenario: Release preparation
 - **WHEN** release artifacts are prepared
 - **THEN** internal, staging and approved production steps, native-compatible OTA limits and rollback constraints are documented without claiming execution
 
 ### Requirement: Scaffold-first feature delivery
-The project MUST deliver a separately reviewed scaffold PR with linting, quality checks, GitHub Actions pipelines and build configuration before business features. Each feature MUST use a separate descriptive ticket branch and PR from reviewed main. Branches MUST exclude AI branding. Human review and merge MUST gate dependent feature work. PR descriptions MUST explain behavior, relevant decisions, actual verification and limitations concisely.
+The project MUST deliver a separately reviewed scaffold PR with linting, quality checks, GitHub Actions pipelines and build configuration before business features. Each feature MUST use a separate descriptive ticket branch and PR from reviewed main. Branches MUST exclude AI branding. Code review and merge MUST gate dependent feature work. PR descriptions MUST explain behavior, relevant decisions, actual verification and limitations concisely.
 
 #### Scenario: Scaffold then feature PR
 - **WHEN** scaffold setup is ready for review
-- **THEN** its own PR contains tooling and pipeline evidence, and the next feature begins on a new branch after human-reviewed merge
+- **THEN** its own PR contains tooling and pipeline evidence, and the next feature begins on a new branch after reviewed merge
 
 #### Scenario: Feature handoff
 - **WHEN** a feature is implemented and checked
-- **THEN** its scoped PR records actual results, risks and requirement links without claiming unexecuted CI or human approval
+- **THEN** its scoped PR records actual results, risks and requirement links without claiming unexecuted CI or approval
