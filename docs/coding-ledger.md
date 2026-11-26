@@ -34,3 +34,5 @@ The latest application change passed 182 automated tests, quality checks and the
 The low-end testing documentation review reconciles the recorded manual checks with the outstanding Android 9 / 2 GB measurement record. Verification covers formatting, links and strict OpenSpec checks. The Expo compatibility fix also passed all 182 tests, typecheck, lint, architecture, public config and all 20 Expo Doctor checks. No new device run or performance measurements were collected.
 
 SDD-035 CI maintenance updated seven Expo SDK 58 dependencies to the versions required by the compatibility check. All 182 tests, typecheck, lint, formatting, architecture, Expo compatibility/public config, all 20 Doctor checks, Android JavaScript export and strict OpenSpec validation passed locally. Native E2E implementation and device runs remain pending.
+
+SDD-035 native automation starts with a pinned Maestro/Android compatibility probe on dedicated CI emulators. Its initial script and workflow passed local lint, syntax, formatting and strict OpenSpec checks. Driver execution and all eight worker scenarios remain unverified until their runs complete.
