@@ -13,3 +13,5 @@ ANDROID_SERIAL=emulator-5554 PROBE_API=28 \
 ```
 
 Use `PROBE_API=34` for the other target. Set `MAESTRO_BINARY` if Maestro is outside `PATH`. `toolchain.json` defines the exact versions; this initial probe targets x86_64 CI rather than the ARM64 desktop emulator. Results default to the ignored `e2e-results/probe` directory. A failed probe leaves task 1.1 incomplete. The bundled worker test app and eight acceptance scenarios are not yet implemented.
+
+The emulator uses `-memory 2048 -lowram` to prevent its API 34 minimum-memory adjustment from silently allocating 2.5 GB. The probe checks guest memory as well as the AVD file. The `-lowram` option removes the emulator's memory floor; it does not change the app's behavior.

@@ -29,12 +29,18 @@ const report = {
 };
 
 async function command(executable, argumentsList) {
-  const result = await executeFile(executable, argumentsList, {
-    timeout: 180_000,
-    maxBuffer: 4 * 1024 * 1024,
-    env: { ...process.env, MAESTRO_CLI_NO_ANALYTICS: '1' },
-  });
-  return `${result.stdout}${result.stderr}`.trim();
+  try {
+    const result = await executeFile(executable, argumentsList, {
+      timeout: 180_000,
+      maxBuffer: 4 * 1024 * 1024,
+      env: { ...process.env, MAESTRO_CLI_NO_ANALYTICS: '1' },
+    });
+    return `${result.stdout}${result.stderr}`.trim();
+  } catch (error) {
+    throw new Error(
+      [String(error), error.stdout, error.stderr].filter(Boolean).join('\n'),
+    );
+  }
 }
 
 const adb = (...argumentsList) =>
@@ -70,10 +76,8 @@ async function flow(filename) {
     'junit',
     '--output',
     path.join(output, `${filename}.xml`),
-    '--debug-output',
+    '--test-output-dir',
     path.join(output, `${filename}-debug`),
-    '-e',
-    `PROBE_OUTPUT=${output}`,
     `.maestro/${filename}.yaml`,
   ]);
 }
@@ -175,33 +179,34 @@ try {
   console.error(error);
 } finally {
   await step('restore-connectivity', async () => {
-    if (originalAirplane !== undefined) {
-      await adb(
-        'shell',
-        'settings',
-        'put',
-        'global',
-        'airplane_mode_on',
-        originalAirplane,
-      );
-      await adb(
-        'shell',
-        'am',
-        'broadcast',
-        '-a',
-        'android.intent.action.AIRPLANE_MODE',
-        '--ez',
-        'state',
-        originalAirplane === '1' ? 'true' : 'false',
-      );
-    }
-    if (originalWifi !== undefined) {
-      await adb(
-        'shell',
-        'svc',
-        'wifi',
-        originalWifi === '0' ? 'disable' : 'enable',
-      );
+    try {
+      if (
+        originalAirplane !== undefined &&
+        (await adb(
+          'shell',
+          'settings',
+          'get',
+          'global',
+          'airplane_mode_on',
+        )) !== originalAirplane
+      ) {
+        await flow(
+          originalAirplane === '1' ? 'probe-airplane' : 'probe-airplane-off',
+        );
+        assert.equal(
+          await adb('shell', 'settings', 'get', 'global', 'airplane_mode_on'),
+          originalAirplane,
+        );
+      }
+    } finally {
+      if (originalWifi !== undefined) {
+        await adb(
+          'shell',
+          'svc',
+          'wifi',
+          originalWifi === '0' ? 'disable' : 'enable',
+        );
+      }
     }
     return { airplane: originalAirplane, wifi: originalWifi };
   }).catch((error) => {

@@ -60,7 +60,7 @@ jobs:
           cores: 2
           avd-name: temporada-probe-${{ matrix.api }}
           emulator-build: '16428233'
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 2048
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 2048 -lowram
           script: node testing/e2e/probe-android.mjs
       - name: Upload probe evidence
         if: always()

@@ -5,7 +5,7 @@ name: Android driver selection and screenshot probe
 - assertVisible: 'Network & internet'
 - tapOn: 'Network & internet'
 - assertVisible: 'Airplane mode'
-- takeScreenshot: ${PROBE_OUTPUT}/native-selection
+- takeScreenshot: native-selection
 - stopApp
 - launchApp
 - assertVisible: 'Network & internet'
