@@ -138,6 +138,8 @@ npm run config:check
 
 The test suite covers presentation, navigation, authorization, mock HTTP behavior and persistence/synchronization against real SQLite and files. GitHub Actions runs validation for pull requests and main.
 
+I completed manual UI testing on iOS and Android, including TalkBack and a lower-end Android emulator. See [question 3](docs/architecture-answers.md#3-store-review-and-low-end-devices) for the test coverage and remaining measurements.
+
 To exercise slow connections, server errors, lost responses, changed terms or upload failures, start the mock with `MOCK_ENABLE_CONTROLS=1 npm run mock:start`. Available controls and requests are documented in the [mock API guide](mock-server/README.md#development-controls).
 
 ## Configuration and deployment

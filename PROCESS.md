@@ -12,7 +12,7 @@ The architecture keeps screens separate from services, repositories and native a
 
 GitHub Actions checks branch and commit conventions, TypeScript, lint, formatting, architecture boundaries, tests, Expo configuration and an Android JavaScript export. The latest application change passed 182 tests: 79 component/domain tests, 5 architecture checks, 12 mock API tests and 86 persistence/integration tests.
 
-The native scenario checks covered offline saving, process restart, lost responses, retry backoff, failed uploads, changed terms and shared-phone isolation. I also completed end-to-end UI testing on iOS and Android, TalkBack checks and testing on lower-end devices. Those were manual checks; exact device models, OS versions and performance measurements were not recorded here. They do not establish release-build performance or store approval.
+The native scenario checks covered offline saving, process restart, lost responses, retry backoff, failed uploads, changed terms and shared-phone isolation. I also completed manual end-to-end UI testing on iOS and Android, including TalkBack and a lower-end Android emulator. [Question 3](docs/architecture-answers.md#3-store-review-and-low-end-devices) records the test coverage and the outstanding target-device measurements.
 
 The original assessment implementation and verification stopped at **299.91 minutes**. The [coding ledger](docs/coding-ledger.md) separates that work from the later redesign, fixes, documentation and recordings. The current application includes the later work.
 
