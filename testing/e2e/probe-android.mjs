@@ -137,7 +137,7 @@ try {
       path.join(avdRoot, `${avd}.avd/config.ini`),
       'utf8',
     );
-    assert.match(configuration, /^hw.ramSize\s*=\s*2048\s*$/m);
+    assert.match(configuration, /^hw.ramSize\s*=\s*2048M?\s*$/m);
     const memory = await adb('shell', 'cat', '/proc/meminfo');
     const observedKiB = Number(/^MemTotal:\s+(\d+) kB/m.exec(memory)?.[1]);
     assert(
