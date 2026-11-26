@@ -1,6 +1,6 @@
 # Verification plan
 
-Current state: scoped worker-domain tests and native checks are recorded under docs/evidence. These do not establish whole-app acceptance; complete assessment scenarios remain owned by offline-integration. Planning validation is separate from executed behavior.
+The original automated and native scenario results are linked in [traceability](traceability.md). I also completed manual UI checks on iOS and Android, including TalkBack and a lower-end Android emulator. The saved low-end results omit the emulator’s Android version, RAM and measurements, so the specific Android 9 / 2 GB result remains open. See [question 3](../docs/architecture-answers.md#3-store-review-and-low-end-devices).
 
 Automated: Jest/Expo + RNTL; pure engine clock/RNG/transport fakes; isolated real SQLite repository integration through an appropriate Node adapter or instrumented Expo harness. Do not claim fake reconstruction proves native persistence. Backend tests start actual service/storage for replay/restart; use temporary files and deterministic failure controls.
 

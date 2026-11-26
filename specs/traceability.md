@@ -43,6 +43,10 @@ Each SDD task appears in exactly one change checklist, active or archived; the c
 - [offline-integration](../openspec/changes/archive/2026-11-07-offline-integration/tasks.md): SDD-016, SDD-017, SDD-019.
 - [submission-documentation](../openspec/changes/submission-documentation/tasks.md): SDD-020, SDD-021.
 
+## Historical feature verification
+
+The following entries describe each feature’s original handoff. Later manual testing is recorded below.
+
 Mock-api: SDD-004/005 implementation evidence for R-API and the backend portions of M3/M4/M6/M7/M8/M10 is in [docs/evidence/mock-api.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/mock-api.md). Mobile acceptance for those invariants is not complete. Scaffold PR #1 was reviewed/merged before this branch; no subsequent feature is started.
 
 Offline-sync SDD-008/009/010: core delivery/retry/isolation/version/replay evidence is in [docs/evidence/offline-sync.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/offline-sync.md), including all six mandatory core tests and Android development probes. Whole-app UI/airplane-mode/media/production acceptance is still incomplete.
@@ -53,7 +57,7 @@ Home-and-terms SDD-012: cached assignment/timeline/connectivity/counts, exact-ve
 
 Document-corrections SDD-013: M4/M5/M8/M9/M10 catalog/projection/orchestration and history evidence is in [docs/evidence/document-corrections.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/document-corrections.md). Camera/compression/private-file adapter and whole-worker resubmission journeys remain owned by document-capture/integration.
 
-Document-capture SDD-014: M1/M2/M3/M5/M7/M8/M9/M10 file/capture evidence in [docs/evidence/document-capture.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/document-capture.md) includes native permission recovery, measured gallery/camera compression, actual private-file/SQL inspection after offline force-stop, acknowledgment cleanup and 413 explicit replacement. Reboot/iOS/low-end performance/full scenarios remain unverified.
+Document-capture SDD-014: M1/M2/M3/M5/M7/M8/M9/M10 file/capture evidence in [docs/evidence/document-capture.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/document-capture.md) includes native permission recovery, measured gallery/camera compression, actual private-file/SQL inspection after offline force-stop, acknowledgment cleanup and 413 explicit replacement. Reboot/iOS/low-end performance/full scenarios were outside that feature’s verification at handoff.
 
 Language-and-accessibility SDD-015: updated M9 English-first defaults, saved preference preservation, bilingual status/error coverage and accessible shared controls are traced in [docs/evidence/language-and-accessibility.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/language-and-accessibility.md). Native 360dp/130% text inspection is distinct from unexecuted TalkBack/iOS acceptance.
 
@@ -63,4 +67,6 @@ Submission-documentation SDD-020: README, consolidated DECISIONS, PROCESS, docs/
 
 SDD-023 restores R-HOME after the merged refactor: `home-overview.test.ts` covers active counts/current version/current replacements/known review/unknown and empty catalogs; `home-compliance.test.tsx` verifies bilingual assignment/terms/timeline directly on Home, unknown counts, disabled features, busy actions, live network/data transitions and late-worker read isolation. Native verification and limitations are tracked in [docs/evidence/home-brief-compliance/README.md](https://github.com/Xheghun/Temporada/blob/cd85eadd9c9fc803c70c4938693c9a827621fec2/docs/evidence/home-brief-compliance/README.md). No other audit findings or domain policies are changed.
 
-Current manual verification: I completed end-to-end UI testing on iOS and Android, TalkBack checks and lower-end device testing. Exact device/OS settings and performance measurements are not recorded; this is separate from the automated integration results above.
+## Current manual verification
+
+I completed end-to-end UI testing on iOS and Android, including TalkBack and a lower-end Android emulator. The saved results omit the low-end emulator configuration, startup timing and peak memory. The specific Android 9 / 2 GB measurement record remains open in [question 3](../docs/architecture-answers.md#3-store-review-and-low-end-devices).

@@ -1,6 +1,6 @@
 # Architecture answers
 
-These answers cover the implemented conflict rules and possible production extensions. Notifications, device binding and store release are not implemented features. I completed manual UI checks on iOS, Android and lower-end devices; release-build profiling remains separate.
+These answers cover the implemented conflict rules and possible production extensions. Notifications, device binding and store release are not implemented features. I completed manual UI checks on iOS and Android, including a lower-end Android emulator.
 
 ## 1. Conflicting passport submissions
 
@@ -16,9 +16,11 @@ Send minimal opaque identifiers, not passport details or correction text on lock
 
 ## 3. Store review and low-end devices
 
-Release risks include incomplete review access, inaccurate privacy disclosures, camera/photo purpose strings, data-retention/deletion practices and production behavior still pointing at a mock. Check the generated manifests, privacy requirements and signed binaries against current Apple/Play policies before submission. No store review has occurred.
+My main risks are camera/photo permissions and privacy disclosures for store review, plus memory pressure during image decoding and compression on low-end Android. The local mock also needs a production backend before release.
 
-Android 9/API 28 is above the locked React Native package's declared minimum API 24; that does not prove the final binary or 2 GB performance. Test release builds on physical low-memory devices with large images, low storage, process kills, permission denial, poor connectivity and large text. Measure peak memory during decoding/compression, startup and scrolling; verify pending files after restart. Existing Android 16 Expo Go results and bounded compression attempts cannot substitute for that device testing.
+I completed manual end-to-end UI checks on iOS and Android, including a lower-end Android emulator and TalkBack. The saved results omit the low-end emulator’s Android version, RAM setting, startup timing and peak memory, so the specific Android 9 / 2 GB result is still missing.
+
+For release validation, I would record those details on an Android 9/API 28 device or emulator with 2 GB RAM, then check large-image capture, low storage, process restart, poor connectivity and queued-file retention. The dependency’s API 24 minimum addresses installation compatibility. Measured behaviour on the target configuration is the performance evidence.
 
 ## 4. Device binding and device loss
 

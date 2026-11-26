@@ -29,6 +29,6 @@ The original integration ran 138 automated tests and all eight Android scenarios
 
 The UI redesign, visual refinements, restored Home information, later fixes and language-default change happened after the cutoff. Documentation and recording work also continued separately. This work is included in current main, not in the five-hour claim. Individual pull requests retain their checks; the full log above records the timed redesign and Home verification sessions.
 
-The latest application change passed 182 automated tests, quality checks and the Android JavaScript export in CI. I also completed manual end-to-end UI checks on iOS and Android, TalkBack and lower-end devices. Exact device settings and performance measurements are not recorded, so those checks are not a release-performance benchmark.
+The latest application change passed 182 automated tests, quality checks and the Android JavaScript export in CI. I also completed manual end-to-end UI checks on iOS and Android, including TalkBack and a lower-end Android emulator. [Question 3](architecture-answers.md#3-store-review-and-low-end-devices) records the coverage and missing target-device measurements.
 
-The current documentation cleanup changes wording and removes redundant notes. Validation covers formatting, links, strict OpenSpec checks and the documentation-only diff; no application or device tests are being claimed for this edit.
+The low-end testing documentation review reconciles the recorded manual checks with the outstanding Android 9 / 2 GB measurement record. Verification covers formatting, links, strict OpenSpec checks and the documentation diff. No new device run or performance measurements were collected.
