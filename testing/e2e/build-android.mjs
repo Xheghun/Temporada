@@ -116,6 +116,9 @@ try {
     [
       ':app:assembleRelease',
       '--no-daemon',
+      ...(process.env.E2E_BUILD_DIAGNOSTICS === '1'
+        ? ['--info', '--stacktrace']
+        : []),
       `-PreactNativeArchitectures=${abi}`,
     ],
     path.join(workspace, 'android'),

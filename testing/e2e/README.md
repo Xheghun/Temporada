@@ -90,3 +90,5 @@ The workflow runs on main and manual dispatch. The local simulator build succeed
 Suite JSON and Markdown reports map passing and failing journeys to their brief numbers, M1–M10 and TEST-01–06/03R. Probe results have no brief scenario number. Independent fixture hashes are compared across groups, and existing output directories are rejected to preserve earlier evidence. The latency regression correlates actual driver tap timestamps with the injected request window.
 
 For isolated driver debugging, manual `scenario` or `foundation` dispatch can reuse an existing E2E APK via `apk_run_id`. Reports retain the original APK build identity and mark the reused run. Smoke/full acceptance requires a fresh build; APK reuse cannot satisfy the final acceptance run.
+
+Manual compatibility checks can select `camera_backend` to compare synthetic image-file and legacy emulated feeds. Reports record the selected backend. `build_diagnostics` enables Gradle dependency-resolution logs for failed builds.

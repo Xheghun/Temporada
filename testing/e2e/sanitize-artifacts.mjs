@@ -17,12 +17,12 @@ async function visit(directory) {
       ['device-logcat.txt', 'device-simulator.log'].includes(entry.name)
     ) {
       const lines = (await readFile(filename, 'utf8')).split('\n');
+      const diagnosticPattern =
+        entry.name === 'device-simulator.log'
+          ? /(?:TemporadaE2E|com\.cremedigital\.seasonalworker\.e2e).*(?:error|exception|crash|fatal|ANR)|securityd.*(?:34018|entitlements)|(?:error|exception|crash|fatal|ANR).*com\.cremedigital\.seasonalworker\.e2e/i
+          : /AndroidRuntime|FATAL EXCEPTION|ANR in com\.cremedigital\.seasonalworker\.e2e/;
       const filtered = lines
-        .filter((line) =>
-          /AndroidRuntime|FATAL EXCEPTION|ANR in com\.cremedigital\.seasonalworker\.e2e|TemporadaE2E|com\.cremedigital\.seasonalworker\.e2e|securityd.*(?:34018|entitlements)/.test(
-            line,
-          ),
-        )
+        .filter((line) => diagnosticPattern.test(line))
         .slice(-500);
       await writeFile(
         filename,

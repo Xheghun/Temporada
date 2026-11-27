@@ -90,6 +90,7 @@ const result = {
   status: 'FAIL',
   steps: [],
   sourceSha: process.env.GITHUB_SHA ?? 'local',
+  virtualCameraBackend: process.env.E2E_CAMERA_BACKEND ?? 'local configuration',
 };
 let backend;
 let originalAirplane;
