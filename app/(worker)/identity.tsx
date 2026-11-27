@@ -26,6 +26,7 @@ export default function WorkerIdentity() {
       <ErrorNotice code={state.error} />
       {state.workers.length > 1 ? (
         <Action
+          testID="identity-switch-worker"
           secondary
           label={translate('switchWorker')}
           onPress={() => {
@@ -34,6 +35,7 @@ export default function WorkerIdentity() {
         />
       ) : null}
       <Action
+        testID="identity-logout"
         label={translate('logout')}
         onPress={() => {
           void auth.perform(() => auth.logout());

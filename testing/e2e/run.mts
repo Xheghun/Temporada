@@ -16,6 +16,8 @@ await mkdir(path.dirname(output), { recursive: true });
 await mkdir(output);
 const implementedScenarios = new Map([
   ['bootstrap', 'testing/e2e/bootstrap-android.mjs'],
+  ['media-es', 'testing/e2e/bootstrap-android.mjs'],
+  ['media-en', 'testing/e2e/bootstrap-android.mjs'],
 ]);
 
 const report = await executeSuite(selection, async (scenario, outputName) => {
@@ -26,7 +28,11 @@ const report = await executeSuite(selection, async (scenario, outputName) => {
   await new Promise<void>((resolve, reject) => {
     const child = spawn(process.execPath, [script], {
       stdio: 'inherit',
-      env: { ...process.env, E2E_OUTPUT: scenarioOutput },
+      env: {
+        ...process.env,
+        E2E_OUTPUT: scenarioOutput,
+        E2E_SCENARIO: scenario,
+      },
     });
     child.once('error', reject);
     child.once('exit', (code, signal) =>

@@ -49,6 +49,7 @@ export function ContextHeader({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={translate('ui.back')}
+        testID="screen-back"
         accessibilityState={{ disabled }}
         disabled={disabled}
         onPress={onBack}
@@ -103,13 +104,16 @@ export function TextAction({
   label,
   onPress,
   disabled = false,
+  testID,
 }: {
   label: string;
   onPress(): void;
   disabled?: boolean;
+  testID?: string;
 }) {
   return (
     <Pressable
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled }}

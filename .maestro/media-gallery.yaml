@@ -1,0 +1,34 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Select fictional media through the native picker
+---
+- scrollUntilVisible:
+    element:
+      id: document-ds160_confirmation
+    direction: DOWN
+- tapOn:
+    id: document-ds160_confirmation
+- scrollUntilVisible:
+    element:
+      id: capture-gallery
+    direction: DOWN
+- tapOn:
+    id: capture-gallery
+- runFlow:
+    when:
+      visible:
+        id: '.*:id/icon_thumbnail'
+    commands:
+      - tapOn:
+          id: '.*:id/icon_thumbnail'
+          index: 0
+- runFlow:
+    when:
+      visible: 'fictional-.*\.png'
+    commands:
+      - tapOn: 'fictional-.*\.png'
+- extendedWaitUntil:
+    visible:
+      id: capture-preview
+    timeout: 30000
+- assertVisible: ${PREVIEW_LABEL}
+- takeScreenshot: native-gallery-preview

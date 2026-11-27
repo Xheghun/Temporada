@@ -39,8 +39,11 @@ The build requires both `BUILD_VARIANT=e2e` and `EXPO_PUBLIC_APP_ENV=e2e` (set b
 npm run e2e:android -- --suite bootstrap --repeat 2
 npm run e2e:android -- --scenario 2
 npm run e2e:android -- --suite full
+npm run e2e:android -- --suite media
 ```
 
-The default suite is `smoke` (brief scenarios 1 and 2); `full` selects all eight. The bootstrap proof is currently the only registered journey. Selecting a pending journey writes `NOT RUN` and fails the suite. `--repeat` runs independent repetitions and preserves every outcome; a later pass cannot erase an earlier failure. Repetitions compare the initial backend fixture hashes. Each journey owns a fresh temporary backend and resets only the E2E package before starting, preserving its state throughout the journey.
+The default suite is `smoke` (brief scenarios 1 and 2); `full` selects all eight. Bootstrap and the Spanish/English media probes are registered; the original brief journeys remain pending. Selecting a pending journey writes `NOT RUN` and fails the suite. `--repeat` runs independent repetitions and preserves every outcome; a later pass cannot erase an earlier failure. Repetitions compare the initial backend fixture hashes. Each journey owns a fresh temporary backend and resets only the E2E package before starting, preserving its state throughout the journey.
 
 Set `E2E_OUTPUT` to choose a fresh report directory. Existing run directories are rejected to preserve failure evidence. The bootstrap checks that normal mock files and the normal app's package registration remain unchanged. CI seeds an unrelated normal mock file and a small native fixture in the normal package namespace. It compares that fixture's private-file digest before and after each E2E run. This verifies native namespace isolation; worker persistence is exercised in the bundled E2E app.
+
+The media probe requires `-camera-back emulated -camera-front emulated`. It generates a reproducible 1920 × 2560 PNG containing only colored noise (14,752,728 bytes), then uses the native camera, retake, preview and gallery paths. Assertions inspect the saved private uploads and confirm that the gallery original remains intact. Generated images stay outside Git and are removed after the journey. API-specific native picker failures remain failed runs with screenshots; task 2.2 stays pending until both platforms and languages pass.

@@ -1,6 +1,6 @@
 # Tasks
 
-Scope SDD-035. Implement only `automate-brief-e2e-scenarios` after a separate apply request. All tasks below are pending. Keep the original assessment timing record intact.
+Scope SDD-035. Implement only `automate-brief-e2e-scenarios`. Check tasks only after executed verification. Keep the original assessment timing record intact.
 
 ## 1. Toolchain and bundled test app
 

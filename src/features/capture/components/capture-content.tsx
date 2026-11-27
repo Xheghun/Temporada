@@ -68,19 +68,24 @@ export function CaptureContent({
         </View>
       ) : null}
       {state.phase === 'saved' ? (
-        <View style={{ gap: 20, marginTop: 28 }}>
+        <View testID="capture-saved" style={{ gap: 20, marginTop: 28 }}>
           <InformationPanel>
             <StatusIndicator>
               {savedStatus ?? translate('capture.saved')}
             </StatusIndicator>
           </InformationPanel>
-          <Action label={translate('capture.back')} onPress={onBack} />
+          <Action
+            testID="capture-back"
+            label={translate('capture.back')}
+            onPress={onBack}
+          />
         </View>
       ) : (
         <>
           <View style={{ marginTop: 28 }}>
             {state.preview ? (
               <Image
+                testID="capture-preview"
                 accessible
                 accessibilityRole="image"
                 source={{ uri: state.preview.uri }}
@@ -116,6 +121,7 @@ export function CaptureContent({
           <View style={{ gap: 16, marginTop: 16 }}>
             {state.preview ? (
               <Action
+                testID="capture-save"
                 label={translate('capture.save')}
                 busy={state.phase === 'saving'}
                 disabled={busy}
@@ -123,6 +129,7 @@ export function CaptureContent({
               />
             ) : null}
             <Action
+              testID="capture-camera"
               label={translate(
                 state.preview ? 'capture.retake' : 'capture.camera',
               )}
@@ -132,6 +139,7 @@ export function CaptureContent({
             />
             <Action
               secondary
+              testID="capture-gallery"
               label={translate('capture.gallery')}
               disabled={busy || !state.selection}
               onPress={() => onChoose('gallery')}
@@ -148,7 +156,11 @@ export function CaptureContent({
               onPress={onSettings}
             />
           ) : null}
-          <TextAction label={translate('capture.back')} onPress={onBack} />
+          <TextAction
+            testID="capture-back"
+            label={translate('capture.back')}
+            onPress={onBack}
+          />
         </>
       )}
     </AuthPage>

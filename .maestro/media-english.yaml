@@ -1,0 +1,6 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Select English from Home
+---
+- tapOn:
+    id: language-toggle
+- assertVisible: '.*Ana López.*'

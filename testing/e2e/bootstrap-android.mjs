@@ -15,8 +15,14 @@ import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { runMediaJourney } from './media-journey.mjs';
 
 const executeFile = promisify(execFile);
+const scenario = process.env.E2E_SCENARIO ?? 'bootstrap';
+assert(
+  ['bootstrap', 'media-es', 'media-en'].includes(scenario),
+  'Scenario implementation is pending',
+);
 const applicationId = 'com.cremedigital.seasonalworker.e2e';
 const serial = process.env.ANDROID_SERIAL;
 assert(
@@ -125,19 +131,28 @@ const adb = (...argumentsList) =>
     serial,
     ...argumentsList,
   ]);
-const flow = (name) =>
-  command(process.env.MAESTRO_BINARY ?? 'maestro', [
+const flowCounts = new Map();
+const flow = (name, parameters = {}) => {
+  const invocation = (flowCounts.get(name) ?? 0) + 1;
+  flowCounts.set(name, invocation);
+  const artifactName = `${name}-${invocation}`;
+  return command(process.env.MAESTRO_BINARY ?? 'maestro', [
     '--device',
     serial,
     'test',
     '--format',
     'junit',
     '--output',
-    path.join(output, `${name}.xml`),
+    path.join(output, `${artifactName}.xml`),
     '--test-output-dir',
-    path.join(output, name),
+    path.join(output, artifactName),
+    ...Object.entries(parameters).flatMap(([key, value]) => [
+      '-e',
+      `${key}=${value}`,
+    ]),
     `.maestro/${name}.yaml`,
   ]);
+};
 
 async function step(name, operation) {
   try {
@@ -281,21 +296,32 @@ try {
     return { port: 3101, temporaryData: true };
   });
   await step('authenticate-and-cache-home', () => flow('bootstrap-sign-in'));
-  await step('offline-force-stop-without-backend-or-metro', async () => {
-    await adb('shell', 'am', 'force-stop', applicationId);
-    await stopBackend();
-    await flow('probe-airplane');
-    await adb('shell', 'svc', 'wifi', 'disable');
-    assert.equal(
-      await adb('shell', 'settings', 'get', 'global', 'airplane_mode_on'),
-      '1',
+  if (scenario.startsWith('media-')) {
+    await step('native-camera-gallery-and-private-storage', () =>
+      runMediaJourney({
+        adb,
+        flow,
+        output,
+        temporaryDirectory: dataDirectory,
+        language: scenario === 'media-es' ? 'es' : 'en',
+      }),
     );
-    assert.equal(
-      await adb('shell', 'settings', 'get', 'global', 'wifi_on'),
-      '0',
-    );
-    return flow('bootstrap-offline');
-  });
+  } else
+    await step('offline-force-stop-without-backend-or-metro', async () => {
+      await adb('shell', 'am', 'force-stop', applicationId);
+      await stopBackend();
+      await flow('probe-airplane');
+      await adb('shell', 'svc', 'wifi', 'disable');
+      assert.equal(
+        await adb('shell', 'settings', 'get', 'global', 'airplane_mode_on'),
+        '1',
+      );
+      assert.equal(
+        await adb('shell', 'settings', 'get', 'global', 'wifi_on'),
+        '0',
+      );
+      return flow('bootstrap-offline');
+    });
   result.status = 'PASS';
 } catch (error) {
   result.error = String(error);

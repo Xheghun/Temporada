@@ -13,6 +13,7 @@ export function LanguageControl() {
   return (
     <View>
       <Pressable
+        testID="language-toggle"
         accessibilityRole="button"
         accessibilityLabel={translate('ui.language')}
         accessibilityState={{ disabled: busy || !savePreference }}

@@ -1,0 +1,23 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Capture through the native virtual camera
+---
+- scrollUntilVisible:
+    element:
+      id: capture-camera
+    direction: DOWN
+- tapOn:
+    id: capture-camera
+- extendedWaitUntil:
+    visible:
+      id: 'com.android.camera2:id/shutter_button'
+    timeout: 20000
+- tapOn:
+    id: 'com.android.camera2:id/shutter_button'
+- tapOn:
+    id: 'com.android.camera2:id/done_button'
+- extendedWaitUntil:
+    visible:
+      id: capture-preview
+    timeout: 30000
+- assertVisible: ${PREVIEW_LABEL}
+- takeScreenshot: native-camera-preview

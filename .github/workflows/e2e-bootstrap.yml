@@ -103,17 +103,20 @@ jobs:
           ram-size: 2048M
           avd-name: temporada-bootstrap-${{ matrix.api }}
           emulator-build: '16428233'
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 2048 -lowram
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 2048 -lowram -camera-back emulated -camera-front emulated
           pre-emulator-launch-script: node testing/e2e/build-isolation-fixture.mjs
           script: |
             adb install e2e-results/isolation-fixture.apk
             adb shell am start -W -n com.cremedigital.seasonalworker/.IsolationFixture
             node testing/e2e/run.mts --suite bootstrap --repeat 2
+            E2E_OUTPUT=e2e-results/media-${{ matrix.api }} node testing/e2e/run.mts --suite media
       - name: Upload bootstrap evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: bundled-cold-start-api-${{ matrix.api }}
-          path: e2e-results/bootstrap-${{ matrix.api }}/
+          path: |
+            e2e-results/bootstrap-${{ matrix.api }}/
+            e2e-results/media-${{ matrix.api }}/
           retention-days: 14
           if-no-files-found: warn

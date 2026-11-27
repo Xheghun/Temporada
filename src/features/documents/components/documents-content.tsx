@@ -142,6 +142,7 @@ export function DocumentsContent({
             >
               {document.canSubmit ? (
                 <Pressable
+                  testID={`document-${document.documentType}`}
                   accessibilityRole="button"
                   accessibilityLabel={actionLabel}
                   accessibilityState={{ disabled: !onCapture }}
@@ -192,6 +193,7 @@ export function DocumentsContent({
         </InformationPanel>
       </View>
       <TextAction
+        testID="documents-refresh"
         disabled={state.refreshing}
         label={translate('home.refresh')}
         onPress={onRefresh}
