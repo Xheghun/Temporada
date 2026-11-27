@@ -1,4 +1,4 @@
-export type Suite = 'bootstrap' | 'media' | 'smoke' | 'full';
+export type Suite = 'bootstrap' | 'media' | 'device' | 'smoke' | 'full';
 export type Selection = { scenarios: string[]; repetitions: number };
 
 export function selectScenarios(argumentsList: string[]): Selection {
@@ -14,12 +14,12 @@ export function selectScenarios(argumentsList: string[]): Selection {
     provided.add(flag);
     if (
       flag === '--suite' &&
-      ['bootstrap', 'media', 'smoke', 'full'].includes(value)
+      ['bootstrap', 'media', 'device', 'smoke', 'full'].includes(value)
     )
       suite = value as Suite;
     else if (
       flag === '--scenario' &&
-      /^(bootstrap|media-es|media-en|[1-8])$/.test(value)
+      /^(bootstrap|media-es|media-en|device|[1-8])$/.test(value)
     )
       scenario = value;
     else if (flag === '--repeat' && /^[1-5]$/.test(value))
@@ -31,6 +31,7 @@ export function selectScenarios(argumentsList: string[]): Selection {
   const suites: Record<Suite, string[]> = {
     bootstrap: ['bootstrap'],
     media: ['media-es', 'media-en'],
+    device: ['device'],
     smoke: ['1', '2'],
     full: ['1', '2', '3', '4', '5', '6', '7', '8'],
   };

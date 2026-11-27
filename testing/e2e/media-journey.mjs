@@ -2,24 +2,8 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { inspectNative } from './native-inspection.mjs';
 import { createMediaFixture } from './media-fixture.mjs';
-
-function decodeXml(value) {
-  return value.replace(
-    /&(?:quot|apos|lt|gt|amp);|&#(\d+);|&#x([0-9a-f]+);/gi,
-    (entity, decimal, hexadecimal) => {
-      if (decimal) return String.fromCodePoint(Number(decimal));
-      if (hexadecimal) return String.fromCodePoint(parseInt(hexadecimal, 16));
-      return {
-        '&quot;': '"',
-        '&apos;': "'",
-        '&lt;': '<',
-        '&gt;': '>',
-        '&amp;': '&',
-      }[entity];
-    },
-  );
-}
 
 export async function runMediaJourney({
   adb,
@@ -27,6 +11,9 @@ export async function runMediaJourney({
   output,
   temporaryDirectory,
   language,
+  afterSave,
+  beforeCapture,
+  includeGallery = true,
 }) {
   const translations = JSON.parse(
     await readFile(`src/core/i18n/${language}.json`, 'utf8'),
@@ -41,7 +28,6 @@ export async function runMediaJourney({
   const filename = `fictional-${randomUUID()}.png`;
   const local = path.join(temporaryDirectory, filename);
   const shared = `/sdcard/Pictures/TemporadaE2E/${filename}`;
-  const hierarchy = `/data/local/tmp/temporada-e2e-${randomUUID()}.xml`;
   const fixture = await createMediaFixture(local);
   assert(
     fixture.bytes > 1_500_000,
@@ -77,50 +63,25 @@ export async function runMediaJourney({
     if (language === 'en') await flow('media-english');
     await flow('probe-airplane');
     await adb('shell', 'svc', 'wifi', 'disable');
+    if (beforeCapture) await beforeCapture();
     await flow('media-open-passport', labels);
     await flow('media-camera', labels);
     // Exercise retake before saving the first real submission.
     await flow('media-camera', labels);
     await flow('media-save', labels);
-    await flow('media-gallery', labels);
-    await flow('media-save', labels);
-    await flow('media-inspect');
-    await adb('shell', 'uiautomator', 'dump', hierarchy);
-    const xml = await adb('exec-out', 'cat', hierarchy);
-    const nodes = xml.match(/<node\b[^>]*>/g) ?? [];
-    const text = nodes
-      .flatMap((node) =>
-        ['text', 'content-desc'].map((attribute) => {
-          const value = node.match(
-            new RegExp(`\\b${attribute}="([^"]*)"`),
-          )?.[1];
-          return value ? decodeXml(value) : '';
-        }),
-      )
-      .find(
-        (value) => value.trim().startsWith('{') && value.includes('"workerId"'),
-      );
-    if (!text)
-      await writeFile(
-        path.join(output, 'inspection-node-metadata.json'),
-        JSON.stringify(
-          nodes.map((node) => ({
-            resourceId: node.match(/resource-id="([^"]*)"/)?.[1] ?? null,
-            textLength: node.match(/\btext="([^"]*)"/)?.[1]?.length ?? 0,
-          })),
-          null,
-          2,
-        ),
-      );
-    assert(text, 'Native inspection text is missing');
-    const inspection = JSON.parse(text);
+    if (includeGallery) {
+      await flow('media-gallery', labels);
+      await flow('media-save', labels);
+    }
+    const inspection = await inspectNative({ adb, flow, output });
     assert.equal(inspection.workerId, 'ana');
     assert.equal(inspection.actions.length, 2);
-    assert.equal(inspection.managedFiles, 2);
+    assert.equal(inspection.managedFiles, includeGallery ? 2 : 1);
     assert.equal(inspection.pickerCacheFiles, 0);
     assert.equal(inspection.journals, 0);
     for (const action of inspection.actions) {
       assert.equal(action.status, 'queued');
+      if (action.actionType !== 'document_upload') continue;
       assert.equal(action.ownsPrivateFile, true);
       assert.equal(action.exists, true);
       assert.equal(action.digestMatches, true);
@@ -142,10 +103,13 @@ export async function runMediaJourney({
         2,
       ),
     );
+    if (afterSave) await afterSave(inspection);
     return {
       language,
       fixtureBytes: fixture.bytes,
-      privateUploads: inspection.actions.length,
+      privateUploads: inspection.actions.filter(
+        (action) => action.actionType === 'document_upload',
+      ).length,
     };
   } catch (error) {
     originalFailure = error;
@@ -153,7 +117,7 @@ export async function runMediaJourney({
   } finally {
     const cleanupErrors = [];
     for (const cleanup of [
-      () => adb('shell', 'rm', '-f', shared, hierarchy),
+      () => adb('shell', 'rm', '-f', shared),
       () =>
         adb(
           'shell',

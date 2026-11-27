@@ -1,0 +1,8 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Observe restored connectivity
+---
+- runFlow: device-home.yaml
+- extendedWaitUntil:
+    visible: 'En línea.*|Online.*'
+    timeout: 15000
+- takeScreenshot: device-online

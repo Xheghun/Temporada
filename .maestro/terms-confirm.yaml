@@ -1,0 +1,21 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Confirm the displayed terms offline
+---
+- openLink: temporada-e2e://terms
+- extendedWaitUntil:
+    visible: ${VERSION_LABEL}
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: terms-confirm
+    direction: DOWN
+- tapOn:
+    id: terms-confirm
+- extendedWaitUntil:
+    visible: ${TERMS_PENDING_LABEL}
+    timeout: 15000
+- openLink: temporada-e2e://home
+- extendedWaitUntil:
+    visible:
+      id: home-assignment
+    timeout: 15000

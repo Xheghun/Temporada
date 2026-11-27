@@ -15,12 +15,15 @@ import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { runScenarioTwo } from './scenario-two.mjs';
+import { androidDevice } from './android-device.mjs';
+import { verifyDeviceDurability } from './device-journey.mjs';
 import { runMediaJourney } from './media-journey.mjs';
 
 const executeFile = promisify(execFile);
 const scenario = process.env.E2E_SCENARIO ?? 'bootstrap';
 assert(
-  ['bootstrap', 'media-es', 'media-en'].includes(scenario),
+  ['bootstrap', 'media-es', 'media-en', 'device', '2'].includes(scenario),
   'Scenario implementation is pending',
 );
 const applicationId = 'com.cremedigital.seasonalworker.e2e';
@@ -47,6 +50,13 @@ let originalAirplane;
 let originalWifi;
 let hasReverse = false;
 let protectedBefore;
+let originalFontScale;
+let isCleaningUp = false;
+const cancellation = new AbortController();
+for (const signal of ['SIGINT', 'SIGTERM'])
+  process.once(signal, () =>
+    cancellation.abort(new Error(`Run cancelled by ${signal}`)),
+  );
 
 async function protectedDataSnapshot() {
   const digest = createHash('sha256');
@@ -115,6 +125,7 @@ async function command(executable, argumentsList) {
     return (
       await executeFile(executable, argumentsList, {
         timeout: 180_000,
+        signal: isCleaningUp ? undefined : cancellation.signal,
         maxBuffer: 4 * 1024 * 1024,
         env: { ...process.env, MAESTRO_CLI_NO_ANALYTICS: '1' },
       })
@@ -156,6 +167,7 @@ const flow = (name, parameters = {}) => {
 
 async function step(name, operation) {
   try {
+    if (!isCleaningUp) cancellation.signal.throwIfAborted();
     result.steps.push({ name, status: 'PASS', detail: await operation() });
     console.log(`PASS ${name}`);
   } catch (error) {
@@ -186,6 +198,13 @@ try {
     'airplane_mode_on',
   );
   originalWifi = await adb('shell', 'settings', 'get', 'global', 'wifi_on');
+  originalFontScale = await adb(
+    'shell',
+    'settings',
+    'get',
+    'system',
+    'font_scale',
+  );
   await step('protected-normal-data-baseline', async () => {
     protectedBefore = await protectedDataSnapshot();
     return {
@@ -296,14 +315,22 @@ try {
     return { port: 3101, temporaryData: true };
   });
   await step('authenticate-and-cache-home', () => flow('bootstrap-sign-in'));
-  if (scenario.startsWith('media-')) {
+  if (scenario === '2') {
+    await step('brief-2-offline-terms-camera-restart-reconnect', () =>
+      runScenarioTwo({ adb, flow, output, temporaryDirectory: dataDirectory }),
+    );
+  } else if (scenario.startsWith('media-') || scenario === 'device') {
     await step('native-camera-gallery-and-private-storage', () =>
       runMediaJourney({
         adb,
         flow,
         output,
         temporaryDirectory: dataDirectory,
-        language: scenario === 'media-es' ? 'es' : 'en',
+        language: scenario === 'media-en' ? 'en' : 'es',
+        afterSave:
+          scenario === 'device'
+            ? (before) => verifyDeviceDurability({ adb, flow, output, before })
+            : undefined,
       }),
     );
   } else
@@ -328,27 +355,22 @@ try {
   process.exitCode = 1;
   console.error(error);
 } finally {
+  isCleaningUp = true;
   for (const [name, cleanup] of [
     ['stop-owned-backend', stopBackend],
     [
-      'restore-airplane',
+      'restore-device-settings',
       async () => {
-        if (originalAirplane !== undefined)
-          await flow(
-            originalAirplane === '1' ? 'probe-airplane' : 'probe-airplane-off',
-          );
-      },
-    ],
-    [
-      'restore-wifi',
-      async () => {
-        if (originalWifi !== undefined)
-          await adb(
-            'shell',
-            'svc',
-            'wifi',
-            originalWifi === '0' ? 'disable' : 'enable',
-          );
+        if (
+          originalAirplane !== undefined &&
+          originalWifi !== undefined &&
+          originalFontScale !== undefined
+        )
+          await androidDevice({ adb, flow }).restore({
+            airplane: originalAirplane,
+            wifi: originalWifi,
+            fontScale: originalFontScale,
+          });
       },
     ],
     [

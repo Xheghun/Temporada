@@ -18,6 +18,8 @@ const implementedScenarios = new Map([
   ['bootstrap', 'testing/e2e/bootstrap-android.mjs'],
   ['media-es', 'testing/e2e/bootstrap-android.mjs'],
   ['media-en', 'testing/e2e/bootstrap-android.mjs'],
+  ['device', 'testing/e2e/bootstrap-android.mjs'],
+  ['2', 'testing/e2e/bootstrap-android.mjs'],
 ]);
 
 const report = await executeSuite(selection, async (scenario, outputName) => {

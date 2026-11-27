@@ -46,7 +46,7 @@ jobs:
   cold-start:
     needs: build
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
@@ -110,6 +110,10 @@ jobs:
             adb shell am start -W -n com.cremedigital.seasonalworker/.IsolationFixture
             node testing/e2e/run.mts --suite bootstrap --repeat 2
             E2E_OUTPUT=e2e-results/media-${{ matrix.api }} node testing/e2e/run.mts --suite media
+            E2E_OUTPUT=e2e-results/device-${{ matrix.api }} node testing/e2e/run.mts --suite device
+            E2E_OUTPUT=e2e-results/failed-cleanup-${{ matrix.api }} node testing/e2e/verify-failed-cleanup.mjs
+            E2E_OUTPUT=e2e-results/scenario-2-${{ matrix.api }} node testing/e2e/run.mts --scenario 2
+            E2E_REBOOT_VARIANT=1 E2E_OUTPUT=e2e-results/scenario-2-reboot-${{ matrix.api }} node testing/e2e/run.mts --scenario 2
       - name: Upload bootstrap evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -118,5 +122,9 @@ jobs:
           path: |
             e2e-results/bootstrap-${{ matrix.api }}/
             e2e-results/media-${{ matrix.api }}/
+            e2e-results/device-${{ matrix.api }}/
+            e2e-results/failed-cleanup-${{ matrix.api }}/
+            e2e-results/scenario-2-${{ matrix.api }}/
+            e2e-results/scenario-2-reboot-${{ matrix.api }}/
           retention-days: 14
           if-no-files-found: warn
