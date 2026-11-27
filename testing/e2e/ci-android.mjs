@@ -11,6 +11,20 @@ import {
 import path from 'node:path';
 
 const mode = process.env.E2E_SUITE ?? 'smoke';
+const acceptanceGroup = process.env.E2E_ACCEPTANCE_GROUP ?? 'all';
+assert(
+  [
+    'all',
+    'individual',
+    'full-first',
+    'full-second',
+    'regressions',
+    'layouts',
+    'measurements',
+  ].includes(acceptanceGroup),
+  'Unknown acceptance group',
+);
+assert(mode === 'acceptance' || acceptanceGroup === 'all');
 assert(
   [
     'foundation',
@@ -53,7 +67,23 @@ const run = async (name, script, parameters = [], extraEnvironment = {}) => {
 const suite = (name, parameters = [], extraEnvironment = {}) =>
   run(name, 'testing/e2e/run.mts', parameters, extraEnvironment);
 try {
-  if (mode === 'foundation') {
+  if (mode === 'acceptance' && acceptanceGroup !== 'all') {
+    if (acceptanceGroup === 'individual') {
+      for (const scenario of ['8', '7', '6', '5', '4', '3', '2', '1'])
+        await suite(`individual-${scenario}`, ['--scenario', scenario]);
+    } else if (acceptanceGroup.startsWith('full-')) {
+      await suite(acceptanceGroup, ['--suite', 'full']);
+    } else if (acceptanceGroup === 'regressions') {
+      await suite('regressions', ['--suite', 'regressions']);
+    } else if (acceptanceGroup === 'layouts') {
+      await suite('layout-media', ['--suite', 'media'], {
+        E2E_LAYOUT_VARIANT: '1',
+      });
+    } else {
+      assert.equal(process.env.E2E_API, '28');
+      await suite('measurements', ['--scenario', 'measurements']);
+    }
+  } else if (mode === 'foundation') {
     await suite('media', ['--suite', 'media']);
     await suite('bootstrap', ['--suite', 'bootstrap', '--repeat', '2']);
     await suite('device', ['--suite', 'device']);
@@ -123,6 +153,7 @@ try {
       {
         status,
         mode,
+        acceptanceGroup,
         sourceSha: process.env.GITHUB_SHA ?? 'local',
         groups,
         journeys,
@@ -136,7 +167,7 @@ try {
   const summary = [
     `# Android ${process.env.E2E_API ?? ''}: ${status}`,
     '',
-    `Suite: ${mode}${process.env.E2E_REUSED_APK_RUN ? ' (driver debugging with an existing APK; not current-commit acceptance)' : ''}. Individual journey results and JUnit files are in the native artifact.`,
+    `Suite: ${mode}; group: ${acceptanceGroup}${process.env.E2E_REUSED_APK_RUN ? ' (driver debugging with an existing APK; not current-commit acceptance)' : ''}. Individual journey results and JUnit files are in the native artifact.`,
     '',
     '| Group | Status |',
     '| --- | --- |',
