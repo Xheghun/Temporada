@@ -1,0 +1,46 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Bundled E2E sign-in and cached Home
+---
+- launchApp
+- scrollUntilVisible:
+    element:
+      id: auth-phone
+    direction: DOWN
+- tapOn:
+    id: auth-phone
+- inputText: '+525510000001'
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: auth-request-code
+    direction: DOWN
+- tapOn:
+    id: auth-request-code
+- scrollUntilVisible:
+    element:
+      id: auth-otp
+    direction: DOWN
+- tapOn:
+    id: auth-otp
+- inputText: '123456'
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: auth-verify
+    direction: DOWN
+- tapOn:
+    id: auth-verify
+- extendedWaitUntil:
+    visible:
+      id: home-assignment
+    timeout: 30000
+- assertVisible: '.*Ana López.*'
+- takeScreenshot: cached-home-online

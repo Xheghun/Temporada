@@ -1,0 +1,8 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Observe actual offline connectivity
+---
+- runFlow: device-home.yaml
+- extendedWaitUntil:
+    visible: 'Sin conexión.*|Offline.*'
+    timeout: 15000
+- takeScreenshot: device-offline

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Stack } from 'expo-router';
 import { Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -8,20 +8,18 @@ import {
   Action,
   Body,
 } from '@/design-system/components/auth-controls';
-import { inspectNativeCapture } from '@/testing/native-capture-inspection';
+import { NativeInspectionContext } from '@/testing/native-inspection-context';
+import { isNativeInspectionAllowed } from '@/core/config/native-runtime-policy';
 export default function CaptureInspection() {
   const identity = useAuthSnapshot();
+  const inspect = useContext(NativeInspectionContext);
   const { t: translate } = useTranslation();
   const [report, setReport] = useState<{
     workerId: string;
     generation: number;
     text: string;
   } | null>(null);
-  if (
-    !__DEV__ ||
-    process.env.EXPO_PUBLIC_ASSESSMENT_MODE !== '1' ||
-    !identity.selectedWorker
-  )
+  if (!isNativeInspectionAllowed() || !inspect || !identity.selectedWorker)
     return <Body>{translate('unavailable')}</Body>;
   const workerId = identity.selectedWorker.workerId,
     generation = identity.generation;
@@ -29,9 +27,11 @@ export default function CaptureInspection() {
     <AuthPage>
       <Stack.Screen options={{ title: translate('capture.inspectionTitle') }} />
       <Action
+        testID="capture-inspect"
         label={translate('capture.inspect')}
         onPress={() => {
-          void inspectNativeCapture(workerId).then(
+          setReport(null);
+          void inspect().then(
             (text) => setReport({ workerId, generation, text }),
             () =>
               setReport({
@@ -43,7 +43,14 @@ export default function CaptureInspection() {
         }}
       />
       {report?.workerId === workerId && report.generation === generation ? (
-        <Text selectable>{report.text}</Text>
+        <Text
+          testID="capture-inspection-report"
+          accessible
+          accessibilityLabel={report.text}
+          selectable
+        >
+          {report.text}
+        </Text>
       ) : null}
     </AuthPage>
   );

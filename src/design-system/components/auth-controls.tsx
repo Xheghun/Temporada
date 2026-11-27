@@ -91,6 +91,7 @@ export function Action({
   highlighted = false,
   arrow = false,
   compact = false,
+  testID,
 }: {
   label: string;
   onPress(): void;
@@ -100,9 +101,11 @@ export function Action({
   highlighted?: boolean;
   arrow?: boolean;
   compact?: boolean;
+  testID?: string;
 }) {
   return (
     <Pressable
+      testID={testID}
       accessible
       accessibilityRole="button"
       accessibilityLabel={label}

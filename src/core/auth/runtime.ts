@@ -23,10 +23,17 @@ import { chooseImage } from '../files/native-image-picker.ts';
 import { DocumentsService } from '../../features/documents/documents-service.ts';
 import { AssignmentService } from '../../features/assignment/assignment-service.ts';
 import { isFeatureEnabled } from '../config/feature-flags.ts';
+import {
+  isE2ERuntime,
+  isNativeInspectionAllowed,
+} from '../config/native-runtime-policy.ts';
+import { resolveApiBaseUrl } from '../config/runtime-policy.ts';
+import { inspectNativeCapture } from '../../testing/native-capture-inspection.ts';
 
 export async function workerAppEnabled(
   name = 'worker_authentication',
 ): Promise<boolean> {
+  if (isE2ERuntime()) return true;
   if (__DEV__ && process.env.EXPO_PUBLIC_ASSESSMENT_MODE === '1') return true;
   return isFeatureEnabled(name, {
     async load() {
@@ -47,13 +54,11 @@ export async function workerAppEnabled(
 export async function createWorkerRuntime() {
   const enabled = await workerAppEnabled();
   if (!enabled) return null;
-  const base = process.env.EXPO_PUBLIC_API_URL;
-  if (
-    !base ||
-    !/^https?:\/\//.test(base) ||
-    (!__DEV__ && !base.startsWith('https://'))
-  )
-    throw new Error('api_configuration_missing');
+  const base = resolveApiBaseUrl(
+    process.env.EXPO_PUBLIC_API_URL,
+    __DEV__,
+    isE2ERuntime(),
+  );
   const homeEnabled = await workerAppEnabled('worker_home_and_terms');
   const documentsEnabled =
     homeEnabled && (await workerAppEnabled('worker_document_corrections'));
@@ -239,6 +244,16 @@ export async function createWorkerRuntime() {
   await auth.restore();
   return {
     auth,
+    inspect: isNativeInspectionAllowed()
+      ? async () => {
+          const session = auth.current();
+          if (!session) throw new Error('inspection_requires_selected_worker');
+          const result = await inspectNativeCapture(database, session.workerId);
+          if (!auth.isCurrent(session))
+            throw new Error('inspection_session_changed');
+          return result;
+        }
+      : null,
     setLanguage,
     assignment,
     documents,

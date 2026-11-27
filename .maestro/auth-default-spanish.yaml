@@ -1,0 +1,10 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Read Spanish before the first login
+---
+- launchApp
+- scrollUntilVisible:
+    element:
+      id: auth-phone
+    direction: DOWN
+- assertVisible: 'Número de teléfono'
+- takeScreenshot: spanish-sign-in

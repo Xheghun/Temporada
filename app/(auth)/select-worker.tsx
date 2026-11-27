@@ -46,6 +46,7 @@ export default function SelectWorker() {
         ) : null}
         {state.workers.map((worker) => (
           <ListRow
+            testID={`worker-${worker.workerId}`}
             outlined
             detail={translate('reference.workerDetail')}
             leading={<WorkerAvatar size={48} name={worker.displayName} />}

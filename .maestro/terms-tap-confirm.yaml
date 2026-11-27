@@ -1,0 +1,9 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Explicitly confirm the current displayed version
+---
+- scrollUntilVisible:
+    element:
+      id: terms-confirm
+    direction: DOWN
+- tapOn:
+    id: terms-confirm

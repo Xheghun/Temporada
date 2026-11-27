@@ -386,33 +386,48 @@ export class WorkerRepository implements WorkerPersistence {
     );
   }
   async readView(): Promise<WorkerViewData> {
+    return this.database.transaction((transaction) =>
+      this.readViewRecords(transaction),
+    );
+  }
+  async readDetailedView(): Promise<{
+    view: WorkerViewData;
+    submissions: LocalSubmission[];
+  }> {
     return this.database.transaction(async (transaction) => {
-      const assignment = await this.readAssignment(transaction);
-      const actions = (
-        await transaction.all<ActionRow>(
-          `SELECT ${actionColumns} FROM outbox_actions WHERE worker_id=? ORDER BY sequence`,
-          [this.workerId],
-        )
-      ).map(decodeActionRow);
-      const cache = await transaction.first<{ cachedAt: number }>(
-        'SELECT cached_at AS cachedAt FROM assignments WHERE worker_id=?',
-        [this.workerId],
-      );
-      const refresh = await transaction.first<{
-        needed: number;
-        error: string | null;
-      }>(
-        `SELECT (assignment_refresh_needed OR terms_refresh_needed) AS needed,last_error_code AS error FROM refresh_state WHERE worker_id=?`,
-        [this.workerId],
-      );
-      return {
-        assignment,
-        actions,
-        cachedAt: cache?.cachedAt ?? null,
-        refreshNeeded: !!refresh?.needed,
-        refreshError: refresh?.error ?? null,
-      };
+      const view = await this.readViewRecords(transaction);
+      const submissions = await this.readSubmissionRecords(transaction);
+      return { view, submissions };
     });
+  }
+  private async readViewRecords(
+    transaction: SqlExecutor,
+  ): Promise<WorkerViewData> {
+    const assignment = await this.readAssignment(transaction);
+    const actions = (
+      await transaction.all<ActionRow>(
+        `SELECT ${actionColumns} FROM outbox_actions WHERE worker_id=? ORDER BY sequence`,
+        [this.workerId],
+      )
+    ).map(decodeActionRow);
+    const cache = await transaction.first<{ cachedAt: number }>(
+      'SELECT cached_at AS cachedAt FROM assignments WHERE worker_id=?',
+      [this.workerId],
+    );
+    const refresh = await transaction.first<{
+      needed: number;
+      error: string | null;
+    }>(
+      `SELECT (assignment_refresh_needed OR terms_refresh_needed) AS needed,last_error_code AS error FROM refresh_state WHERE worker_id=?`,
+      [this.workerId],
+    );
+    return {
+      assignment,
+      actions,
+      cachedAt: cache?.cachedAt ?? null,
+      refreshNeeded: !!refresh?.needed,
+      refreshError: refresh?.error ?? null,
+    };
   }
   private async readAssignment(
     transaction: SqlExecutor,
@@ -505,7 +520,12 @@ export class WorkerRepository implements WorkerPersistence {
   }
 
   async listSubmissions(): Promise<LocalSubmission[]> {
-    return this.database.all<LocalSubmission>(
+    return this.readSubmissionRecords(this.database);
+  }
+  private async readSubmissionRecords(
+    transaction: SqlExecutor,
+  ): Promise<LocalSubmission[]> {
+    return transaction.all<LocalSubmission>(
       `SELECT ${submissionColumns}
         FROM document_submissions AS submission
         LEFT JOIN outbox_actions AS outboxAction ON outboxAction.worker_id=submission.worker_id AND outboxAction.client_action_id=submission.client_action_id

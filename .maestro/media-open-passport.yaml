@@ -1,0 +1,17 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Open passport capture from the backend catalog
+---
+- tapOn:
+    id: nav-documents
+- scrollUntilVisible:
+    element:
+      id: document-passport
+    direction: UP
+- tapOn:
+    id: document-passport
+- scrollUntilVisible:
+    element:
+      id: capture-camera
+    direction: DOWN
+- assertVisible: ${CAMERA_LABEL}
+- assertVisible: ${GALLERY_LABEL}

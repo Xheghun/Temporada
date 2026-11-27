@@ -1,0 +1,8 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Observe a delivered document awaiting staff review
+---
+- openLink: temporada-e2e://documents
+- extendedWaitUntil:
+    visible: ${REVIEW_LABEL}
+    timeout: 45000
+- takeScreenshot: document-pending-review

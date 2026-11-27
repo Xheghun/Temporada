@@ -1,0 +1,10 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Refresh staff decisions through the ordinary UI
+---
+- openLink: temporada-e2e://documents
+- scrollUntilVisible:
+    element:
+      id: documents-refresh
+    direction: DOWN
+- tapOn:
+    id: documents-refresh

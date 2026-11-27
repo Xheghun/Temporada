@@ -1,0 +1,7 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Restore the saved English choice after restart
+---
+- openLink: temporada-e2e://home
+- assertVisible: ${GREETING_LABEL}
+- assertVisible: ${LANGUAGE_LABEL}
+- takeScreenshot: english-restored

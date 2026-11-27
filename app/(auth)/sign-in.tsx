@@ -59,6 +59,7 @@ export default function SignIn() {
           name="phone"
           render={({ field: { value, onChange, onBlur } }) => (
             <Field
+              testID="auth-phone"
               label={translate('phone')}
               value={value}
               onChangeText={onChange}
@@ -76,6 +77,7 @@ export default function SignIn() {
           )}
         />
         <Action
+          testID="auth-request-code"
           label={translate('requestCode')}
           busy={state.busy}
           onPress={() => {

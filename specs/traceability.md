@@ -69,4 +69,4 @@ SDD-023 restores R-HOME after the merged refactor: `home-overview.test.ts` cover
 
 ## Current manual verification
 
-I completed end-to-end UI testing on iOS and Android, including TalkBack and a lower-end Android emulator. The saved results omit the low-end emulator configuration, startup timing and peak memory. The specific Android 9 / 2 GB measurement record remains open in [question 3](../docs/architecture-answers.md#3-store-review-and-low-end-devices).
+I completed end-to-end UI testing on iOS and Android, including TalkBack and a lower-end Android emulator. The later automated API 28 / 2,048 MiB baseline, cold-launch values and sampled PSS are recorded in [question 3](../docs/architecture-answers.md#3-store-review-and-low-end-devices). Repeated native-suite acceptance remains incomplete in the [SDD-035 checklist](../openspec/changes/automate-brief-e2e-scenarios/tasks.md).

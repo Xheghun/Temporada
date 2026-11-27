@@ -1,0 +1,7 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Sign out with pending work
+---
+- openLink: temporada-e2e://identity
+- tapOn:
+    id: identity-logout
+- runFlow: auth-required.yaml

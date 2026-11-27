@@ -1,0 +1,21 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Navigate and change language during network work
+---
+- openLink: temporada-e2e://home
+- tapOn:
+    id: nav-job
+- assertVisible: 'Tu trabajo'
+- tapOn:
+    id: nav-home
+- tapOn:
+    id: language-toggle
+- assertVisible: '.*Ana López.*'
+- tapOn:
+    id: nav-documents
+- assertVisible: 'Your documents'
+- tapOn:
+    id: nav-home
+- tapOn:
+    id: language-toggle
+- assertVisible: '.*Ana López.*'
+- takeScreenshot: responsive-during-network-work

@@ -1,0 +1,16 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Select English and navigate on iOS
+---
+- tapOn:
+    id: language-toggle
+- assertVisible: 'Hello, Ana López'
+- assertVisible: 'Change language'
+- tapOn:
+    id: nav-documents
+- assertVisible: 'Your documents'
+- tapOn:
+    id: nav-job
+- assertVisible: 'Your job'
+- tapOn:
+    id: nav-home
+- takeScreenshot: ios-english-navigation

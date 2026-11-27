@@ -1,0 +1,17 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Save processed private upload offline
+---
+- scrollUntilVisible:
+    element:
+      id: capture-save
+    direction: DOWN
+- assertVisible: ${SAVE_LABEL}
+- tapOn:
+    id: capture-save
+- extendedWaitUntil:
+    visible:
+      id: capture-saved
+    timeout: 30000
+- assertVisible: ${PENDING_LABEL}
+- tapOn:
+    id: capture-back

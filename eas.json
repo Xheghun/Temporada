@@ -4,6 +4,16 @@
     "appVersionSource": "local"
   },
   "build": {
+    "e2e": {
+      "distribution": "internal",
+      "env": {
+        "BUILD_VARIANT": "e2e",
+        "EXPO_PUBLIC_APP_ENV": "e2e",
+        "EXPO_PUBLIC_API_URL": "http://127.0.0.1:3101"
+      },
+      "android": { "buildType": "apk" },
+      "ios": { "simulator": true }
+    },
     "development": {
       "developmentClient": true,
       "distribution": "internal",

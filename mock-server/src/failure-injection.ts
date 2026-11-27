@@ -5,6 +5,7 @@ export class Failures {
   serverErrorRate = 0;
   dropNextResponse = false;
   force413 = false;
+  force422 = false;
   private seed = 1;
 
   configure(value: unknown): void {
@@ -15,6 +16,7 @@ export class Failures {
       'randomSeed',
       'dropNextResponse',
       'force413',
+      'force422',
     ];
     for (const key of Object.keys(body))
       if (!allowed.includes(key))
@@ -33,7 +35,7 @@ export class Failures {
       )
         throw new ApiError(422, 'invalid_failure_control');
     }
-    for (const key of ['dropNextResponse', 'force413'] as const)
+    for (const key of ['dropNextResponse', 'force413', 'force422'] as const)
       if (body[key] !== undefined && typeof body[key] !== 'boolean')
         throw new ApiError(422, 'invalid_failure_control');
     // Validate all fields before mutation so an invalid update cannot partially apply.
@@ -44,6 +46,7 @@ export class Failures {
     if (typeof body.dropNextResponse === 'boolean')
       this.dropNextResponse = body.dropNextResponse;
     if (typeof body.force413 === 'boolean') this.force413 = body.force413;
+    if (typeof body.force422 === 'boolean') this.force422 = body.force422;
   }
   async beforeRequest(): Promise<void> {
     if (this.latencyMs)

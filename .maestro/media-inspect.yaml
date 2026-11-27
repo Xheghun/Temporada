@@ -1,0 +1,11 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Read durable upload inspection
+---
+- openLink: temporada-e2e://dev/capture-inspection
+- tapOn:
+    id: capture-inspect
+- assertVisible: '(?s).*"workerId": "${WORKER_ID}".*'
+- copyTextFrom:
+    id: capture-inspection-report
+- evalScript: ${console.log('TEMPORADA_NATIVE_INSPECTION=' + JSON.stringify(JSON.parse(maestro.copiedText)))}
+- takeScreenshot: native-inspection

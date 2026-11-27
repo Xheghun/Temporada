@@ -1,0 +1,22 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Interact while two-second requests are in flight
+---
+- openLink: temporada-e2e://home
+- assertVisible: 'Sin conexión.*'
+- setAirplaneMode: disabled
+- tapOn:
+    id: nav-job
+- assertVisible: 'Tu trabajo'
+- tapOn:
+    id: nav-home
+- tapOn:
+    id: language-toggle
+- assertVisible: 'Hello, Ana López'
+- tapOn:
+    id: nav-documents
+- assertVisible: 'Your documents'
+- tapOn:
+    id: nav-home
+- tapOn:
+    id: language-toggle
+- takeScreenshot: latency-interaction

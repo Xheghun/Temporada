@@ -1,0 +1,9 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Read unconfirmed displayed terms
+---
+- openLink: temporada-e2e://terms
+- scrollUntilVisible:
+    element: ${VERSION_LABEL}
+    direction: UP
+- assertVisible: ${UNCONFIRMED_LABEL}
+- takeScreenshot: unconfirmed-terms

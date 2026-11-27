@@ -141,6 +141,7 @@ export function HomeContent({
           trailing={
             onProfile ? (
               <Pressable
+                testID="home-profile"
                 accessibilityRole="button"
                 accessibilityLabel={translate('ui.profile')}
                 onPress={onProfile}
@@ -170,7 +171,10 @@ export function HomeContent({
       <ErrorNotice code={state.error} />
       {assignment ? (
         <>
-          <View style={[styles.featured, { marginTop: 20 }]}>
+          <View
+            testID="home-assignment"
+            style={[styles.featured, { marginTop: 20 }]}
+          >
             <Text style={styles.taskEyebrow}>
               {translate('reference.upNext')}
             </Text>
@@ -187,6 +191,7 @@ export function HomeContent({
             {onNext ? (
               <View style={{ marginTop: 8 }}>
                 <Action
+                  testID="home-next-action"
                   compact
                   arrow
                   highlighted
@@ -277,7 +282,11 @@ export function HomeContent({
               )}
             </Body>
             <Body>{assignment.terms.summary[language]}</Body>
-            <TextAction label={translate('home.openTerms')} onPress={onTerms} />
+            <TextAction
+              testID="home-open-terms"
+              label={translate('home.openTerms')}
+              onPress={onTerms}
+            />
           </View>
           <HomeProgress overview={overview} />
           {state.data?.refreshNeeded ? (
@@ -420,6 +429,7 @@ export function TermsContent({
       <ErrorNotice code={state.error} />
       <View style={{ marginTop: 20 }}>
         <Action
+          testID="terms-confirm"
           label={translate(
             facts.replacementActionId
               ? 'terms.replaceFailed'

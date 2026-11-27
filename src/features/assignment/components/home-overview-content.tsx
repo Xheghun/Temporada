@@ -19,11 +19,15 @@ export function HomeSyncSummary({
 }) {
   const { t: translate } = useTranslation();
   return (
-    <View style={styles.sync}>
+    <View testID="home-sync-summary" style={styles.sync}>
       <StatusIndicator>
         {translate(online ? 'home.online' : 'home.offline')}
       </StatusIndicator>
-      <Text accessibilityLiveRegion="polite" style={styles.syncCount}>
+      <Text
+        testID="home-pending-count"
+        accessibilityLiveRegion="polite"
+        style={styles.syncCount}
+      >
         {overview.pendingCount === null
           ? translate(loading ? 'home.queueLoading' : 'home.queueUnavailable')
           : translate('home.pending', { count: overview.pendingCount })}

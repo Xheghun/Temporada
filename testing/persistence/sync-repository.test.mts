@@ -74,6 +74,9 @@ for (const revision of [null, 1] as const) {
         'Foto borrosa, vuelva a tomarla',
       );
       assert.equal((await testContext.store().refreshState()).needed, true);
+      const detailed = await testContext.worker().readDetailedView();
+      assert.equal(detailed.view.actions[0]?.id, action.id);
+      assert.deepEqual(detailed.submissions[0], submission);
     } finally {
       await testContext.close();
     }
@@ -173,6 +176,10 @@ test('missing revision can initialize Pending Review without inventing approval'
     assert.equal(submission?.serverStatus, 'pending_review');
     assert.equal(submission?.serverRevision, null);
     assert.equal(submission?.deliveryStatus, 'delivered');
+    const detailed = await testContext.worker().readDetailedView();
+    assert.equal(detailed.view.actions[0]?.status, 'delivered');
+    assert.deepEqual(detailed.submissions[0], submission);
+    assert(detailed.submissions[0]?.serverSubmissionId);
     assert.equal((await testContext.store().refreshState()).needed, true);
   } finally {
     await testContext.close();

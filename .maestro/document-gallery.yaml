@@ -1,0 +1,38 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Capture a selected catalog document from the gallery
+---
+- openLink: temporada-e2e://documents
+- scrollUntilVisible:
+    element: ${DOCUMENTS_TITLE}
+    direction: UP
+- scrollUntilVisible:
+    element:
+      id: document-${DOCUMENT_TYPE}
+    direction: DOWN
+- tapOn:
+    id: document-${DOCUMENT_TYPE}
+- scrollUntilVisible:
+    element:
+      id: capture-gallery
+    direction: DOWN
+- tapOn:
+    id: capture-gallery
+- runFlow:
+    when:
+      visible:
+        id: '.*:id/icon_thumbnail'
+    commands:
+      - tapOn:
+          id: '.*:id/icon_thumbnail'
+          index: 0
+- runFlow:
+    when:
+      visible: 'fictional-.*\.png'
+    commands:
+      - tapOn: 'fictional-.*\.png'
+- extendedWaitUntil:
+    visible:
+      id: capture-preview
+    timeout: 30000
+- assertVisible: ${PREVIEW_LABEL}
+- takeScreenshot: native-gallery-preview

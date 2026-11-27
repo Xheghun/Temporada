@@ -1,0 +1,30 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Select and switch the shared phone on iOS
+---
+- tapOn:
+    id: home-profile
+- tapOn:
+    id: identity-logout
+- runFlow: shared-sign-in.yaml
+- tapOn:
+    id: home-profile
+- tapOn:
+    id: identity-switch-worker
+- extendedWaitUntil:
+    visible:
+      id: worker-bruno
+    timeout: 15000
+- tapOn:
+    id: worker-bruno
+- extendedWaitUntil:
+    visible:
+      id: home-assignment
+    timeout: 20000
+- assertVisible: '.*Bruno Díaz.*'
+- assertNotVisible: '.*Carla Díaz.*'
+- tapOn:
+    id: nav-documents
+- assertVisible: 'Your documents'
+- tapOn:
+    id: nav-home
+- takeScreenshot: ios-shared-bruno

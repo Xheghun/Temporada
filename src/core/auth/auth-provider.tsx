@@ -10,6 +10,7 @@ import { CaptureContext } from '../../features/capture/hooks/use-capture';
 import { DocumentsContext } from '../../features/documents/hooks/use-documents';
 import { AssignmentContext } from '../../features/assignment/hooks/use-assignment';
 import { AuthContext } from './auth-context';
+import { NativeInspectionContext } from '../../testing/native-inspection-context';
 export { useAuth, useAuthSnapshot } from './auth-context';
 export function AuthProvider({ children }: PropsWithChildren) {
   const { t: translate } = useTranslation();
@@ -56,7 +57,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
           <AssignmentContext.Provider value={state.runtime.assignment}>
             <DocumentsContext.Provider value={state.runtime.documents}>
               <CaptureContext.Provider value={state.runtime.capture}>
-                {children}
+                <NativeInspectionContext.Provider value={state.runtime.inspect}>
+                  {children}
+                </NativeInspectionContext.Provider>
               </CaptureContext.Provider>
             </DocumentsContext.Provider>
           </AssignmentContext.Provider>

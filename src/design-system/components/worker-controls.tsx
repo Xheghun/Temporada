@@ -53,6 +53,7 @@ export function ListRow({
   disabled = false,
   number,
   outlined = false,
+  testID,
 }: {
   title: string;
   detail?: string | undefined;
@@ -62,6 +63,7 @@ export function ListRow({
   disabled?: boolean;
   number?: number;
   outlined?: boolean;
+  testID?: string;
 }) {
   const content = (
     <>
@@ -82,6 +84,7 @@ export function ListRow({
   );
   return onPress ? (
     <Pressable
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={label ?? title}
       accessibilityState={{ disabled }}
@@ -138,6 +141,7 @@ export function BottomNavigation({
       {destinations.map((destination) => (
         <Pressable
           key={destination}
+          testID={`nav-${destination}`}
           accessibilityRole="tab"
           accessibilityState={{ selected: selected === destination }}
           onPress={() => onNavigate(destination)}

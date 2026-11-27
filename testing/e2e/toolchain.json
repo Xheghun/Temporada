@@ -1,0 +1,26 @@
+{
+  "maestro": {
+    "version": "2.12.1",
+    "url": "https://github.com/mobile-dev-inc/Maestro/releases/download/cli-2.12.1/maestro.zip",
+    "sha256": "54dbb0716425626604973cbb374c585ca30272375d9ce15177a1152765ddd9d7"
+  },
+  "android": {
+    "emulatorVersion": "37.2.12",
+    "emulatorBuild": "16428233",
+    "ramMiB": 2048,
+    "images": {
+      "28": {
+        "target": "google_apis",
+        "abi": "x86_64",
+        "revision": 11,
+        "emulatorVersion": "35.6.11",
+        "emulatorBuild": "13610412"
+      },
+      "34": {
+        "target": "google_apis",
+        "abi": "x86_64",
+        "revision": 14
+      }
+    }
+  }
+}

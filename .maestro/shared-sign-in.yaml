@@ -1,0 +1,52 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Sign in to the shared fictional phone
+---
+- launchApp
+- scrollUntilVisible:
+    element:
+      id: auth-phone
+    direction: DOWN
+- tapOn:
+    id: auth-phone
+- inputText: '+525510000002'
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: auth-request-code
+    direction: DOWN
+- tapOn:
+    id: auth-request-code
+- scrollUntilVisible:
+    element:
+      id: auth-otp
+    direction: DOWN
+- tapOn:
+    id: auth-otp
+- inputText: '123456'
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: auth-verify
+    direction: DOWN
+- tapOn:
+    id: auth-verify
+- extendedWaitUntil:
+    visible:
+      id: worker-carla
+    timeout: 20000
+- tapOn:
+    id: worker-carla
+- extendedWaitUntil:
+    visible:
+      id: home-assignment
+    timeout: 30000
+- assertVisible: '.*Carla Díaz.*'
+- takeScreenshot: cached-home-online
