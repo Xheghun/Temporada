@@ -1,6 +1,7 @@
 appId: com.cremedigital.seasonalworker.e2e
 name: Require authentication before delivery resumes
 ---
+- openLink: temporada-e2e://home
 - extendedWaitUntil:
     visible:
       id: auth-phone
