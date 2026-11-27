@@ -1,0 +1,8 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Verify visible identity and separate pending count
+---
+- openLink: temporada-e2e://home
+- assertVisible: ${WORKER_NAME}
+- assertNotVisible: ${OTHER_WORKER_NAME}
+- assertVisible: ${COUNT_LABEL}
+- takeScreenshot: worker-count

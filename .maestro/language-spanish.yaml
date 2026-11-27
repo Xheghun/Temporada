@@ -1,0 +1,7 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Verify Spanish is the fresh-install default
+---
+- assertVisible: 'Hola, Ana López'
+- assertVisible: 'Cambiar idioma'
+- assertVisible: 'Tu próximo paso / Trabajo'
+- takeScreenshot: default-spanish

@@ -20,6 +20,7 @@ export async function runScenarioTwo(context) {
     ...context,
     language: 'es',
     includeGallery: false,
+    expectedActionCount: 2,
     async beforeCapture() {
       await flow('terms-confirm', {
         VERSION_LABEL: translations.terms.version.replace('{{version}}', 'v2'),

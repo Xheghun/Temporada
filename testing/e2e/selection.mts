@@ -1,4 +1,5 @@
-export type Suite = 'bootstrap' | 'media' | 'device' | 'smoke' | 'full';
+export type Suite =
+  'bootstrap' | 'media' | 'device' | 'regressions' | 'smoke' | 'full';
 export type Selection = { scenarios: string[]; repetitions: number };
 
 export function selectScenarios(argumentsList: string[]): Selection {
@@ -14,12 +15,16 @@ export function selectScenarios(argumentsList: string[]): Selection {
     provided.add(flag);
     if (
       flag === '--suite' &&
-      ['bootstrap', 'media', 'device', 'smoke', 'full'].includes(value)
+      ['bootstrap', 'media', 'device', 'regressions', 'smoke', 'full'].includes(
+        value,
+      )
     )
       suite = value as Suite;
     else if (
       flag === '--scenario' &&
-      /^(bootstrap|media-es|media-en|device|[1-8])$/.test(value)
+      /^(bootstrap|media-es|media-en|device|[1-8]|2-reboot|3-restart|5-422|6-latency|8-logout|replay-approved|replay-correction)$/.test(
+        value,
+      )
     )
       scenario = value;
     else if (flag === '--repeat' && /^[1-5]$/.test(value))
@@ -32,6 +37,15 @@ export function selectScenarios(argumentsList: string[]): Selection {
     bootstrap: ['bootstrap'],
     media: ['media-es', 'media-en'],
     device: ['device'],
+    regressions: [
+      '2-reboot',
+      '3-restart',
+      '5-422',
+      '6-latency',
+      '8-logout',
+      'replay-approved',
+      'replay-correction',
+    ],
     smoke: ['1', '2'],
     full: ['1', '2', '3', '4', '5', '6', '7', '8'],
   };

@@ -1,0 +1,9 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Read the verbatim staff correction
+---
+- openLink: temporada-e2e://documents
+- scrollUntilVisible:
+    element: ${REASON_LABEL}
+    direction: DOWN
+- assertVisible: ${REASON_LABEL}
+- takeScreenshot: staff-correction

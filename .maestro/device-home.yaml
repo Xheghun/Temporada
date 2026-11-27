@@ -6,4 +6,4 @@ name: Open cached worker Home
     visible:
       id: home-assignment
     timeout: 20000
-- assertVisible: '.*Ana López.*'
+- assertVisible: ${WORKER_NAME}

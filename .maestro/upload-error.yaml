@@ -1,0 +1,9 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Explain the permanent document rejection
+---
+- openLink: temporada-e2e://documents
+- scrollUntilVisible:
+    element: ${ERROR_LABEL}
+    direction: DOWN
+- assertVisible: ${ERROR_LABEL}
+- takeScreenshot: permanent-upload-rejection

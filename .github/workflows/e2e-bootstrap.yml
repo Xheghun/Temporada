@@ -1,9 +1,11 @@
-name: E2E bundled app bootstrap
+name: Android acceptance
 on:
   pull_request:
     paths:
       - 'app/**'
       - 'src/**'
+      - 'mock-server/**'
+      - 'tsconfig.json'
       - 'plugins/**'
       - 'app.config.ts'
       - 'app.json'
@@ -11,7 +13,26 @@ on:
       - 'testing/e2e/**'
       - '.maestro/**'
       - '.github/workflows/e2e-bootstrap.yml'
+  push:
+    branches: [main]
+  schedule:
+    - cron: '20 1 * * *'
+    - cron: '20 3 * * 0'
   workflow_dispatch:
+    inputs:
+      suite:
+        type: choice
+        options:
+          [smoke, full, foundation, acceptance, scenario, intentional-failure]
+        default: smoke
+      scenario:
+        description: 'Individual scenario or regression ID'
+        type: string
+        default: '2'
+      api:
+        type: choice
+        options: ['34', '28', both]
+        default: '34'
 permissions:
   contents: read
 jobs:
@@ -43,14 +64,14 @@ jobs:
           path: e2e-results/temporada-e2e.apk*
           retention-days: 14
           if-no-files-found: error
-  cold-start:
+  android:
     needs: build
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
-        api: [28, 34]
+        api: ${{ fromJSON(github.event_name == 'workflow_dispatch' && (inputs.api == 'both' && '[28,34]' || format('[{0}]', inputs.api)) || github.event.schedule == '20 3 * * 0' && '[28]' || '[34]') }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -89,11 +110,13 @@ jobs:
         run: |
           mkdir -p mock-server/.data
           node --input-type=module -e "import {writeFileSync} from 'node:fs'; writeFileSync('mock-server/.data/unrelated-fixture.txt', 'fictional normal mock data', {flag:'wx'});"
-      - name: Verify native offline cold start
+      - name: Run installed app journeys
         uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808 # v2
         env:
           ANDROID_SERIAL: emulator-5554
-          E2E_OUTPUT: e2e-results/bootstrap-${{ matrix.api }}
+          E2E_OUTPUT: e2e-results/native-${{ matrix.api }}
+          E2E_SUITE: ${{ inputs.suite || (github.event_name == 'pull_request' && 'smoke' || 'full') }}
+          E2E_SELECTED_SCENARIO: ${{ inputs.scenario }}
           E2E_API: ${{ matrix.api }}
           E2E_PROTECTED_FIXTURE: '1'
         with:
@@ -108,23 +131,17 @@ jobs:
           script: |
             adb install e2e-results/isolation-fixture.apk
             adb shell am start -W -n com.cremedigital.seasonalworker/.IsolationFixture
-            node testing/e2e/run.mts --suite bootstrap --repeat 2
-            E2E_OUTPUT=e2e-results/media-${{ matrix.api }} node testing/e2e/run.mts --suite media
-            E2E_OUTPUT=e2e-results/device-${{ matrix.api }} node testing/e2e/run.mts --suite device
-            E2E_OUTPUT=e2e-results/failed-cleanup-${{ matrix.api }} node testing/e2e/verify-failed-cleanup.mjs
-            E2E_OUTPUT=e2e-results/scenario-2-${{ matrix.api }} node testing/e2e/run.mts --scenario 2
-            E2E_REBOOT_VARIANT=1 E2E_OUTPUT=e2e-results/scenario-2-reboot-${{ matrix.api }} node testing/e2e/run.mts --scenario 2
-      - name: Upload bootstrap evidence
+            node testing/e2e/ci-android.mjs
+      - name: Filter native diagnostic logs
+        if: always()
+        env:
+          E2E_OUTPUT: e2e-results/native-${{ matrix.api }}
+        run: node testing/e2e/sanitize-artifacts.mjs
+      - name: Upload native acceptance evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: bundled-cold-start-api-${{ matrix.api }}
-          path: |
-            e2e-results/bootstrap-${{ matrix.api }}/
-            e2e-results/media-${{ matrix.api }}/
-            e2e-results/device-${{ matrix.api }}/
-            e2e-results/failed-cleanup-${{ matrix.api }}/
-            e2e-results/scenario-2-${{ matrix.api }}/
-            e2e-results/scenario-2-reboot-${{ matrix.api }}/
+          name: native-acceptance-api-${{ matrix.api }}
+          path: e2e-results/native-${{ matrix.api }}/
           retention-days: 14
           if-no-files-found: warn

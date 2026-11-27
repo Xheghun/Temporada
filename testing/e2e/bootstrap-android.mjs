@@ -15,6 +15,15 @@ import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { readAndroidMetadata } from './android-metadata.mjs';
+import { runReplayJourney } from './replay-journey.mjs';
+import { runScenarioOne } from './scenario-one.mjs';
+import { runScenarioEight } from './scenario-eight.mjs';
+import { runScenarioSeven } from './scenario-seven.mjs';
+import { runScenarioSix } from './scenario-six.mjs';
+import { runScenarioFive } from './scenario-five.mjs';
+import { runScenarioFour } from './scenario-four.mjs';
+import { runScenarioThree } from './scenario-three.mjs';
 import { runScenarioTwo } from './scenario-two.mjs';
 import { androidDevice } from './android-device.mjs';
 import { verifyDeviceDurability } from './device-journey.mjs';
@@ -23,9 +32,38 @@ import { runMediaJourney } from './media-journey.mjs';
 const executeFile = promisify(execFile);
 const scenario = process.env.E2E_SCENARIO ?? 'bootstrap';
 assert(
-  ['bootstrap', 'media-es', 'media-en', 'device', '2'].includes(scenario),
+  [
+    'bootstrap',
+    'media-es',
+    'media-en',
+    'device',
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '2-reboot',
+    '3-restart',
+    '5-422',
+    '6-latency',
+    '8-logout',
+    'replay-approved',
+    'replay-correction',
+  ].includes(scenario),
   'Scenario implementation is pending',
 );
+const briefScenario = /^[1-8]/.test(scenario) ? scenario[0] : null;
+for (const [variant, variable] of [
+  ['2-reboot', 'E2E_REBOOT_VARIANT'],
+  ['3-restart', 'E2E_BACKEND_RESTART'],
+  ['6-latency', 'E2E_LATENCY_VARIANT'],
+  ['8-logout', 'E2E_LOGOUT_VARIANT'],
+])
+  if (scenario === variant) process.env[variable] = '1';
+if (scenario === '5-422') process.env.E2E_REJECTION = '422';
 const applicationId = 'com.cremedigital.seasonalworker.e2e';
 const serial = process.env.ANDROID_SERIAL;
 assert(
@@ -132,7 +170,14 @@ async function command(executable, argumentsList) {
     ).stdout.trim();
   } catch (error) {
     throw new Error(
-      [String(error), error.stdout, error.stderr].filter(Boolean).join('\n'),
+      [
+        String(error),
+        `exit=${error.code ?? 'none'} signal=${error.signal ?? 'none'} killed=${error.killed ?? false}`,
+        error.stdout,
+        error.stderr,
+      ]
+        .filter(Boolean)
+        .join('\n'),
     );
   }
 }
@@ -143,7 +188,20 @@ const adb = (...argumentsList) =>
     ...argumentsList,
   ]);
 const flowCounts = new Map();
-const flow = (name, parameters = {}) => {
+const flow = async (name, parameters = {}) => {
+  await adb('wait-for-device');
+  assert.equal(
+    await adb('get-state'),
+    'device',
+    'Emulator ADB transport is not ready',
+  );
+  if (hasReverse && !(await adb('reverse', '--list')).includes('tcp:3101'))
+    await adb('reverse', 'tcp:3101', 'tcp:3101');
+  parameters = {
+    WORKER_ID: briefScenario === '7' ? 'carla' : 'ana',
+    WORKER_NAME: briefScenario === '7' ? '.*Carla Díaz.*' : '.*Ana López.*',
+    ...parameters,
+  };
   const invocation = (flowCounts.get(name) ?? 0) + 1;
   flowCounts.set(name, invocation);
   const artifactName = `${name}-${invocation}`;
@@ -189,6 +247,46 @@ async function stopBackend() {
   });
 }
 
+async function startBackend() {
+  backend = spawn(
+    process.execPath,
+    ['--experimental-strip-types', 'mock-server/src/server.ts'],
+    {
+      env: {
+        ...process.env,
+        NODE_ENV: 'test',
+        MOCK_PORT: '3101',
+        MOCK_DATA_DIR: dataDirectory,
+        MOCK_ENABLE_CONTROLS: '1',
+      },
+      stdio: 'ignore',
+    },
+  );
+  let startupError;
+  backend.once('error', (error) => {
+    startupError = error;
+  });
+  const deadline = Date.now() + 15_000;
+  while (true) {
+    if (startupError) throw startupError;
+    assert(backend.exitCode === null, 'Owned backend exited during startup');
+    try {
+      const response = await fetch('http://127.0.0.1:3101/health', {
+        signal: AbortSignal.timeout(1000),
+      });
+      if (response.ok) break;
+    } catch (error) {
+      if (Date.now() >= deadline) throw error;
+    }
+    assert(Date.now() < deadline, 'Mock readiness deadline exceeded');
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+}
+async function restartBackend() {
+  await stopBackend();
+  await startBackend();
+}
+
 try {
   originalAirplane = await adb(
     'shell',
@@ -204,6 +302,9 @@ try {
     'get',
     'system',
     'font_scale',
+  );
+  await step('device-and-toolchain-identity', () =>
+    readAndroidMetadata({ adb, command, sdk }),
   );
   await step('protected-normal-data-baseline', async () => {
     protectedBefore = await protectedDataSnapshot();
@@ -267,39 +368,7 @@ try {
       !mappings.includes('tcp:3101'),
       'Existing ADB reverse mapping must remain untouched',
     );
-    backend = spawn(
-      process.execPath,
-      ['--experimental-strip-types', 'mock-server/src/server.ts'],
-      {
-        env: {
-          ...process.env,
-          NODE_ENV: 'test',
-          MOCK_PORT: '3101',
-          MOCK_DATA_DIR: dataDirectory,
-          MOCK_ENABLE_CONTROLS: '1',
-        },
-        stdio: 'ignore',
-      },
-    );
-    let startupError;
-    backend.once('error', (error) => {
-      startupError = error;
-    });
-    const deadline = Date.now() + 15_000;
-    while (true) {
-      if (startupError) throw startupError;
-      assert(backend.exitCode === null, 'Owned backend exited during startup');
-      try {
-        const response = await fetch('http://127.0.0.1:3101/health', {
-          signal: AbortSignal.timeout(1000),
-        });
-        if (response.ok) break;
-      } catch (error) {
-        if (Date.now() >= deadline) throw error;
-      }
-      assert(Date.now() < deadline, 'Mock readiness deadline exceeded');
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
+    await startBackend();
     await adb('reverse', 'tcp:3101', 'tcp:3101');
     hasReverse = true;
     const fixtureResponse = await fetch('http://127.0.0.1:3101/__dev/state', {
@@ -314,8 +383,61 @@ try {
     await adb('shell', 'svc', 'wifi', 'enable');
     return { port: 3101, temporaryData: true };
   });
-  await step('authenticate-and-cache-home', () => flow('bootstrap-sign-in'));
-  if (scenario === '2') {
+  await step('authenticate-and-cache-home', () =>
+    flow(briefScenario === '7' ? 'shared-sign-in' : 'bootstrap-sign-in'),
+  );
+  if (scenario.startsWith('replay-')) {
+    await step('TEST-03R-newer-review-before-old-receipt', () =>
+      runReplayJourney(
+        { adb, flow, output, temporaryDirectory: dataDirectory },
+        scenario === 'replay-approved' ? 'approved' : 'correction_requested',
+      ),
+    );
+  } else if (briefScenario === '1') {
+    await step('brief-1-language-persistence-and-localized-feedback', () =>
+      runScenarioOne({ adb, flow, output, temporaryDirectory: dataDirectory }),
+    );
+  } else if (briefScenario === '8') {
+    await step('brief-8-expiry-reauthentication-and-pending-work', () =>
+      runScenarioEight({
+        adb,
+        flow,
+        output,
+        temporaryDirectory: dataDirectory,
+      }),
+    );
+  } else if (briefScenario === '7') {
+    await step('brief-7-shared-phone-correction-isolation', () =>
+      runScenarioSeven({
+        adb,
+        flow,
+        output,
+        temporaryDirectory: dataDirectory,
+      }),
+    );
+  } else if (briefScenario === '6') {
+    await step('brief-6-persisted-backoff-and-responsive-ui', () =>
+      runScenarioSix({ adb, flow, output, temporaryDirectory: dataDirectory }),
+    );
+  } else if (briefScenario === '5') {
+    await step('brief-5-permanent-rejection-and-explicit-retake', () =>
+      runScenarioFive({ adb, flow, output, temporaryDirectory: dataDirectory }),
+    );
+  } else if (briefScenario === '4') {
+    await step('brief-4-stale-terms-and-explicit-new-confirmation', () =>
+      runScenarioFour({ adb, flow, output }),
+    );
+  } else if (briefScenario === '3') {
+    await step('brief-3-committed-drop-and-replay', () =>
+      runScenarioThree({
+        adb,
+        flow,
+        output,
+        temporaryDirectory: dataDirectory,
+        restartBackend,
+      }),
+    );
+  } else if (briefScenario === '2') {
     await step('brief-2-offline-terms-camera-restart-reconnect', () =>
       runScenarioTwo({ adb, flow, output, temporaryDirectory: dataDirectory }),
     );

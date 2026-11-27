@@ -1,0 +1,9 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Read English retry feedback
+---
+- openLink: temporada-e2e://home
+- scrollUntilVisible:
+    element: ${RETRY_LABEL}
+    direction: DOWN
+- assertVisible: ${RETRY_LABEL}
+- takeScreenshot: english-retry

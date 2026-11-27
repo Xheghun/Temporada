@@ -19,7 +19,26 @@ const implementedScenarios = new Map([
   ['media-es', 'testing/e2e/bootstrap-android.mjs'],
   ['media-en', 'testing/e2e/bootstrap-android.mjs'],
   ['device', 'testing/e2e/bootstrap-android.mjs'],
+  ['1', 'testing/e2e/bootstrap-android.mjs'],
   ['2', 'testing/e2e/bootstrap-android.mjs'],
+  ['3', 'testing/e2e/bootstrap-android.mjs'],
+  ['4', 'testing/e2e/bootstrap-android.mjs'],
+  ['5', 'testing/e2e/bootstrap-android.mjs'],
+  ['6', 'testing/e2e/bootstrap-android.mjs'],
+  ['7', 'testing/e2e/bootstrap-android.mjs'],
+  ['8', 'testing/e2e/bootstrap-android.mjs'],
+  ...[
+    '2-reboot',
+    '3-restart',
+    '5-422',
+    '6-latency',
+    '8-logout',
+    'replay-approved',
+    'replay-correction',
+  ].map((scenario): [string, string] => [
+    scenario,
+    'testing/e2e/bootstrap-android.mjs',
+  ]),
 ]);
 
 const report = await executeSuite(selection, async (scenario, outputName) => {

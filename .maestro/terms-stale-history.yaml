@@ -1,0 +1,9 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Retain rejected old-version history
+---
+- openLink: temporada-e2e://terms
+- scrollUntilVisible:
+    element: ${STALE_LABEL}
+    direction: DOWN
+- assertVisible: ${STALE_LABEL}
+- takeScreenshot: stale-history

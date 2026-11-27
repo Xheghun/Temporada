@@ -14,6 +14,10 @@ export async function runMediaJourney({
   afterSave,
   beforeCapture,
   includeGallery = true,
+  primaryDocument = 'passport',
+  primarySource = 'camera',
+  expectedActionCount = includeGallery ? 2 : 1,
+  workerId = 'ana',
 }) {
   const translations = JSON.parse(
     await readFile(`src/core/i18n/${language}.json`, 'utf8'),
@@ -64,18 +68,26 @@ export async function runMediaJourney({
     await flow('probe-airplane');
     await adb('shell', 'svc', 'wifi', 'disable');
     if (beforeCapture) await beforeCapture();
-    await flow('media-open-passport', labels);
-    await flow('media-camera', labels);
-    // Exercise retake before saving the first real submission.
-    await flow('media-camera', labels);
+    if (primarySource === 'camera') {
+      assert.equal(primaryDocument, 'passport');
+      await flow('media-open-passport', labels);
+      await flow('media-camera', labels);
+      // Exercise retake before saving the first real submission.
+      await flow('media-camera', labels);
+    } else {
+      await flow('document-gallery', {
+        ...labels,
+        DOCUMENT_TYPE: primaryDocument,
+      });
+    }
     await flow('media-save', labels);
     if (includeGallery) {
       await flow('media-gallery', labels);
       await flow('media-save', labels);
     }
-    const inspection = await inspectNative({ adb, flow, output });
-    assert.equal(inspection.workerId, 'ana');
-    assert.equal(inspection.actions.length, 2);
+    const inspection = await inspectNative({ adb, flow, output, workerId });
+    assert.equal(inspection.workerId, workerId);
+    assert.equal(inspection.actions.length, expectedActionCount);
     assert.equal(inspection.managedFiles, includeGallery ? 2 : 1);
     assert.equal(inspection.pickerCacheFiles, 0);
     assert.equal(inspection.journals, 0);

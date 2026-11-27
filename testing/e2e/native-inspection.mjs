@@ -20,10 +20,10 @@ function decodeXml(value) {
   );
 }
 
-export async function inspectNative({ adb, flow, output }) {
+export async function inspectNative({ adb, flow, output, workerId = 'ana' }) {
   const hierarchy = `/data/local/tmp/temporada-e2e-${randomUUID()}.xml`;
   try {
-    await flow('media-inspect');
+    await flow('media-inspect', { WORKER_ID: workerId });
     await adb('shell', 'uiautomator', 'dump', hierarchy);
     const xml = await adb('exec-out', 'cat', hierarchy);
     const nodes = xml.match(/<node\b[^>]*>/g) ?? [];

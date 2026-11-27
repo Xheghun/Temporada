@@ -1,0 +1,14 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Read English Home Terms and Documents
+---
+- openLink: temporada-e2e://home
+- assertVisible: ${GREETING_LABEL}
+- assertVisible: ${LANGUAGE_LABEL}
+- assertVisible: ${OFFLINE_LABEL}
+- openLink: temporada-e2e://terms
+- assertVisible: ${TERMS_TITLE}
+- assertVisible: ${TERMS_VERSION}
+- openLink: temporada-e2e://documents
+- assertVisible: ${DOCUMENTS_TITLE}
+- openLink: temporada-e2e://home
+- takeScreenshot: english-home

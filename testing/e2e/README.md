@@ -12,7 +12,7 @@ ANDROID_SERIAL=emulator-5554 PROBE_API=28 \
   node testing/e2e/probe-android.mjs
 ```
 
-Use `PROBE_API=34` for the other target. Set `MAESTRO_BINARY` if Maestro is outside `PATH`. `toolchain.json` defines the exact versions; this initial probe targets x86_64 CI rather than the ARM64 desktop emulator. Results default to the ignored `e2e-results/probe` directory. The eight acceptance scenarios are not yet implemented.
+Use `PROBE_API=34` for the other target. Set `MAESTRO_BINARY` if Maestro is outside `PATH`. `toolchain.json` defines the exact versions; this initial probe targets x86_64 CI rather than the ARM64 desktop emulator. Results default to the ignored `e2e-results/probe` directory. The eight acceptance journeys are implemented but await native acceptance verification.
 
 The emulator uses `-memory 2048 -lowram` to prevent its API 34 minimum-memory adjustment from silently allocating 2.5 GB. The probe checks guest memory as well as the AVD file. The `-lowram` option removes the emulator's memory floor; it does not change the app's behavior.
 
@@ -43,7 +43,7 @@ npm run e2e:android -- --suite media
 npm run e2e:android -- --suite device
 ```
 
-The default suite is `smoke` (brief scenarios 1 and 2); `full` selects all eight. Bootstrap, Spanish/English media probes, device durability and brief scenario 2 are registered. The new journeys remain unverified until their native reports pass; the other seven original journeys are not implemented. Selecting a pending journey writes `NOT RUN` and fails the suite. `--repeat` runs independent repetitions and preserves every outcome; a later pass cannot erase an earlier failure. Repetitions compare the initial backend fixture hashes. Each journey owns a fresh temporary backend and resets only the E2E package before starting, preserving its state throughout the journey.
+The default suite is `smoke` (brief scenarios 1 and 2); `full` selects all eight. All eight original journeys, bootstrap, media, device durability and supplemental regressions are registered. The new journeys remain unverified until their native reports pass. Selecting a pending journey writes `NOT RUN` and fails the suite. `--repeat` runs independent repetitions and preserves every outcome; a later pass cannot erase an earlier failure. Repetitions compare the initial backend fixture hashes. Each journey owns a fresh temporary backend and resets only the E2E package before starting, preserving its state throughout the journey.
 
 Set `E2E_OUTPUT` to choose a fresh report directory. Existing run directories are rejected to preserve failure evidence. The bootstrap checks that normal mock files and the normal app's package registration remain unchanged. CI seeds an unrelated normal mock file and a small native fixture in the normal package namespace. It compares that fixture's private-file digest before and after each E2E run. This verifies native namespace isolation; worker persistence is exercised in the bundled E2E app.
 
@@ -58,3 +58,11 @@ Native inspection reads the selected worker's actions and submissions in one dat
 The mock server's existing opt-in, loopback-only development controls also expose `GET /__dev/trace` for bounded attempt metadata and `GET /__dev/replays` for replay events. `POST /__dev/replays` accepts `{workerId, clientActionId, mode, timeoutMs}`; `hold`, `disconnect` and `release` coordinate an existing receipt without changing it. Holds expire visibly within 12 seconds. Failure injection supports `force422` alongside `force413`. These controls are unavailable by default and in production mode. HTTP tests cover redaction, disabled controls, unchanged receipt replay and unrelated action progress; native journey verification remains pending.
 
 The device probe compares real actions and file integrity through force-stop and a full emulator reboot, checks that no requests reach the mock while offline, then restores connectivity. `node testing/e2e/verify-failed-cleanup.mjs` deliberately fails after those offline steps and independently verifies a failing exit/result, restored settings and stopped backend. `E2E_REBOOT_VARIANT=1` adds a reboot to scenario 2. These probes restore airplane mode, Wi-Fi and font scale; cancellation aborts the active driver command so cleanup can run. Native results for these additions remain pending.
+
+## CI suites
+
+PRs run Android API 34 smoke (brief 1 and 2). Main and nightly runs select all eight plus regressions; the weekly lane uses API 28 with 2,048 MiB RAM. Manual inputs select the API and suite: `smoke`, `full`, `foundation`, `acceptance`, `scenario` or `intentional-failure`. `acceptance` runs every original journey individually, then the suite twice and the supplemental cases. `foundation` exercises media, repeated bootstrap, reboot and expected-failure cleanup. These workflow changes await executed CI verification.
+
+`npm run e2e:android -- --suite regressions` selects `2-reboot`, `3-restart`, `5-422`, `6-latency`, `8-logout`, `replay-approved` and `replay-correction`. Each also accepts `--scenario <id>`. Backend restart retains the same owned data directory; replay barriers preserve the original receipt. The backoff journey records its seed, failure controls, actual deadlines and an ADB clock-correlation interval. The latency case uses a separate 2,000 ms setting.
+
+Every native journey validates API, image, ABI, configured/guest RAM and pinned tools, then records the installed APK hash and source/build identity. Reports retain the first failure, JUnit files and screenshots. Uploaded logcat is filtered to fatal/ANR diagnostics and redacts private paths and bearer values. `intentional-failure` deliberately returns a failing workflow status; its artifacts must remain available. Native acceptance, low-end measurements and iOS smoke remain incomplete until their required runs pass.
