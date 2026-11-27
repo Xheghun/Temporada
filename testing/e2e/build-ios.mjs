@@ -88,6 +88,18 @@ try {
   );
   assert.equal(projects.length, 1, 'Expected one generated iOS workspace');
   const scheme = projects[0].replace(/\.xcworkspace$/, '');
+  // Simulator Keychain still requires application identity entitlements.
+  // Ad-hoc signing uses no developer certificate or provisioning profile.
+  const entitlementsPath = path.join(workspace, 'simulator.entitlements');
+  await writeFile(
+    entitlementsPath,
+    `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>application-identifier</key><string>com.cremedigital.seasonalworker.e2e</string>
+<key>keychain-access-groups</key><array><string>com.cremedigital.seasonalworker.e2e</string></array>
+</dict></plist>`,
+  );
   await run('xcodebuild', [
     '-workspace',
     path.join(workspace, 'ios', projects[0]),
@@ -101,7 +113,11 @@ try {
     'generic/platform=iOS Simulator',
     '-derivedDataPath',
     path.join(workspace, 'derived'),
-    'CODE_SIGNING_ALLOWED=NO',
+    'CODE_SIGNING_ALLOWED=YES',
+    'CODE_SIGN_IDENTITY=-',
+    'CODE_SIGNING_REQUIRED=NO',
+    'CODE_SIGN_STYLE=Manual',
+    `CODE_SIGN_ENTITLEMENTS=${entitlementsPath}`,
     'build',
   ]);
   const products = path.join(
@@ -125,26 +141,6 @@ try {
     (await readFile(path.join(app, 'main.jsbundle'))).length > 0,
     'Simulator app must bundle JavaScript',
   );
-  // Simulator Keychain still requires application identity entitlements.
-  // Ad-hoc signing uses no developer certificate or provisioning profile.
-  const entitlementsPath = path.join(workspace, 'simulator.entitlements');
-  await writeFile(
-    entitlementsPath,
-    `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict>
-<key>application-identifier</key><string>${identifier}</string>
-<key>keychain-access-groups</key><array><string>${identifier}</string></array>
-</dict></plist>`,
-  );
-  await run('/usr/bin/codesign', [
-    '--force',
-    '--sign',
-    '-',
-    '--entitlements',
-    entitlementsPath,
-    app,
-  ]);
   const signedEntitlements = (
     await execute('/usr/bin/codesign', [
       '--display',
@@ -169,7 +165,7 @@ try {
         hostArchitecture: process.arch,
         metroRequired: false,
         inspectionEnabled: true,
-        signing: 'ad-hoc simulator signature; no developer credentials',
+        signing: 'Xcode ad-hoc simulator signature; no developer credentials',
         keychainAccessGroup: identifier,
         sha256: createHash('sha256')
           .update(await readFile(output))

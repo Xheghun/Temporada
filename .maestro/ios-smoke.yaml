@@ -1,0 +1,9 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: iOS sign-in, language persistence and shared-phone smoke
+---
+- runFlow: bootstrap-sign-in.yaml
+- runFlow: language-spanish.yaml
+- runFlow: ios-english-navigation.yaml
+- stopApp
+- runFlow: ios-reopen.yaml
+- runFlow: ios-shared-phone.yaml

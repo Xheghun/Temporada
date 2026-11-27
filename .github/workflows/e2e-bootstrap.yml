@@ -44,7 +44,7 @@ on:
       camera_backend:
         description: 'Virtual camera backend for focused compatibility checks'
         type: choice
-        options: [auto, emulated, imagefile]
+        options: [auto, emulated, imagefile, virtualscene]
         default: auto
       build_diagnostics:
         description: 'Include Gradle dependency-resolution diagnostics'
@@ -107,6 +107,11 @@ jobs:
           - api: 34
             acceptanceGroup: measurements
     steps:
+      - name: Validate virtual camera choice
+        if: ${{ matrix.api == 28 && inputs.camera_backend == 'imagefile' }}
+        run: |
+          echo 'The selected virtual camera backend is unsupported by this pinned emulator.'
+          exit 1
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
@@ -150,7 +155,7 @@ jobs:
           E2E_SELECTED_SCENARIO: ${{ inputs.scenario }}
           E2E_REUSED_APK_RUN: ${{ inputs.apk_run_id }}
           E2E_API: ${{ matrix.api }}
-          E2E_CAMERA_BACKEND: ${{ (inputs.camera_backend == 'emulated' || (matrix.api == 28 && inputs.camera_backend != 'imagefile')) && 'emulated' || 'imagefile' }}
+          E2E_CAMERA_BACKEND: ${{ inputs.camera_backend == 'virtualscene' && 'virtualscene' || (inputs.camera_backend == 'emulated' || (matrix.api == 28 && inputs.camera_backend != 'imagefile')) && 'emulated' || 'imagefile' }}
           E2E_ACCEPTANCE_GROUP: ${{ matrix.acceptanceGroup }}
           E2E_PROTECTED_FIXTURE: '1'
         with:
@@ -160,7 +165,7 @@ jobs:
           ram-size: 2048M
           avd-name: temporada-bootstrap-${{ matrix.api }}
           emulator-build: ${{ matrix.api == 28 && '13610412' || '16428233' }}
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 2048 ${{ matrix.api == 34 && '-lowram' || '' }} ${{ (matrix.acceptanceGroup == 'layouts' || inputs.suite == 'layouts') && '-skin 360x720' || '' }} -camera-back ${{ (inputs.camera_backend == 'emulated' || (matrix.api == 28 && inputs.camera_backend != 'imagefile')) && 'emulated' || format('imagefile:{0}/e2e-results/camera-feed.png', github.workspace) }} -camera-front none
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 2048 ${{ matrix.api == 34 && '-lowram' || '' }} ${{ (matrix.acceptanceGroup == 'layouts' || inputs.suite == 'layouts') && '-skin 360x720' || '' }} -camera-back ${{ inputs.camera_backend == 'virtualscene' && 'virtualscene' || (inputs.camera_backend == 'emulated' || (matrix.api == 28 && inputs.camera_backend != 'imagefile')) && 'emulated' || format('imagefile:{0}/e2e-results/camera-feed.png', github.workspace) }} -camera-front none
           pre-emulator-launch-script: node testing/e2e/prepare-emulator.mjs
           script: |
             adb install e2e-results/isolation-fixture.apk

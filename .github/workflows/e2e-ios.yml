@@ -32,6 +32,13 @@ jobs:
         run: node testing/e2e/install-maestro.mjs
       - name: Build bundled simulator application
         run: node testing/e2e/build-ios.mjs
+      - name: Retain bundled simulator application
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ios-e2e-app
+          path: e2e-results/temporada-e2e-ios.tar.gz*
+          retention-days: 14
+          if-no-files-found: error
       - name: Run the iOS smoke subset
         env:
           E2E_OUTPUT: e2e-results/ios-smoke
@@ -49,6 +56,5 @@ jobs:
           path: |
             e2e-results/ios-smoke/
             e2e-results/temporada-e2e-ios.tar.gz.json
-            e2e-results/temporada-e2e-ios.tar.gz
           retention-days: 14
           if-no-files-found: warn

@@ -206,19 +206,8 @@ try {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
   });
-  await step('Ana-sign-in-and-Spanish', async () => {
-    await flow('bootstrap-sign-in');
-    await flow('language-spanish');
-  });
-  await step('English-and-primary-navigation', () =>
-    flow('ios-english-navigation'),
-  );
-  await step('persisted-language-after-termination', async () => {
-    await simctl('terminate', simulator, 'com.cremedigital.seasonalworker.e2e');
-    await flow('ios-reopen');
-  });
-  await step('shared-phone-selection-and-switch', () =>
-    flow('ios-shared-phone'),
+  await step('sign-in-locale-restart-and-shared-phone', () =>
+    flow('ios-smoke'),
   );
   report.status = 'PASS';
 } catch (error) {
