@@ -27,7 +27,10 @@ import { runScenarioFive } from './scenario-five.mjs';
 import { runScenarioFour } from './scenario-four.mjs';
 import { runScenarioThree } from './scenario-three.mjs';
 import { runScenarioTwo } from './scenario-two.mjs';
-import { androidDevice } from './android-device.mjs';
+import {
+  androidDevice,
+  waitForStableAndroidTransport,
+} from './android-device.mjs';
 import { verifyDeviceDurability } from './device-journey.mjs';
 import { runMediaJourney } from './media-journey.mjs';
 import { require360DpDisplay } from './display-geometry.mts';
@@ -173,7 +176,12 @@ async function command(executable, argumentsList) {
         timeout: 180_000,
         signal: isCleaningUp ? undefined : cancellation.signal,
         maxBuffer: 4 * 1024 * 1024,
-        env: { ...process.env, TZ: 'UTC', MAESTRO_CLI_NO_ANALYTICS: '1' },
+        env: {
+          ...process.env,
+          TZ: 'UTC',
+          MAESTRO_CLI_NO_ANALYTICS: '1',
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: '60000',
+        },
       })
     ).stdout.trim();
   } catch (error) {
@@ -196,6 +204,7 @@ const adb = (...argumentsList) =>
     ...argumentsList,
   ]);
 const flowCounts = new Map();
+let hasReadyDriver = false;
 const flow = async (name, parameters = {}) => {
   await adb('wait-for-device');
   assert.equal(
@@ -203,6 +212,10 @@ const flow = async (name, parameters = {}) => {
     'device',
     'Emulator ADB transport is not ready',
   );
+  if (!hasReadyDriver)
+    await step('stable-driver-transport', () =>
+      waitForStableAndroidTransport(adb),
+    );
   if (hasReverse && !(await adb('reverse', '--list')).includes('tcp:3101'))
     await adb('reverse', 'tcp:3101', 'tcp:3101');
   parameters = {
@@ -213,6 +226,7 @@ const flow = async (name, parameters = {}) => {
   const invocation = (flowCounts.get(name) ?? 0) + 1;
   flowCounts.set(name, invocation);
   const artifactName = `${name}-${invocation}`;
+  hasReadyDriver = false;
   const stdout = await command(process.env.MAESTRO_BINARY ?? 'maestro', [
     '--device',
     serial,
@@ -229,6 +243,7 @@ const flow = async (name, parameters = {}) => {
     ]),
     `.maestro/${name}.yaml`,
   ]);
+  hasReadyDriver = true;
   return { stdout, artifactDirectory: path.join(output, artifactName) };
 };
 

@@ -4,6 +4,27 @@ const applicationId = 'com.cremedigital.seasonalworker.e2e';
 const pause = (milliseconds) =>
   new Promise((resolve) => setTimeout(resolve, milliseconds));
 
+export async function waitForStableAndroidTransport(adb) {
+  const deadline = Date.now() + 30_000;
+  let stableSince;
+  let lastError;
+  while (Date.now() < deadline) {
+    try {
+      assert.equal(await adb('get-state'), 'device');
+      stableSince ??= Date.now();
+      if (Date.now() - stableSince >= 5000)
+        return { stableForMs: Date.now() - stableSince };
+    } catch (error) {
+      lastError = error;
+      stableSince = undefined;
+    }
+    await pause(250);
+  }
+  throw new Error('ADB transport did not remain ready for five seconds', {
+    cause: lastError,
+  });
+}
+
 /** Device mutations are limited to the dedicated emulator and E2E package. */
 export function androidDevice({ adb, flow }) {
   return {
@@ -73,6 +94,7 @@ export function androidDevice({ adb, flow }) {
       await adb('shell', 'input', 'keyevent', '82');
       // ADB reverse mappings do not survive emulator reboot.
       await adb('reverse', 'tcp:3101', 'tcp:3101');
+      await waitForStableAndroidTransport(adb);
     },
     async restore(settings) {
       const errors = [];

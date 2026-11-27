@@ -4,6 +4,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { waitForStableAndroidTransport } from './android-device.mjs';
 
 const executeFile = promisify(execFile);
 const toolchain = JSON.parse(
@@ -33,7 +34,11 @@ async function command(executable, argumentsList) {
     const result = await executeFile(executable, argumentsList, {
       timeout: 180_000,
       maxBuffer: 4 * 1024 * 1024,
-      env: { ...process.env, MAESTRO_CLI_NO_ANALYTICS: '1' },
+      env: {
+        ...process.env,
+        MAESTRO_CLI_NO_ANALYTICS: '1',
+        MAESTRO_DRIVER_STARTUP_TIMEOUT: '60000',
+      },
     });
     return `${result.stdout}${result.stderr}`.trim();
   } catch (error) {
@@ -67,8 +72,14 @@ async function step(name, operation) {
   }
 }
 
+let hasReadyDriver = false;
 async function flow(filename) {
-  return command(maestro, [
+  if (!hasReadyDriver)
+    await step('stable-driver-transport', () =>
+      waitForStableAndroidTransport(adb),
+    );
+  hasReadyDriver = false;
+  const result = await command(maestro, [
     '--device',
     serial,
     'test',
@@ -80,6 +91,8 @@ async function flow(filename) {
     path.join(output, `${filename}-debug`),
     `.maestro/${filename}.yaml`,
   ]);
+  hasReadyDriver = true;
+  return result;
 }
 
 let originalAirplane;
