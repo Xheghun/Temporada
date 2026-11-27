@@ -5,3 +5,4 @@ name: Read durable upload inspection
 - tapOn:
     id: capture-inspect
 - assertVisible: '(?s).*"workerId": "ana".*'
+- takeScreenshot: native-inspection

@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createMockService } from './service.ts';
 import { Failures } from './failure-injection.ts';
+import type { TestControls } from './test-controls.ts';
 
 const png = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aF9sAAAAASUVORK5CYII=',
@@ -19,6 +20,8 @@ interface Result {
   status?: string;
   correctionReason?: string | null;
 }
+type TraceSnapshot = ReturnType<TestControls['trace']>;
+type ReplaySnapshot = ReturnType<TestControls['replays']>;
 async function fixture(controlsEnabled = true) {
   const directory = mkdtempSync(join(tmpdir(), 'worker-api-'));
   let service = createMockService(directory, { controlsEnabled });
@@ -449,6 +452,8 @@ test('development controls absent by default and in production', async () => {
       404,
     );
     assert.equal((await testContext.get('/__dev/state')).status, 404);
+    for (const endpoint of ['/__dev/trace', '/__dev/replays'])
+      assert.equal((await testContext.get(endpoint)).status, 404);
   } finally {
     await testContext.close();
   }
@@ -456,6 +461,8 @@ test('development controls absent by default and in production', async () => {
   process.env.NODE_ENV = 'production';
   const enabledControlsContext = await fixture(true);
   try {
+    for (const endpoint of ['/__dev/trace', '/__dev/replays'])
+      assert.equal((await enabledControlsContext.get(endpoint)).status, 404);
     assert.equal(
       (await enabledControlsContext.post('/__dev/terms', { version: 'v3' }))
         .status,
@@ -465,5 +472,226 @@ test('development controls absent by default and in production', async () => {
     await enabledControlsContext.close();
     if (prior === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = prior;
+  }
+});
+
+async function waitForHeldReplay(
+  testContext: Awaited<ReturnType<typeof fixture>>,
+  clientActionId: string,
+): Promise<void> {
+  const deadline = Date.now() + 2000;
+  while (Date.now() < deadline) {
+    const snapshot = (await (
+      await testContext.get('/__dev/replays')
+    ).json()) as ReplaySnapshot;
+    if (
+      snapshot.rules.some(
+        (rule) => rule.clientActionId === clientActionId && rule.pending > 0,
+      )
+    )
+      return;
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+  assert.fail('Replay barrier was not reached');
+}
+
+test('forced 422 is atomic, leaves no effect and does not block unrelated terms', async () => {
+  const testContext = await fixture();
+  try {
+    await testContext.login();
+    assert.equal(
+      (
+        await testContext.post('/__dev/failures', {
+          force422: 'true',
+          latencyMs: 2000,
+        })
+      ).status,
+      422,
+    );
+    assert.equal(testContext.service.failures.latencyMs, 0);
+    assert.equal(testContext.service.failures.force422, false);
+    assert.equal(
+      (await testContext.post('/__dev/failures', { force422: true })).status,
+      200,
+    );
+    const clientActionId = randomUUID();
+    const rejected = await testContext.upload(clientActionId);
+    assert.equal(rejected.status, 422);
+    assert.equal(
+      ((await rejected.json()) as { code: string }).code,
+      'invalid_upload',
+    );
+    assert.equal(
+      testContext.service.store.receipt('ana', clientActionId),
+      undefined,
+    );
+    assert.equal(testContext.service.store.submissions('ana').length, 0);
+    assert.equal(
+      (
+        await testContext.post('/me/terms-acceptances', {
+          clientActionId: randomUUID(),
+          termsVersionId: 'v2',
+        })
+      ).status,
+      201,
+    );
+  } finally {
+    await testContext.close();
+  }
+});
+
+test('request observations allow only worker/action/timing/status metadata', async () => {
+  const testContext = await fixture();
+  try {
+    await testContext.login();
+    const clientActionId = randomUUID();
+    await testContext.post('/me/terms-acceptances', {
+      clientActionId,
+      termsVersionId: 'v2',
+      token: 'fictional-not-for-artifacts',
+      privateUri: 'file:///fictional/private/not-for-artifacts.jpg',
+      imageBytes: [1, 2, 3],
+    });
+    await testContext.get('/me/assignment');
+    const snapshot = (await (
+      await testContext.get('/__dev/trace')
+    ).json()) as TraceSnapshot;
+    assert.equal(snapshot.totalAttempts, 2);
+    assert.equal(snapshot.entries[0]?.clientActionId, clientActionId);
+    assert.equal(snapshot.entries[0]?.status, 201);
+    assert.equal(snapshot.entries[1]?.operation, 'assignment');
+    assert(
+      snapshot.entries.every(
+        (entry) =>
+          entry.workerId === 'ana' &&
+          entry.outcome === 'completed' &&
+          Number.isFinite(entry.elapsedMs),
+      ),
+    );
+    const serialized = JSON.stringify(snapshot);
+    for (const forbidden of [
+      testContext.headers.authorization!,
+      'fictional-not-for-artifacts',
+      'file:///',
+      'imageBytes',
+      'authorization',
+    ])
+      assert(!serialized.includes(forbidden));
+    await testContext.post('/__dev/expire-sessions', {});
+    assert.equal((await testContext.get('/me/assignment')).status, 401);
+    const expired = (await (
+      await testContext.get('/__dev/trace')
+    ).json()) as TraceSnapshot;
+    assert.equal(expired.entries.at(-1)?.status, 401);
+  } finally {
+    await testContext.close();
+  }
+});
+
+test('replay barrier holds only the original receipt and supports controlled disconnect before release', async () => {
+  const testContext = await fixture();
+  try {
+    await testContext.login();
+    const clientActionId = randomUUID();
+    const original = (await (
+      await testContext.upload(clientActionId)
+    ).json()) as Result;
+    assert(original.submissionId);
+    await testContext.post('/__dev/replays', {
+      workerId: 'ana',
+      clientActionId,
+      mode: 'hold',
+    });
+    const disconnected = testContext.upload(clientActionId).then(
+      (response) => ({ response }),
+      (error: unknown) => ({ error }),
+    );
+    await waitForHeldReplay(testContext, clientActionId);
+    assert.equal(
+      (
+        await testContext.post('/me/terms-acceptances', {
+          clientActionId: randomUUID(),
+          termsVersionId: 'v2',
+        })
+      ).status,
+      201,
+    );
+    await testContext.post('/__dev/review', {
+      submissionId: original.submissionId,
+      status: 'correction_requested',
+      correctionReason: 'Foto borrosa, vuelva a tomarla',
+    });
+    const assignment = (await (
+      await testContext.get('/me/assignment')
+    ).json()) as { documentSubmissions: Result[] };
+    assert.equal(
+      assignment.documentSubmissions[0]?.status,
+      'correction_requested',
+    );
+    await testContext.post('/__dev/replays', {
+      workerId: 'ana',
+      clientActionId,
+      mode: 'disconnect',
+    });
+    assert('error' in (await disconnected));
+    const replay = testContext.upload(clientActionId).then(
+      (response) => ({ response }),
+      (error: unknown) => ({ error }),
+    );
+    await waitForHeldReplay(testContext, clientActionId);
+    const release = (await (
+      await testContext.post('/__dev/replays', {
+        workerId: 'ana',
+        clientActionId,
+        mode: 'release',
+      })
+    ).json()) as { released: number };
+    assert.equal(release.released, 1);
+    const result = await replay;
+    assert('response' in result);
+    assert.equal(result.response.status, 200);
+    assert.deepEqual(await result.response.json(), original);
+    assert.equal(testContext.service.store.submissions('ana').length, 1);
+    const snapshot = (await (
+      await testContext.get('/__dev/replays')
+    ).json()) as ReplaySnapshot;
+    assert(snapshot.events.some((event) => event.event === 'disconnected'));
+    assert(snapshot.events.some((event) => event.event === 'released'));
+    assert.equal(snapshot.rules.length, 0);
+  } finally {
+    await testContext.close();
+  }
+});
+
+test('a missed replay release expires visibly without changing the durable receipt', async () => {
+  const testContext = await fixture();
+  try {
+    await testContext.login();
+    const clientActionId = randomUUID();
+    const original = await (await testContext.upload(clientActionId)).json();
+    assert.equal(
+      (
+        await testContext.post('/__dev/replays', {
+          workerId: 'ana',
+          clientActionId,
+          mode: 'hold',
+          timeoutMs: 20,
+        })
+      ).status,
+      200,
+    );
+    assert.equal((await testContext.upload(clientActionId)).status, 503);
+    const snapshot = (await (
+      await testContext.get('/__dev/replays')
+    ).json()) as ReplaySnapshot;
+    assert.equal(snapshot.rules.length, 0);
+    assert(snapshot.events.some((event) => event.event === 'expired'));
+    assert.deepEqual(
+      await (await testContext.upload(clientActionId)).json(),
+      original,
+    );
+    assert.equal(testContext.service.store.submissions('ana').length, 1);
+  } finally {
+    await testContext.close();
   }
 });

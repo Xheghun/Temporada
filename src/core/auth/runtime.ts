@@ -23,8 +23,12 @@ import { chooseImage } from '../files/native-image-picker.ts';
 import { DocumentsService } from '../../features/documents/documents-service.ts';
 import { AssignmentService } from '../../features/assignment/assignment-service.ts';
 import { isFeatureEnabled } from '../config/feature-flags.ts';
-import { isE2ERuntime } from '../config/native-runtime-policy.ts';
+import {
+  isE2ERuntime,
+  isNativeInspectionAllowed,
+} from '../config/native-runtime-policy.ts';
 import { resolveApiBaseUrl } from '../config/runtime-policy.ts';
+import { inspectNativeCapture } from '../../testing/native-capture-inspection.ts';
 
 export async function workerAppEnabled(
   name = 'worker_authentication',
@@ -240,6 +244,16 @@ export async function createWorkerRuntime() {
   await auth.restore();
   return {
     auth,
+    inspect: isNativeInspectionAllowed()
+      ? async () => {
+          const session = auth.current();
+          if (!session) throw new Error('inspection_requires_selected_worker');
+          const result = await inspectNativeCapture(database, session.workerId);
+          if (!auth.isCurrent(session))
+            throw new Error('inspection_session_changed');
+          return result;
+        }
+      : null,
     setLanguage,
     assignment,
     documents,

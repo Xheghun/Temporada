@@ -46,4 +46,12 @@ The default suite is `smoke` (brief scenarios 1 and 2); `full` selects all eight
 
 Set `E2E_OUTPUT` to choose a fresh report directory. Existing run directories are rejected to preserve failure evidence. The bootstrap checks that normal mock files and the normal app's package registration remain unchanged. CI seeds an unrelated normal mock file and a small native fixture in the normal package namespace. It compares that fixture's private-file digest before and after each E2E run. This verifies native namespace isolation; worker persistence is exercised in the bundled E2E app.
 
+[Runner isolation run 45980872233](https://github.com/Xheghun/Temporada/actions/runs/45980872233) passed two independent bootstrap repetitions on each API. Initial backend fixture hashes matched, and both the unrelated mock-data digest and normal-namespace private-file digest remained unchanged through every repetition.
+
 The media probe requires `-camera-back emulated -camera-front emulated`. It generates a reproducible 1920 × 2560 PNG containing only colored noise (14,752,728 bytes), then uses the native camera, retake, preview and gallery paths. Assertions inspect the saved private uploads and confirm that the gallery original remains intact. Generated images stay outside Git and are removed after the journey. API-specific native picker failures remain failed runs with screenshots; task 2.2 stays pending until both platforms and languages pass.
+
+## Inspection and fixture controls
+
+Native inspection reads the selected worker's actions and submissions in one database transaction, measures private files, then checks that the database snapshot is unchanged. Concurrent delivery causes a bounded resample instead of a mixed report. Reports include UUIDs, delivery/review state, retry deadlines, byte counts and digests; they exclude tokens, image contents and private paths.
+
+The mock server's existing opt-in, loopback-only development controls also expose `GET /__dev/trace` for bounded attempt metadata and `GET /__dev/replays` for replay events. `POST /__dev/replays` accepts `{workerId, clientActionId, mode, timeoutMs}`; `hold`, `disconnect` and `release` coordinate an existing receipt without changing it. Holds expire visibly within 12 seconds. Failure injection supports `force422` alongside `force413`. These controls are unavailable by default and in production mode. HTTP tests cover redaction, disabled controls, unchanged receipt replay and unrelated action progress; native journey verification remains pending.

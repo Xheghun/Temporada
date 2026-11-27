@@ -21,7 +21,8 @@ import {
   parseNonEmptyString,
 } from './app.ts';
 import { Failures } from './failure-injection.ts';
-import { documentCatalog } from './seed.ts';
+import { documentCatalog, workers } from './seed.ts';
+import { TestControls } from './test-controls.ts';
 
 const parseClientActionId = (value: unknown): string => {
   const clientActionId = parseNonEmptyString(value);
@@ -39,14 +40,20 @@ function sendReplayReceipt(
   clientActionId: string,
   fingerprint: string,
   httpResponse: Response,
+  controls?: TestControls,
 ): boolean {
   const persistReceipt = store.receipt(workerId, clientActionId);
   if (!persistReceipt) return false;
   if (persistReceipt.fingerprint !== fingerprint)
     throw new ApiError(409, 'action_id_conflict');
-  httpResponse
-    .status(200)
-    .json(JSON.parse(persistReceipt.responseJson) as unknown);
+  const send = () => {
+    httpResponse
+      .status(200)
+      .json(JSON.parse(persistReceipt.responseJson) as unknown);
+  };
+  // Keep the absent-receipt path synchronous with the effect transaction.
+  if (!controls?.deferReplay(workerId, clientActionId, httpResponse, send))
+    send();
   return true;
 }
 function persistReceipt(
@@ -114,16 +121,26 @@ export function createMockService(
 ) {
   const store = new Store(directory);
   const failures = new Failures();
-  const app = createAuthApp(store, async (request, _httpResponse, next) => {
+  const controls =
+    options.controlsEnabled && process.env.NODE_ENV !== 'production'
+      ? new TestControls(new Set(workers.map((worker) => worker.workerId)))
+      : undefined;
+  const app = createAuthApp(store, async (request, httpResponse, next) => {
+    controls?.observe(request, httpResponse, 'assignment');
     authorizeWorkerRequest(store, request);
     await failures.beforeRequest();
     next();
   });
   const authenticate = (
     request: Request,
-    _httpResponse: Response,
+    httpResponse: Response,
     next: () => void,
   ) => {
+    controls?.observe(
+      request,
+      httpResponse,
+      request.path === '/me/documents' ? 'document' : 'terms',
+    );
     authorizeWorkerRequest(store, request);
     next();
   };
@@ -134,6 +151,7 @@ export function createMockService(
       const workerId = authorizeWorkerRequest(store, request);
       const body = parseRequestObject(request.body as unknown);
       const clientActionId = parseClientActionId(body.clientActionId);
+      controls?.identify(request, clientActionId);
       const version = parseNonEmptyString(body.termsVersionId);
       const fingerprint = sha256(JSON.stringify(['terms', workerId, version]));
       if (
@@ -143,6 +161,7 @@ export function createMockService(
           clientActionId,
           fingerprint,
           httpResponse,
+          controls,
         )
       )
         return;
@@ -154,6 +173,7 @@ export function createMockService(
           clientActionId,
           fingerprint,
           httpResponse,
+          controls,
         )
       )
         return;
@@ -195,6 +215,7 @@ export function createMockService(
       const workerId = authorizeWorkerRequest(store, request);
       const body = parseRequestObject(request.body as unknown);
       const clientActionId = parseClientActionId(body.clientActionId);
+      controls?.identify(request, clientActionId);
       const documentType = parseNonEmptyString(body.documentType);
       const file = request.file;
       if (!file) throw new ApiError(422, 'image_required');
@@ -218,6 +239,7 @@ export function createMockService(
           clientActionId,
           fingerprint,
           httpResponse,
+          controls,
         )
       )
         return;
@@ -230,11 +252,13 @@ export function createMockService(
           clientActionId,
           fingerprint,
           httpResponse,
+          controls,
         )
       )
         return;
       if (failures.force413 || file.size >= 1_500_000)
         throw new ApiError(413, 'upload_too_large');
+      if (failures.force422) throw new ApiError(422, 'invalid_upload');
       if (
         !documentCatalog.some(
           (document) => document.documentType === documentType,
@@ -311,6 +335,33 @@ export function createMockService(
     app.post('/__dev/failures', (request, httpResponse) => {
       failures.configure(request.body as unknown);
       httpResponse.json({ status: 'configured' });
+    });
+    app.get('/__dev/trace', (_request, httpResponse) => {
+      httpResponse.json(controls?.trace());
+    });
+    app.get('/__dev/replays', (_request, httpResponse) => {
+      httpResponse.json(controls?.replays());
+    });
+    app.post('/__dev/replays', (request, httpResponse) => {
+      const body = parseRequestObject(request.body as unknown);
+      if (
+        Object.keys(body).some(
+          (key) =>
+            !['workerId', 'clientActionId', 'mode', 'timeoutMs'].includes(key),
+        )
+      )
+        throw new ApiError(422, 'invalid_replay_control');
+      const timeoutMs = body.timeoutMs === undefined ? 12000 : body.timeoutMs;
+      if (typeof timeoutMs !== 'number')
+        throw new ApiError(422, 'invalid_replay_control');
+      httpResponse.json(
+        controls?.configureReplay(
+          parseNonEmptyString(body.workerId),
+          parseClientActionId(body.clientActionId),
+          parseNonEmptyString(body.mode),
+          timeoutMs,
+        ),
+      );
     });
     app.post('/__dev/terms', (request, httpResponse) => {
       if (parseRequestObject(request.body as unknown).version !== 'v3')

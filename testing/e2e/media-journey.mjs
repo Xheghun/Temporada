@@ -87,14 +87,33 @@ export async function runMediaJourney({
     await flow('media-inspect');
     await adb('shell', 'uiautomator', 'dump', hierarchy);
     const xml = await adb('exec-out', 'cat', hierarchy);
-    const node = xml
-      .match(/<node\b[^>]*>/g)
-      ?.find((candidate) =>
-        /resource-id="[^"]*capture-inspection-report"/.test(candidate),
+    const nodes = xml.match(/<node\b[^>]*>/g) ?? [];
+    const text = nodes
+      .flatMap((node) =>
+        ['text', 'content-desc'].map((attribute) => {
+          const value = node.match(
+            new RegExp(`\\b${attribute}="([^"]*)"`),
+          )?.[1];
+          return value ? decodeXml(value) : '';
+        }),
+      )
+      .find(
+        (value) => value.trim().startsWith('{') && value.includes('"workerId"'),
       );
-    const text = node?.match(/\btext="([^"]*)"/)?.[1];
+    if (!text)
+      await writeFile(
+        path.join(output, 'inspection-node-metadata.json'),
+        JSON.stringify(
+          nodes.map((node) => ({
+            resourceId: node.match(/resource-id="([^"]*)"/)?.[1] ?? null,
+            textLength: node.match(/\btext="([^"]*)"/)?.[1]?.length ?? 0,
+          })),
+          null,
+          2,
+        ),
+      );
     assert(text, 'Native inspection text is missing');
-    const inspection = JSON.parse(decodeXml(text));
+    const inspection = JSON.parse(text);
     assert.equal(inspection.workerId, 'ana');
     assert.equal(inspection.actions.length, 2);
     assert.equal(inspection.managedFiles, 2);
@@ -102,6 +121,7 @@ export async function runMediaJourney({
     assert.equal(inspection.journals, 0);
     for (const action of inspection.actions) {
       assert.equal(action.status, 'queued');
+      assert.equal(action.ownsPrivateFile, true);
       assert.equal(action.exists, true);
       assert.equal(action.digestMatches, true);
       assert(action.bytes > 0 && action.bytes < 1_500_000);
