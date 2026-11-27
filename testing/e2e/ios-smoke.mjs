@@ -49,10 +49,14 @@ for (const signal of ['SIGINT', 'SIGTERM'])
 const command = async (executable, parameters) =>
   (
     await execute(executable, parameters, {
-      timeout: 180_000,
+      timeout: 420_000,
       signal: isCleaningUp ? undefined : cancellation.signal,
       maxBuffer: 4 * 1024 * 1024,
-      env: { ...process.env, MAESTRO_CLI_NO_ANALYTICS: '1' },
+      env: {
+        ...process.env,
+        MAESTRO_CLI_NO_ANALYTICS: '1',
+        MAESTRO_DRIVER_STARTUP_TIMEOUT: '240000',
+      },
     })
   ).stdout.trim();
 const simctl = (...parameters) => command('xcrun', ['simctl', ...parameters]);

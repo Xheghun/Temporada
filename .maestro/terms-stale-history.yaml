@@ -3,6 +3,10 @@ name: Retain rejected old-version history
 ---
 - openLink: temporada-e2e://terms
 - scrollUntilVisible:
+    element: ${HISTORY_LABEL}
+    direction: DOWN
+- tapOn: ${HISTORY_LABEL}
+- scrollUntilVisible:
     element: ${STALE_LABEL}
     direction: DOWN
 - assertVisible: ${STALE_LABEL}

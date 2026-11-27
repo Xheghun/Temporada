@@ -73,6 +73,7 @@ export async function runScenarioFour(context) {
   assert.equal(acceptances[0].termsVersionId, 'v3');
   assert.equal(acceptances[0].clientActionId, newAction.clientActionId);
   await flow('terms-stale-history', {
+    HISTORY_LABEL: translations.terms.history,
     STALE_LABEL: translations.terms.staleHistory.replace('{{version}}', 'v2'),
   });
   await writeFile(

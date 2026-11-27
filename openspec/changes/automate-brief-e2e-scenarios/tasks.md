@@ -11,12 +11,12 @@ Scope SDD-035. Implement only `automate-brief-e2e-scenarios`. Check tasks only a
 
 - [x] 2.1 Add the local E2E command with suite/scenario selection, temporary mock directories, fixture seeding, package-scoped app resets and bounded readiness waits. Verify two isolated runs produce the same starting state and do not touch the normal app or mock data. Document the runnable commands beside the harness.
 - [ ] 2.2 Add stable selectors to the exercised controls, fictional media fixtures and API-specific camera/gallery helpers. Verify Spanish and English selectors, native virtual-camera capture, real preview/compression, app-created original cleanup and gallery selection on API 34 and API 28. Keep failed or unavailable capture steps visible.
-- [ ] 2.3 Reuse native inspection and `/__dev/state` for worker/action/submission identity, retry metadata, review state and private-file integrity. Add mock-only 422/replay timing/allowlisted attempt tracing where needed. Verify snapshot consistency, disabled non-test controls and redaction of tokens, image contents and private paths.
+- [x] 2.3 Reuse native inspection and `/__dev/state` for worker/action/submission identity, retry metadata, review state and private-file integrity. Add mock-only 422/replay timing/allowlisted attempt tracing where needed. Verify snapshot consistency, disabled non-test controls and redaction of tokens, image contents and private paths.
 - [ ] 2.4 Implement device-level offline/online, force-stop, relaunch and reboot helpers plus cleanup. Verify airplane mode also disables Wi-Fi, the app observes Offline, no sends occur offline, storage survives restart and cleanup restores settings after an intentionally failed flow.
 
 ## 3. Initial device journeys
 
-- [ ] 3.1 Implement brief scenario 1 with Ana login, default Spanish, English selection from Home and saved preference after restart. Assert app-owned text on Home/Terms/Documents/Capture plus representative queued/retry/error messages and unchanged staff free text. Map the result to M9 and document its covered states.
+- [x] 3.1 Implement brief scenario 1 with Ana login, default Spanish, English selection from Home and saved preference after restart. Assert app-owned text on Home/Terms/Documents/Capture plus representative queued/retry/error messages and unchanged staff free text. Map the result to M9 and document its covered states.
 - [ ] 3.2 Implement brief scenario 2 with actual camera capture offline, terms confirmation, force-stop/reopen and reconnect. Assert both original UUIDs, private compressed size/digest, no premature server effects, one final effect per action and Pending Review. Add a full-suite emulator-reboot variant and record TEST-01/02 coverage.
 
 ## 4. Brief failure and shared-phone journeys
