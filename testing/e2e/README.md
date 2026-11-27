@@ -14,7 +14,7 @@ ANDROID_SERIAL=emulator-5554 PROBE_API=28 \
 
 Use `PROBE_API=34` for the other target. Set `MAESTRO_BINARY` if Maestro is outside `PATH`. `toolchain.json` defines the exact versions; this initial probe targets x86_64 CI rather than the ARM64 desktop emulator. Results default to the ignored `e2e-results/probe` directory. The eight acceptance journeys are implemented but await native acceptance verification.
 
-API 28 uses emulator 35.6.11 (build 13610412); API 34 uses 37.2.12 (build 16428233). The newer emulator crashes in camera YUV conversion on the API 28 image. Both versions are checked from SDK metadata. The new API 28 pin awaits a compatibility rerun.
+API 28 uses emulator 35.6.11 (build 13610412); API 34 uses 37.2.12 (build 16428233). The newer emulator crashes in camera YUV conversion on the API 28 image. Both versions are checked from SDK metadata. [Compatibility run 46003750142](https://github.com/Xheghun/Temporada/actions/runs/46003750142) passed both target pins, including 2,048 MiB configuration, guest RAM, native selection/restart and connectivity restoration.
 
 API 34 uses `-memory 2048 -lowram` to prevent its minimum-memory adjustment from silently allocating 2.5 GB. The probe checks guest memory as well as the AVD file. The `-lowram` option removes the emulator's memory floor; it does not change the app's behavior.
 

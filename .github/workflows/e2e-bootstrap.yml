@@ -71,6 +71,7 @@ jobs:
           retention-days: 14
           if-no-files-found: error
   android:
+    name: ${{ inputs.apk_run_id != '' && format('Driver debug {0} (API {1})', inputs.suite == 'scenario' && inputs.scenario || inputs.suite, matrix.api) || format('Android {0} (API {1})', inputs.suite || (github.event_name == 'pull_request' && 'smoke' || 'full'), matrix.api) }}
     needs: build
     if: ${{ always() && !cancelled() && (needs.build.result == 'success' || inputs.apk_run_id != '') }}
     runs-on: ubuntu-24.04

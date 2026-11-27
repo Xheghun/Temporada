@@ -4,7 +4,7 @@ Scope SDD-035. Implement only `automate-brief-e2e-scenarios`. Check tasks only a
 
 ## 1. Toolchain and bundled test app
 
-- [ ] 1.1 Pin Maestro and the Android emulator/system-image tooling. Run a driver compatibility probe on API 34 and API 28 with 2,048 MiB RAM, covering native UI selection, screenshots, restart and airplane/Wi-Fi control. Record versions and output. If API 28 fails, keep its result incomplete and revise the runner choice before continuing the target lane.
+- [x] 1.1 Pin Maestro and the Android emulator/system-image tooling. Run a driver compatibility probe on API 34 and API 28 with 2,048 MiB RAM, covering native UI selection, screenshots, restart and airplane/Wi-Fi control. Record versions and output. If API 28 fails, keep its result incomplete and revise the runner choice before continuing the target lane.
 - [x] 1.2 Add a bundled E2E variant with its own application ID, test API/flag providers and inspection access. Install it, stop Metro, force-stop offline and verify cached Home can reopen. Add tests proving production configurations reject E2E settings and retain HTTPS/feature gates. Document the exact local build command and variant settings.
 
 ## 2. Isolated runner and assertions

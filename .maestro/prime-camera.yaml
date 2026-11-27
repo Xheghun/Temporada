@@ -1,0 +1,31 @@
+appId: com.android.camera2
+name: Finish Android 9 camera onboarding before capture intents
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: 'com.android.packageinstaller:id/permission_allow_button|com.android.camera2:id/check_box|com.android.camera2:id/shutter_button'
+    timeout: 20000
+- runFlow:
+    when:
+      visible: 'Allow Camera.*location.*'
+    commands:
+      - tapOn:
+          id: 'com.android.packageinstaller:id/permission_deny_button'
+- runFlow:
+    when:
+      visible:
+        id: 'com.android.camera2:id/check_box'
+    commands:
+      - tapOn:
+          id: 'com.android.camera2:id/check_box'
+      - tapOn:
+          id: 'com.android.camera2:id/confirm_button'
+- extendedWaitUntil:
+    visible:
+      id: 'com.android.camera2:id/shutter_button'
+    timeout: 20000
+- takeScreenshot: prepared-system-camera
+- stopApp
+- launchApp:
+    appId: com.cremedigital.seasonalworker.e2e

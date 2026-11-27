@@ -65,6 +65,11 @@ export async function runMediaJourney({
       'com.android.camera2',
       'android.permission.CAMERA',
     );
+    if (
+      primarySource === 'camera' &&
+      (await adb('shell', 'getprop', 'ro.build.version.sdk')) === '28'
+    )
+      await flow('prime-camera');
     if (language === 'en') await flow('media-english');
     await flow('probe-airplane');
     await adb('shell', 'svc', 'wifi', 'disable');

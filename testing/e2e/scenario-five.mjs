@@ -25,20 +25,22 @@ export async function runScenarioFive(context) {
     ...context,
     language: 'es',
     includeGallery: false,
-    expectedActionCount: 2,
-    async beforeCapture() {
-      await flow('terms-confirm', {
-        VERSION_LABEL: translations.terms.version.replace('{{version}}', 'v2'),
-        TERMS_PENDING_LABEL: translations.terms.status.pending_sync,
-      });
-    },
+    expectedActionCount: 1,
     async afterSave(before) {
       const original = before.actions.find(
         (action) => action.actionType === 'document_upload',
       );
-      const terms = before.actions.find(
+      await flow('terms-confirm', {
+        VERSION_LABEL: translations.terms.version.replace('{{version}}', 'v2'),
+        TERMS_PENDING_LABEL: translations.terms.status.pending_sync,
+      });
+      const queued = await inspectNative(context);
+      assert.equal(queued.actions.length, 2);
+      assert.equal(queued.actions[0].clientActionId, original.clientActionId);
+      const terms = queued.actions.find(
         (action) => action.actionType === 'terms_acceptance',
       );
+      assert(terms && terms.status === 'queued');
       await fixtureRequest('/__dev/failures', {
         [code === 413 ? 'force413' : 'force422']: true,
       });
@@ -168,6 +170,7 @@ export async function runScenarioFive(context) {
             tests: ['TEST-04'],
             observationMs,
             before,
+            queued,
             rejected,
             replacement,
             delivered,
