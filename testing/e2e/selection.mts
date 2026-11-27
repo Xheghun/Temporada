@@ -1,0 +1,31 @@
+export type Suite = 'bootstrap' | 'smoke' | 'full';
+export type Selection = { scenarios: string[]; repetitions: number };
+
+export function selectScenarios(argumentsList: string[]): Selection {
+  let suite: Suite | undefined;
+  let scenario: string | undefined;
+  let repetitions = 1;
+  const provided = new Set<string>();
+  for (let index = 0; index < argumentsList.length; index += 2) {
+    const flag = argumentsList[index];
+    const value = argumentsList[index + 1];
+    if (!flag || !value || provided.has(flag))
+      throw new Error('Missing or repeated E2E option');
+    provided.add(flag);
+    if (flag === '--suite' && ['bootstrap', 'smoke', 'full'].includes(value))
+      suite = value as Suite;
+    else if (flag === '--scenario' && /^(bootstrap|[1-8])$/.test(value))
+      scenario = value;
+    else if (flag === '--repeat' && /^[1-5]$/.test(value))
+      repetitions = Number(value);
+    else throw new Error(`Unsupported E2E option: ${flag} ${value}`);
+  }
+  if (suite && scenario) throw new Error('Choose a suite or one scenario');
+  if (scenario) return { scenarios: [scenario], repetitions };
+  const suites: Record<Suite, string[]> = {
+    bootstrap: ['bootstrap'],
+    smoke: ['1', '2'],
+    full: ['1', '2', '3', '4', '5', '6', '7', '8'],
+  };
+  return { scenarios: suites[suite ?? 'smoke'], repetitions };
+}

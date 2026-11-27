@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict';
 import { execFile, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  readlink,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -31,6 +40,69 @@ let backend;
 let originalAirplane;
 let originalWifi;
 let hasReverse = false;
+let protectedBefore;
+
+async function protectedDataSnapshot() {
+  const digest = createHash('sha256');
+  async function visit(directory, relative = '') {
+    let entries;
+    try {
+      entries = await readdir(directory, { withFileTypes: true });
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+      digest.update('absent');
+      return;
+    }
+    for (const entry of entries.sort((left, right) =>
+      left.name.localeCompare(right.name),
+    )) {
+      const filename = path.join(directory, entry.name);
+      const relativeName = path.join(relative, entry.name);
+      digest.update(
+        JSON.stringify([
+          relativeName,
+          entry.isDirectory() ? 'directory' : 'file',
+        ]),
+      );
+      if (entry.isDirectory()) await visit(filename, relativeName);
+      else if (entry.isSymbolicLink()) digest.update(await readlink(filename));
+      else
+        for await (const bytes of createReadStream(filename))
+          digest.update(bytes);
+    }
+  }
+  await visit(path.resolve('mock-server/.data'));
+  return {
+    normalMockDigest: digest.digest('hex'),
+    ...(process.env.E2E_PROTECTED_FIXTURE === '1'
+      ? {
+          normalPrivateFixtureDigest: createHash('sha256')
+            .update(
+              await adb(
+                'shell',
+                'run-as',
+                'com.cremedigital.seasonalworker',
+                'cat',
+                'files/isolation-sentinel',
+              ),
+            )
+            .digest('hex'),
+        }
+      : {}),
+    normalAppPackage: (
+      await adb(
+        'shell',
+        'pm',
+        'list',
+        'packages',
+        'com.cremedigital.seasonalworker',
+      )
+    )
+      .split('\n')
+      .filter((entry) => entry === 'package:com.cremedigital.seasonalworker')
+      .join('\n'),
+  };
+}
 
 async function command(executable, argumentsList) {
   try {
@@ -99,6 +171,17 @@ try {
     'airplane_mode_on',
   );
   originalWifi = await adb('shell', 'settings', 'get', 'global', 'wifi_on');
+  await step('protected-normal-data-baseline', async () => {
+    protectedBefore = await protectedDataSnapshot();
+    return {
+      normalAppInstalled: protectedBefore.normalAppPackage
+        .split('\n')
+        .includes('package:com.cremedigital.seasonalworker'),
+      normalMockDigest: protectedBefore.normalMockDigest,
+      normalPrivateFixtureDigest:
+        protectedBefore.normalPrivateFixtureDigest ?? null,
+    };
+  });
   await step('isolated-bundled-apk', async () => {
     const metadata = JSON.parse(await readFile(`${apk}.json`, 'utf8'));
     assert.equal(metadata.applicationId, applicationId);
@@ -185,6 +268,14 @@ try {
     }
     await adb('reverse', 'tcp:3101', 'tcp:3101');
     hasReverse = true;
+    const fixtureResponse = await fetch('http://127.0.0.1:3101/__dev/state', {
+      signal: AbortSignal.timeout(1000),
+    });
+    assert.equal(fixtureResponse.status, 200);
+    await writeFile(
+      path.join(output, 'initial-fixture.json'),
+      JSON.stringify(await fixtureResponse.json(), null, 2),
+    );
     await flow('probe-airplane-off');
     await adb('shell', 'svc', 'wifi', 'enable');
     return { port: 3101, temporaryData: true };
@@ -243,6 +334,20 @@ try {
     [
       'remove-temporary-fixtures',
       () => rm(dataDirectory, { recursive: true, force: true }),
+    ],
+    [
+      'verify-protected-normal-data',
+      async () => {
+        if (!protectedBefore)
+          throw new Error('Protected-data baseline unavailable');
+        const protectedAfter = await protectedDataSnapshot();
+        assert.deepEqual(
+          protectedAfter,
+          protectedBefore,
+          'Normal app package or mock data changed during E2E execution',
+        );
+        return { unchanged: true, ...protectedAfter };
+      },
     ],
   ]) {
     try {

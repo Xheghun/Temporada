@@ -29,6 +29,18 @@ npm ci --prefix mock-server
 ANDROID_SERIAL=emulator-5554 node testing/e2e/bootstrap-android.mjs
 ```
 
-The default APK targets x86_64 CI. Use `E2E_ANDROID_ABI=arm64-v8a` when building for an ARM64 emulator. `E2E_APK` overrides the output path; the APK and its build record must remain together. The runner uses only the E2E package, its own temporary mock directory and port 3101. It authenticates through the real UI, caches Home, stops the backend, force-stops the app, enables airplane mode with Wi-Fi off, then reopens cached Home. It never starts Metro. The **E2E bundled app bootstrap** workflow executes this proof on API 28 and API 34; task 1.2 stays pending until those runs pass.
+The default APK targets x86_64 CI. Use `E2E_ANDROID_ABI=arm64-v8a` when building for an ARM64 emulator. `E2E_APK` overrides the output path; the APK and its build record must remain together. The runner uses only the E2E package, its own temporary mock directory and port 3101. It authenticates through the real UI, caches Home, stops the backend, force-stops the app, enables airplane mode with Wi-Fi off, then reopens cached Home and guarded file inspection. It never starts Metro. [Bundled bootstrap run 45976961048](https://github.com/Xheghun/Temporada/actions/runs/45976961048) passed this proof on API 28 and API 34.
 
 The build requires both `BUILD_VARIANT=e2e` and `EXPO_PUBLIC_APP_ENV=e2e` (set by the builder). The EAS `e2e` profile records equivalent settings for optional use. Other EAS profiles reject E2E settings. At runtime, bundled test metadata must match the native application ID before local feature flags or inspection are available. The fixture API is restricted to HTTP on `127.0.0.1`. Ordinary builds retain HTTPS and remote feature gates.
+
+## Scenario runner
+
+```sh
+npm run e2e:android -- --suite bootstrap --repeat 2
+npm run e2e:android -- --scenario 2
+npm run e2e:android -- --suite full
+```
+
+The default suite is `smoke` (brief scenarios 1 and 2); `full` selects all eight. The bootstrap proof is currently the only registered journey. Selecting a pending journey writes `NOT RUN` and fails the suite. `--repeat` runs independent repetitions and preserves every outcome; a later pass cannot erase an earlier failure. Repetitions compare the initial backend fixture hashes. Each journey owns a fresh temporary backend and resets only the E2E package before starting, preserving its state throughout the journey.
+
+Set `E2E_OUTPUT` to choose a fresh report directory. Existing run directories are rejected to preserve failure evidence. The bootstrap checks that normal mock files and the normal app's package registration remain unchanged. CI seeds an unrelated normal mock file and a small native fixture in the normal package namespace. It compares that fixture's private-file digest before and after each E2E run. This verifies native namespace isolation; worker persistence is exercised in the bundled E2E app.
