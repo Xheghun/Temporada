@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
-import { mkdir, writeFile, appendFile } from 'node:fs/promises';
+import {
+  mkdir,
+  writeFile,
+  appendFile,
+  readdir,
+  readFile,
+} from 'node:fs/promises';
 import path from 'node:path';
 
 const mode = process.env.E2E_SUITE ?? 'smoke';
@@ -15,8 +22,13 @@ assert(
   ].includes(mode),
   'Unknown CI suite',
 );
+assert(
+  !process.env.E2E_REUSED_APK_RUN || ['scenario', 'foundation'].includes(mode),
+  'APK reuse is restricted to driver debugging; acceptance requires a fresh build',
+);
 const output = path.resolve(process.env.E2E_OUTPUT ?? 'e2e-results/native');
-await mkdir(output, { recursive: true });
+await mkdir(path.dirname(output), { recursive: true });
+await mkdir(output);
 const groups = [];
 const run = async (name, script, parameters = [], extraEnvironment = {}) => {
   const groupOutput = path.join(output, name);
@@ -58,7 +70,7 @@ try {
     });
   } else {
     if (mode === 'acceptance') {
-      for (const scenario of ['1', '2', '3', '4', '5', '6', '7', '8'])
+      for (const scenario of ['8', '7', '6', '5', '4', '3', '2', '1'])
         await suite(`individual-${scenario}`, ['--scenario', scenario]);
     }
     await suite(mode === 'smoke' ? 'smoke' : 'full', [
@@ -77,6 +89,29 @@ try {
       });
   }
 } finally {
+  const fixtureHashes = new Set();
+  const journeys = [];
+  async function collect(directory) {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const filename = path.join(directory, entry.name);
+      if (entry.isDirectory()) await collect(filename);
+      else if (entry.name === 'initial-fixture.json')
+        fixtureHashes.add(
+          createHash('sha256')
+            .update(await readFile(filename))
+            .digest('hex'),
+        );
+      else if (entry.name === 'suite.json')
+        journeys.push(...JSON.parse(await readFile(filename, 'utf8')).outcomes);
+    }
+  }
+  await collect(output);
+  if (fixtureHashes.size > 1)
+    groups.push({
+      name: 'fixture-independence',
+      status: 'FAIL',
+      error: 'Independent runs began with different fixture state',
+    });
   const status =
     groups.length && groups.every((group) => group.status === 'PASS')
       ? 'PASS'
@@ -85,7 +120,15 @@ try {
   await writeFile(
     path.join(output, 'ci-result.json'),
     JSON.stringify(
-      { status, mode, sourceSha: process.env.GITHUB_SHA ?? 'local', groups },
+      {
+        status,
+        mode,
+        sourceSha: process.env.GITHUB_SHA ?? 'local',
+        groups,
+        journeys,
+        initialFixtureHashes: [...fixtureHashes],
+        reusedApkRunForDriverDebugging: process.env.E2E_REUSED_APK_RUN || null,
+      },
       null,
       2,
     ),
@@ -93,11 +136,18 @@ try {
   const summary = [
     `# Android ${process.env.E2E_API ?? ''}: ${status}`,
     '',
-    `Suite: ${mode}. Individual journey results and JUnit files are in the native artifact.`,
+    `Suite: ${mode}${process.env.E2E_REUSED_APK_RUN ? ' (driver debugging with an existing APK; not current-commit acceptance)' : ''}. Individual journey results and JUnit files are in the native artifact.`,
     '',
     '| Group | Status |',
     '| --- | --- |',
     ...groups.map((group) => `| ${group.name} | ${group.status} |`),
+    '',
+    '| Journey | Repetition | Status | Sync tests |',
+    '| --- | --- | --- | --- |',
+    ...journeys.map(
+      (journey) =>
+        `| ${journey.scenario} | ${journey.repetition} | ${journey.status} | ${journey.coverage?.tests?.join(', ') ?? ''} |`,
+    ),
     '',
   ].join('\n');
   await writeFile(path.join(output, 'summary.md'), summary);

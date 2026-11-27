@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFile, spawn } from 'node:child_process';
-import { readFile, writeFile } from 'node:fs/promises';
+import { access, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { promisify } from 'node:util';
 
@@ -28,6 +28,12 @@ const before = await settings();
 const output = path.resolve(
   process.env.E2E_OUTPUT ?? 'e2e-results/intentional-failure',
 );
+try {
+  await access(output);
+  throw new Error('Choose a fresh cleanup-verification output directory');
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error;
+}
 const exitCode = await new Promise((resolve, reject) => {
   const child = spawn(process.execPath, ['testing/e2e/bootstrap-android.mjs'], {
     stdio: 'inherit',

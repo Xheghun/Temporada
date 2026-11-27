@@ -1,59 +1,34 @@
 import assert from 'node:assert/strict';
-import { randomUUID } from 'node:crypto';
-import { writeFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
-function decodeXml(value) {
-  return value.replace(
-    /&(?:quot|apos|lt|gt|amp);|&#(\d+);|&#x([0-9a-f]+);/gi,
-    (entity, decimal, hexadecimal) => {
-      if (decimal) return String.fromCodePoint(Number(decimal));
-      if (hexadecimal) return String.fromCodePoint(parseInt(hexadecimal, 16));
-      return {
-        '&quot;': '"',
-        '&apos;': "'",
-        '&lt;': '<',
-        '&gt;': '>',
-        '&amp;': '&',
-      }[entity];
-    },
-  );
+const marker = /TEMPORADA_NATIVE_INSPECTION=(\{[^\r\n]*\})/;
+async function readDriverReport(directory) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const filename = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      const report = await readDriverReport(filename);
+      if (report) return report;
+    } else if (entry.name === 'maestro.log') {
+      const report = marker.exec(await readFile(filename, 'utf8'))?.[1];
+      if (report) return report;
+    }
+  }
+  return null;
 }
 
-export async function inspectNative({ adb, flow, output, workerId = 'ana' }) {
-  const hierarchy = `/data/local/tmp/temporada-e2e-${randomUUID()}.xml`;
-  try {
-    await flow('media-inspect', { WORKER_ID: workerId });
-    await adb('shell', 'uiautomator', 'dump', hierarchy);
-    const xml = await adb('exec-out', 'cat', hierarchy);
-    const nodes = xml.match(/<node\b[^>]*>/g) ?? [];
-    const text = nodes
-      .flatMap((node) =>
-        ['text', 'content-desc'].map((attribute) => {
-          const value = node.match(
-            new RegExp(`\\b${attribute}="([^"]*)"`),
-          )?.[1];
-          return value ? decodeXml(value) : '';
-        }),
-      )
-      .find(
-        (value) => value.trim().startsWith('{') && value.includes('"workerId"'),
-      );
-    if (!text)
-      await writeFile(
-        path.join(output, 'inspection-node-metadata.json'),
-        JSON.stringify(
-          nodes.map((node) => ({
-            resourceId: node.match(/resource-id="([^"]*)"/)?.[1] ?? null,
-            textLength: node.match(/\btext="([^"]*)"/)?.[1]?.length ?? 0,
-          })),
-          null,
-          2,
-        ),
-      );
-    assert(text, 'Native inspection text is missing');
-    return JSON.parse(text);
-  } finally {
-    await adb('shell', 'rm', '-f', hierarchy);
-  }
+/** Copy the real read-only UI report through the same native driver as UI assertions. */
+export async function inspectNative({ flow, workerId = 'ana' }) {
+  const execution = await flow('media-inspect', { WORKER_ID: workerId });
+  const text =
+    marker.exec(execution.stdout)?.[1] ??
+    (await readDriverReport(execution.artifactDirectory));
+  assert(text, 'Native inspection text is missing from the driver output');
+  const report = JSON.parse(text);
+  assert.equal(report.workerId, workerId);
+  assert(
+    Array.isArray(report.actions) && Array.isArray(report.submissions),
+    'Incomplete native inspection report',
+  );
+  return report;
 }

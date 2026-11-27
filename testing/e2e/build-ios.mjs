@@ -18,6 +18,14 @@ import { promisify } from 'node:util';
 
 assert.equal(process.platform, 'darwin', 'iOS simulator builds require macOS');
 const execute = promisify(execFile);
+const swift = (await execute('xcrun', ['swift', '--version'])).stdout;
+const compilerVersion = /Swift version (\d+)\.(\d+)/.exec(swift);
+assert(
+  compilerVersion &&
+    (Number(compilerVersion[1]) > 6 ||
+      (Number(compilerVersion[1]) === 6 && Number(compilerVersion[2]) >= 2)),
+  'Expo SDK 58 requires Swift 6.2 or newer; select Xcode 26 with DEVELOPER_DIR',
+);
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const workspace = await mkdtemp(
   path.join(tmpdir(), 'temporada-e2e-ios-build-'),
@@ -135,6 +143,7 @@ try {
           .digest('hex'),
         xcode: (await execute('xcodebuild', ['-version'])).stdout.trim(),
         cocoaPods: (await execute('pod', ['--version'])).stdout.trim(),
+        swift: swift.trim(),
       },
       null,
       2,

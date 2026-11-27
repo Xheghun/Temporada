@@ -1,0 +1,24 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Check readable controls at 360dp and 130 percent text
+---
+- openLink: temporada-e2e://home
+- assertVisible: ${GREETING_LABEL}
+- takeScreenshot: layout-home
+- openLink: temporada-e2e://terms
+- assertVisible: ${TERMS_TITLE}
+- takeScreenshot: layout-terms-top
+- scrollUntilVisible:
+    element:
+      id: terms-confirm
+    direction: DOWN
+- assertVisible:
+    id: terms-confirm
+- takeScreenshot: layout-terms-confirm
+- openLink: temporada-e2e://documents
+- assertVisible: ${DOCUMENTS_TITLE}
+- scrollUntilVisible:
+    element:
+      id: document-passport
+    direction: DOWN
+- takeScreenshot: layout-documents
+- openLink: temporada-e2e://home

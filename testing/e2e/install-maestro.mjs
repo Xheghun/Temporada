@@ -4,6 +4,7 @@ import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { appendFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { tmpdir } from 'node:os';
 import { promisify } from 'node:util';
 
 const { maestro } = JSON.parse(
@@ -12,7 +13,7 @@ const { maestro } = JSON.parse(
 const root = path.resolve(
   process.env.MAESTRO_INSTALL_ROOT ??
     path.join(
-      process.env.RUNNER_TEMP ?? '/private/tmp',
+      process.env.RUNNER_TEMP ?? tmpdir(),
       `temporada-maestro-${maestro.version}`,
     ),
 );

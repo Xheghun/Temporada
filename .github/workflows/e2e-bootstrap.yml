@@ -29,14 +29,20 @@ on:
         description: 'Individual scenario or regression ID'
         type: string
         default: '2'
+      apk_run_id:
+        description: 'Existing APK run for driver debugging only; leave empty for acceptance'
+        type: string
+        default: ''
       api:
         type: choice
         options: ['34', '28', both]
         default: '34'
 permissions:
   contents: read
+  actions: read
 jobs:
   build:
+    if: ${{ !inputs.apk_run_id }}
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -66,6 +72,7 @@ jobs:
           if-no-files-found: error
   android:
     needs: build
+    if: ${{ always() && !cancelled() && (needs.build.result == 'success' || inputs.apk_run_id != '') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     strategy:
@@ -83,10 +90,19 @@ jobs:
           java-version: '21'
       - run: npm ci --prefix mock-server
       - name: Download test APK
+        if: ${{ !inputs.apk_run_id }}
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: e2e-apk
           path: e2e-results/
+      - name: Reuse APK for driver debugging
+        if: ${{ inputs.apk_run_id != '' }}
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: e2e-apk
+          path: e2e-results/
+          run-id: ${{ inputs.apk_run_id }}
+          github-token: ${{ github.token }}
       - name: Install pinned Maestro
         run: node testing/e2e/install-maestro.mjs
       - name: Enable KVM
@@ -105,6 +121,7 @@ jobs:
           E2E_OUTPUT: e2e-results/native-${{ matrix.api }}
           E2E_SUITE: ${{ inputs.suite || (github.event_name == 'pull_request' && 'smoke' || 'full') }}
           E2E_SELECTED_SCENARIO: ${{ inputs.scenario }}
+          E2E_REUSED_APK_RUN: ${{ inputs.apk_run_id }}
           E2E_API: ${{ matrix.api }}
           E2E_PROTECTED_FIXTURE: '1'
         with:
@@ -114,8 +131,8 @@ jobs:
           ram-size: 2048M
           avd-name: temporada-bootstrap-${{ matrix.api }}
           emulator-build: '16428233'
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 2048 -lowram -camera-back emulated -camera-front emulated
-          pre-emulator-launch-script: node testing/e2e/build-isolation-fixture.mjs
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 2048 -lowram -camera-back imagefile:${{ github.workspace }}/e2e-results/camera-feed.png -camera-front none
+          pre-emulator-launch-script: node testing/e2e/prepare-emulator.mjs
           script: |
             adb install e2e-results/isolation-fixture.apk
             adb shell am start -W -n com.cremedigital.seasonalworker/.IsolationFixture

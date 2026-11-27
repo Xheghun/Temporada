@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { writeFile, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { readTapTimings } from './flow-timings.mjs';
 import { androidDevice } from './android-device.mjs';
 import { inspectNative } from './native-inspection.mjs';
 import { fixtureRequest, waitForObservation } from './mock-client.mjs';
@@ -47,8 +48,31 @@ export async function runScenarioSix(context) {
     },
     async afterSave(before) {
       await fixtureRequest('/__dev/failures', controls);
-      await device.online();
-      await flow('retry-interact');
+      let latencyInteraction;
+      if (latency) {
+        const interaction = await flow('latency-interact');
+        const taps = await readTapTimings(interaction.artifactDirectory);
+        const trace = await fixtureRequest('/__dev/trace');
+        const overlap = taps.filter(
+          (tap) =>
+            tap.status === 'COMPLETED' &&
+            tap.actualTapAt !== null &&
+            trace.entries.some(
+              (attempt) =>
+                attempt.operation !== 'assignment' &&
+                tap.actualTapAt >= attempt.receivedAtUnixMs &&
+                tap.actualTapAt < attempt.receivedAtUnixMs + 2000,
+            ),
+        );
+        assert(
+          overlap.length > 0,
+          'No completed UI interaction overlapped the injected two-second request latency',
+        );
+        latencyInteraction = { taps, overlap, trace };
+      } else {
+        await device.online();
+        await flow('retry-interact');
+      }
       let backoff;
       let reopened;
       let clock;
@@ -176,6 +200,7 @@ export async function runScenarioSix(context) {
           {
             status: 'PASS',
             controls,
+            latencyInteraction,
             requirements: ['M1', 'M2', 'M3', 'M5'],
             tests: ['TEST-04'],
             before,

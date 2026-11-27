@@ -79,8 +79,9 @@ const output = path.resolve(process.env.E2E_OUTPUT ?? 'e2e-results/bootstrap');
 const apk = path.resolve(
   process.env.E2E_APK ?? 'e2e-results/temporada-e2e.apk',
 );
+await mkdir(path.dirname(output), { recursive: true });
+await mkdir(output);
 const dataDirectory = await mkdtemp(path.join(tmpdir(), 'temporada-e2e-mock-'));
-await mkdir(output, { recursive: true });
 const result = {
   status: 'FAIL',
   steps: [],
@@ -171,7 +172,7 @@ async function command(executable, argumentsList) {
         timeout: 180_000,
         signal: isCleaningUp ? undefined : cancellation.signal,
         maxBuffer: 4 * 1024 * 1024,
-        env: { ...process.env, MAESTRO_CLI_NO_ANALYTICS: '1' },
+        env: { ...process.env, TZ: 'UTC', MAESTRO_CLI_NO_ANALYTICS: '1' },
       })
     ).stdout.trim();
   } catch (error) {
@@ -211,7 +212,7 @@ const flow = async (name, parameters = {}) => {
   const invocation = (flowCounts.get(name) ?? 0) + 1;
   flowCounts.set(name, invocation);
   const artifactName = `${name}-${invocation}`;
-  return command(process.env.MAESTRO_BINARY ?? 'maestro', [
+  const stdout = await command(process.env.MAESTRO_BINARY ?? 'maestro', [
     '--device',
     serial,
     'test',
@@ -227,6 +228,7 @@ const flow = async (name, parameters = {}) => {
     ]),
     `.maestro/${name}.yaml`,
   ]);
+  return { stdout, artifactDirectory: path.join(output, artifactName) };
 };
 
 async function step(name, operation) {
@@ -405,6 +407,10 @@ try {
     await adb('shell', 'svc', 'wifi', 'enable');
     return { port: 3101, temporaryData: true };
   });
+  if (briefScenario === '1')
+    await step('Spanish-default-before-authentication', () =>
+      flow('auth-default-spanish'),
+    );
   await step('authenticate-and-cache-home', () =>
     flow(briefScenario === '7' ? 'shared-sign-in' : 'bootstrap-sign-in'),
   );
@@ -475,6 +481,18 @@ try {
         output,
         temporaryDirectory: dataDirectory,
         language: scenario === 'media-en' ? 'en' : 'es',
+        beforeCapture:
+          process.env.E2E_LAYOUT_VARIANT === '1'
+            ? ({ translations }) =>
+                flow('layout-screens', {
+                  GREETING_LABEL: translations.ui.greeting.replace(
+                    '{{name}}',
+                    'Ana López',
+                  ),
+                  TERMS_TITLE: translations.reference.beforeBegin,
+                  DOCUMENTS_TITLE: translations.documents.title,
+                })
+            : undefined,
         afterSave:
           scenario === 'device'
             ? (before) => verifyDeviceDurability({ adb, flow, output, before })

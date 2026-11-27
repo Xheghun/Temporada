@@ -30,6 +30,7 @@ export default function CaptureInspection() {
         testID="capture-inspect"
         label={translate('capture.inspect')}
         onPress={() => {
+          setReport(null);
           void inspect().then(
             (text) => setReport({ workerId, generation, text }),
             () =>

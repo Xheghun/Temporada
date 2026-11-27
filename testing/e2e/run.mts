@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { coverageFor } from './coverage.mts';
 import { selectScenarios } from './selection.mts';
 
 import { executeSuite } from './execute-suite.mts';
@@ -83,7 +84,14 @@ if (report.status !== 'PASS') process.exitCode = 1;
 await writeFile(
   path.join(output, 'suite.json'),
   JSON.stringify(
-    { ...report, sourceSha: process.env.GITHUB_SHA ?? 'local' },
+    {
+      ...report,
+      sourceSha: process.env.GITHUB_SHA ?? 'local',
+      outcomes: report.outcomes.map((outcome) => ({
+        ...outcome,
+        coverage: coverageFor(outcome.scenario),
+      })),
+    },
     null,
     2,
   ),

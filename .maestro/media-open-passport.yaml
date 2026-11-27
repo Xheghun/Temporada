@@ -6,7 +6,7 @@ name: Open passport capture from the backend catalog
 - scrollUntilVisible:
     element:
       id: document-passport
-    direction: DOWN
+    direction: UP
 - tapOn:
     id: document-passport
 - scrollUntilVisible:

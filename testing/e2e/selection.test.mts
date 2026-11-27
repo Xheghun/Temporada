@@ -62,3 +62,37 @@ test('a later pass never erases the first failure and changed fixtures fail', as
   assert.equal(changed.status, 'FAIL');
   assert.match(changed.outcomes[1]?.error ?? '', /different fixtures/);
 });
+
+test('acceptance mapping includes all mandatory sync tests without counting probes as brief journeys', async () => {
+  const { coverageFor } = await import('./coverage.mts');
+  const cases = [
+    ...selectScenarios(['--suite', 'full']).scenarios,
+    ...selectScenarios(['--suite', 'regressions']).scenarios,
+  ];
+  const requirements = new Set(
+    cases.flatMap((scenario) => [...coverageFor(scenario).requirements]),
+  );
+  const tests = new Set(
+    cases.flatMap((scenario) => [...coverageFor(scenario).tests]),
+  );
+  for (let number = 1; number <= 10; number++)
+    assert(requirements.has(`M${number}`));
+  for (const id of [
+    'TEST-01',
+    'TEST-02',
+    'TEST-03',
+    'TEST-03R',
+    'TEST-04',
+    'TEST-05',
+    'TEST-06',
+  ])
+    assert(tests.has(id));
+  for (const probe of [
+    'bootstrap',
+    'media-es',
+    'media-en',
+    'device',
+    'measurements',
+  ])
+    assert.equal(coverageFor(probe).briefScenario, null);
+});

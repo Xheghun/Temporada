@@ -24,6 +24,7 @@ export async function runMediaJourney({
   );
   const labels = {
     CAMERA_LABEL: translations.capture.camera,
+    DOCUMENTS_TITLE: translations.documents.title,
     GALLERY_LABEL: translations.capture.gallery,
     PREVIEW_LABEL: translations.capture.preview,
     SAVE_LABEL: translations.capture.save,
@@ -67,7 +68,7 @@ export async function runMediaJourney({
     if (language === 'en') await flow('media-english');
     await flow('probe-airplane');
     await adb('shell', 'svc', 'wifi', 'disable');
-    if (beforeCapture) await beforeCapture();
+    if (beforeCapture) await beforeCapture({ translations, labels });
     if (primarySource === 'camera') {
       assert.equal(primaryDocument, 'passport');
       await flow('media-open-passport', labels);

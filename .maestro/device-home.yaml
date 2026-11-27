@@ -4,6 +4,11 @@ name: Open cached worker Home
 - openLink: temporada-e2e://home
 - extendedWaitUntil:
     visible:
-      id: home-assignment
+      id: nav-home
     timeout: 20000
+- scrollUntilVisible:
+    element: ${WORKER_NAME}
+    direction: UP
+- assertVisible:
+    id: home-assignment
 - assertVisible: ${WORKER_NAME}

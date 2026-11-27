@@ -3,7 +3,11 @@ name: Explain the permanent document rejection
 ---
 - openLink: temporada-e2e://documents
 - scrollUntilVisible:
-    element: ${ERROR_LABEL}
+    element:
+      id: documents-refresh
     direction: DOWN
+- scrollUntilVisible:
+    element: ${ERROR_LABEL}
+    direction: UP
 - assertVisible: ${ERROR_LABEL}
 - takeScreenshot: permanent-upload-rejection

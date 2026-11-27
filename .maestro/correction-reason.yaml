@@ -3,7 +3,11 @@ name: Read the verbatim staff correction
 ---
 - openLink: temporada-e2e://documents
 - scrollUntilVisible:
-    element: ${REASON_LABEL}
+    element:
+      id: documents-refresh
     direction: DOWN
+- scrollUntilVisible:
+    element: ${REASON_LABEL}
+    direction: UP
 - assertVisible: ${REASON_LABEL}
 - takeScreenshot: staff-correction

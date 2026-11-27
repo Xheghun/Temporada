@@ -105,7 +105,13 @@ export async function runScenarioFive(context) {
       assert(fresh, 'Explicit retake did not create a new action');
       assert.equal(fresh.status, 'queued');
       assert.notEqual(fresh.submissionId, original.submissionId);
-      assert.equal(fresh.replacesSubmissionId, original.submissionId);
+      assert.equal(fresh.replacesSubmissionId, original.replacesSubmissionId);
+      assert.equal(
+        replacement.actions.find(
+          (action) => action.clientActionId === original.clientActionId,
+        )?.status,
+        'superseded',
+      );
       assert.equal(fresh.exists, true);
       assert.equal(fresh.ownsPrivateFile, true);
       assert.equal(fresh.digestMatches, true);

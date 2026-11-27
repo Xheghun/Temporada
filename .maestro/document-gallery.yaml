@@ -3,6 +3,9 @@ name: Capture a selected catalog document from the gallery
 ---
 - openLink: temporada-e2e://documents
 - scrollUntilVisible:
+    element: ${DOCUMENTS_TITLE}
+    direction: UP
+- scrollUntilVisible:
     element:
       id: document-${DOCUMENT_TYPE}
     direction: DOWN

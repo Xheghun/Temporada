@@ -17,7 +17,8 @@ import { promisify } from 'node:util';
 assert.equal(process.platform, 'darwin');
 const execute = promisify(execFile);
 const output = path.resolve(process.env.E2E_OUTPUT ?? 'e2e-results/ios-smoke');
-await mkdir(output, { recursive: true });
+await mkdir(path.dirname(output), { recursive: true });
+await mkdir(output);
 const temporary = await mkdtemp(path.join(tmpdir(), 'temporada-ios-smoke-'));
 const archive = path.resolve(
   process.env.E2E_IOS_ARCHIVE ?? 'e2e-results/temporada-e2e-ios.tar.gz',
