@@ -83,6 +83,7 @@ export default function Verify() {
           name="otp"
           render={({ field: { value, onChange, onBlur } }) => (
             <Field
+              testID="auth-otp"
               label={translate('otp')}
               value={value}
               onChangeText={onChange}
@@ -99,6 +100,7 @@ export default function Verify() {
         />
         <ErrorNotice code={state.error} />
         <Action
+          testID="auth-verify"
           label={translate('verify')}
           busy={state.busy}
           onPress={() => {

@@ -4,10 +4,10 @@ import {
   workerRepository,
 } from '../core/database/expo-database';
 import { nativeCaptureStorage } from '../core/files/native-capture-storage';
+import { isNativeInspectionAllowed } from '../core/config/native-runtime-policy';
 /** Read-only assessment probe: IDs/counts/integrity only; never tokens, image bytes or private URIs. */
 export async function inspectNativeCapture(workerId: string): Promise<string> {
-  if (!__DEV__ || process.env.EXPO_PUBLIC_ASSESSMENT_MODE !== '1')
-    throw new Error('development_only');
+  if (!isNativeInspectionAllowed()) throw new Error('development_only');
   const database = await openWorkerDatabase();
   try {
     const actions = await workerRepository(database, workerId).listActions();

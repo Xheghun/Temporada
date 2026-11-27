@@ -1,0 +1,22 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Bundled E2E sign-in and cached Home
+---
+- launchApp
+- tapOn:
+    id: auth-phone
+- inputText: '+525510000001'
+- hideKeyboard
+- tapOn:
+    id: auth-request-code
+- tapOn:
+    id: auth-otp
+- inputText: '123456'
+- hideKeyboard
+- tapOn:
+    id: auth-verify
+- extendedWaitUntil:
+    visible:
+      id: home-assignment
+    timeout: 30000
+- assertVisible: '.*Ana López.*'
+- takeScreenshot: cached-home-online

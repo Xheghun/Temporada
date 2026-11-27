@@ -170,7 +170,10 @@ export function HomeContent({
       <ErrorNotice code={state.error} />
       {assignment ? (
         <>
-          <View style={[styles.featured, { marginTop: 20 }]}>
+          <View
+            testID="home-assignment"
+            style={[styles.featured, { marginTop: 20 }]}
+          >
             <Text style={styles.taskEyebrow}>
               {translate('reference.upNext')}
             </Text>

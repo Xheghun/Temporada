@@ -1,0 +1,11 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Bundled offline cold start without Metro
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: home-assignment
+    timeout: 15000
+- assertVisible: '.*Ana López.*'
+- assertVisible: 'Sin conexión.*'
+- takeScreenshot: cached-home-offline

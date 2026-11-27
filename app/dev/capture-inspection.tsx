@@ -9,6 +9,7 @@ import {
   Body,
 } from '@/design-system/components/auth-controls';
 import { inspectNativeCapture } from '@/testing/native-capture-inspection';
+import { isNativeInspectionAllowed } from '@/core/config/native-runtime-policy';
 export default function CaptureInspection() {
   const identity = useAuthSnapshot();
   const { t: translate } = useTranslation();
@@ -17,11 +18,7 @@ export default function CaptureInspection() {
     generation: number;
     text: string;
   } | null>(null);
-  if (
-    !__DEV__ ||
-    process.env.EXPO_PUBLIC_ASSESSMENT_MODE !== '1' ||
-    !identity.selectedWorker
-  )
+  if (!isNativeInspectionAllowed() || !identity.selectedWorker)
     return <Body>{translate('unavailable')}</Body>;
   const workerId = identity.selectedWorker.workerId,
     generation = identity.generation;
