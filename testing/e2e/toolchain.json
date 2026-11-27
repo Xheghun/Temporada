@@ -9,8 +9,18 @@
     "emulatorBuild": "16428233",
     "ramMiB": 2048,
     "images": {
-      "28": { "target": "google_apis", "abi": "x86_64", "revision": 11 },
-      "34": { "target": "google_apis", "abi": "x86_64", "revision": 14 }
+      "28": {
+        "target": "google_apis",
+        "abi": "x86_64",
+        "revision": 11,
+        "emulatorVersion": "35.6.11",
+        "emulatorBuild": "13610412"
+      },
+      "34": {
+        "target": "google_apis",
+        "abi": "x86_64",
+        "revision": 14
+      }
     }
   }
 }

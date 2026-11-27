@@ -130,8 +130,8 @@ jobs:
           target: google_apis
           ram-size: 2048M
           avd-name: temporada-bootstrap-${{ matrix.api }}
-          emulator-build: '16428233'
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 2048 -lowram -camera-back imagefile:${{ github.workspace }}/e2e-results/camera-feed.png -camera-front none
+          emulator-build: ${{ matrix.api == 28 && '13610412' || '16428233' }}
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 2048 ${{ matrix.api == 34 && '-lowram' || '' }} -camera-back ${{ matrix.api == 28 && 'emulated' || format('imagefile:{0}/e2e-results/camera-feed.png', github.workspace) }} -camera-front none
           pre-emulator-launch-script: node testing/e2e/prepare-emulator.mjs
           script: |
             adb install e2e-results/isolation-fixture.apk

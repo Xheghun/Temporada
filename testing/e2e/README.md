@@ -14,7 +14,9 @@ ANDROID_SERIAL=emulator-5554 PROBE_API=28 \
 
 Use `PROBE_API=34` for the other target. Set `MAESTRO_BINARY` if Maestro is outside `PATH`. `toolchain.json` defines the exact versions; this initial probe targets x86_64 CI rather than the ARM64 desktop emulator. Results default to the ignored `e2e-results/probe` directory. The eight acceptance journeys are implemented but await native acceptance verification.
 
-The emulator uses `-memory 2048 -lowram` to prevent its API 34 minimum-memory adjustment from silently allocating 2.5 GB. The probe checks guest memory as well as the AVD file. The `-lowram` option removes the emulator's memory floor; it does not change the app's behavior.
+API 28 uses emulator 35.6.11 (build 13610412); API 34 uses 37.2.12 (build 16428233). The newer emulator crashes in camera YUV conversion on the API 28 image. Both versions are checked from SDK metadata. The new API 28 pin awaits a compatibility rerun.
+
+API 34 uses `-memory 2048 -lowram` to prevent its minimum-memory adjustment from silently allocating 2.5 GB. The probe checks guest memory as well as the AVD file. The `-lowram` option removes the emulator's memory floor; it does not change the app's behavior.
 
 [Compatibility run 45887783598](https://github.com/Xheghun/Temporada/actions/runs/45887783598) passed all probe steps on both targets with Maestro 2.12.1 and emulator 37.2.12. API 28 reported 2,046,996 KiB of guest memory; API 34 reported 2,021,528 KiB. The configured allocation was 2,048 MiB in each case. This proves driver compatibility, not worker acceptance or application performance.
 
@@ -49,7 +51,7 @@ Set `E2E_OUTPUT` to choose a fresh report directory. Existing run directories ar
 
 [Runner isolation run 45980872233](https://github.com/Xheghun/Temporada/actions/runs/45980872233) passed two independent bootstrap repetitions on each API. Initial backend fixture hashes matched, and both the unrelated mock-data digest and normal-namespace private-file digest remained unchanged through every repetition.
 
-The media probe uses `-camera-back imagefile:/absolute/path/to/camera-feed.png -camera-front none`. `prepare-emulator.mjs` creates the synthetic feed and the isolation fixture before CI boots the emulator. It generates a reproducible 1920 × 2560 PNG containing only colored noise (14,752,728 bytes), then uses the native camera, retake, preview and gallery paths. Assertions inspect the saved private uploads and confirm that the gallery original remains intact. Generated images stay outside Git and are removed after the journey. API-specific native picker failures remain failed runs with screenshots; task 2.2 stays pending until both platforms and languages pass.
+API 34 uses `-camera-back imagefile:/absolute/path/to/camera-feed.png -camera-front none`; API 28 uses its legacy emulated camera. `prepare-emulator.mjs` creates the synthetic feed and the isolation fixture before CI boots the emulator. It generates a reproducible 1920 × 2560 PNG containing only colored noise (14,752,728 bytes), then uses the native camera, retake, preview and gallery paths. Assertions inspect the saved private uploads and confirm that the gallery original remains intact. Generated images stay outside Git and are removed after the journey. API-specific native picker failures remain failed runs with screenshots; task 2.2 stays pending until both platforms and languages pass.
 
 ## Inspection and fixture controls
 
@@ -81,7 +83,7 @@ node testing/e2e/install-maestro.mjs
 MAESTRO_BINARY=/path/printed/by/installer node testing/e2e/ios-smoke.mjs
 ```
 
-CI selects Xcode 26.3 for Swift 6.2. The builder generates an isolated Release simulator app with bundled JavaScript and no signing credentials. The runner creates and deletes its own simulator and temporary mock data. Its exact subset is Ana sign-in, Spanish default, English navigation, locale persistence after termination, shared-phone selection and switching. It records Xcode, runtime, device type, architecture, archive digest and source/build identity. Android airplane-mode, upload/failure journeys and spoken VoiceOver listening are outside the iOS pass count.
+CI selects Xcode 26.6 on macOS 26, matching the successful local build. The builder generates an isolated Release simulator app with bundled JavaScript and no signing credentials. The runner creates and deletes its own simulator and temporary mock data. Its exact subset is Ana sign-in, Spanish default, English navigation, locale persistence after termination, shared-phone selection and switching. It records Xcode, runtime, device type, architecture, archive digest and source/build identity. Android airplane-mode, upload/failure journeys and spoken VoiceOver listening are outside the iOS pass count.
 
 The workflow runs on main/manual dispatch and PR changes to its own smoke/build definitions. The local simulator build succeeded with Xcode 26.6; local smoke did not run because the pinned driver download timed out. CI smoke remains pending.
 

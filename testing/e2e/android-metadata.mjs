@@ -35,7 +35,9 @@ export async function readAndroidMetadata({ adb, command, sdk }) {
     'utf8',
   );
   assert(
-    emulator.includes(`Pkg.Revision=${toolchain.android.emulatorVersion}`),
+    emulator.includes(
+      `Pkg.Revision=${image.emulatorVersion ?? toolchain.android.emulatorVersion}`,
+    ),
   );
   const systemImage = await readFile(
     path.join(
