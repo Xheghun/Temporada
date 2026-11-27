@@ -9,3 +9,8 @@ name: Bundled offline cold start without Metro
 - assertVisible: '.*Ana López.*'
 - assertVisible: 'Sin conexión.*'
 - takeScreenshot: cached-home-offline
+- openLink: temporada-e2e://dev/capture-inspection
+- tapOn:
+    id: capture-inspect
+- assertVisible: '(?s).*"workerId": "ana".*'
+- takeScreenshot: offline-native-inspection

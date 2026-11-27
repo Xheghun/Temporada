@@ -118,6 +118,10 @@ try {
       badging.includes(`package: name='${applicationId}'`),
       'Wrong native APK identity',
     );
+    assert(
+      !badging.includes('application-debuggable'),
+      'E2E proof requires bundled release mode',
+    );
     const entries = await command('unzip', ['-Z1', apk]);
     assert(
       entries.split('\n').includes('assets/index.android.bundle'),

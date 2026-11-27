@@ -2,16 +2,28 @@ appId: com.cremedigital.seasonalworker.e2e
 name: Bundled E2E sign-in and cached Home
 ---
 - launchApp
+- scrollUntilVisible:
+    element:
+      id: auth-phone
+    direction: DOWN
 - tapOn:
     id: auth-phone
 - inputText: '+525510000001'
 - hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: auth-request-code
+    direction: DOWN
 - tapOn:
     id: auth-request-code
 - tapOn:
     id: auth-otp
 - inputText: '123456'
 - hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: auth-verify
+    direction: DOWN
 - tapOn:
     id: auth-verify
 - extendedWaitUntil:

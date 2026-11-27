@@ -136,6 +136,8 @@ try {
         variant: 'release-e2e',
         abi,
         metroRequired: false,
+        debuggable: false,
+        inspectionEnabled: true,
         sha256: createHash('sha256').update(bytes).digest('hex'),
       },
       null,

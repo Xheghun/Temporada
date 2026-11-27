@@ -26,6 +26,7 @@ export default function CaptureInspection() {
     <AuthPage>
       <Stack.Screen options={{ title: translate('capture.inspectionTitle') }} />
       <Action
+        testID="capture-inspect"
         label={translate('capture.inspect')}
         onPress={() => {
           void inspectNativeCapture(workerId).then(
@@ -40,7 +41,9 @@ export default function CaptureInspection() {
         }}
       />
       {report?.workerId === workerId && report.generation === generation ? (
-        <Text selectable>{report.text}</Text>
+        <Text testID="capture-inspection-report" selectable>
+          {report.text}
+        </Text>
       ) : null}
     </AuthPage>
   );
