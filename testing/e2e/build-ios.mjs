@@ -90,7 +90,13 @@ try {
   const scheme = projects[0].replace(/\.xcworkspace$/, '');
   // Simulator Keychain still requires application identity entitlements.
   // Ad-hoc signing uses no developer certificate or provisioning profile.
-  const entitlementsPath = path.join(workspace, 'simulator.entitlements');
+  const entitlementsPath = path.join(
+    workspace,
+    'ios',
+    scheme,
+    `${scheme}.entitlements`,
+  );
+  await readFile(entitlementsPath);
   await writeFile(
     entitlementsPath,
     `<?xml version="1.0" encoding="UTF-8"?>
@@ -117,7 +123,6 @@ try {
     'CODE_SIGN_IDENTITY=-',
     'CODE_SIGNING_REQUIRED=NO',
     'CODE_SIGN_STYLE=Manual',
-    `CODE_SIGN_ENTITLEMENTS=${entitlementsPath}`,
     'build',
   ]);
   const products = path.join(
