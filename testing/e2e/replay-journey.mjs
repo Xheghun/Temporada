@@ -23,7 +23,7 @@ export async function runReplayJourney(context, status) {
       const control = {
         workerId: 'ana',
         clientActionId: original.clientActionId,
-        timeoutMs: 12000,
+        timeoutMs: 120000,
       };
       await fixtureRequest('/__dev/failures', { dropNextResponse: true });
       await fixtureRequest('/__dev/replays', { ...control, mode: 'hold' });
@@ -90,6 +90,18 @@ export async function runReplayJourney(context, status) {
       assert.notEqual(refreshed.actions[0].status, 'delivered');
       assert.equal(refreshed.actions[0].exists, true);
       assert.equal(refreshed.actions[0].digest, original.digest);
+      // Native inspection can outlast a normal transport timeout. Keep retrying
+      // the same held receipt, then release a live response after the snapshot.
+      const releaseReady = await waitForObservation(
+        'live replay after the newer review snapshot',
+        () => fixtureRequest('/__dev/replays'),
+        (state) =>
+          state.rules.some(
+            (rule) =>
+              rule.clientActionId === original.clientActionId &&
+              rule.pending > 0,
+          ),
+      );
       const released = await fixtureRequest('/__dev/replays', {
         ...control,
         mode: 'release',
@@ -157,6 +169,7 @@ export async function runReplayJourney(context, status) {
             disconnected,
             nextHeld,
             refreshed,
+            releaseReady,
             released,
             delivered,
             reopened,

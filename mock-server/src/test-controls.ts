@@ -120,7 +120,7 @@ export class TestControls {
       !['hold', 'release', 'disconnect'].includes(mode) ||
       !Number.isSafeInteger(timeoutMs) ||
       timeoutMs < 10 ||
-      timeoutMs > 12000
+      timeoutMs > 120000
     )
       throw new ApiError(422, 'invalid_replay_control');
     const key = `${workerId}:${clientActionId}`;

@@ -597,10 +597,22 @@ test('replay barrier holds only the original receipt and supports controlled dis
       await testContext.upload(clientActionId)
     ).json()) as Result;
     assert(original.submissionId);
+    assert.equal(
+      (
+        await testContext.post('/__dev/replays', {
+          workerId: 'ana',
+          clientActionId,
+          mode: 'hold',
+          timeoutMs: 120001,
+        })
+      ).status,
+      422,
+    );
     await testContext.post('/__dev/replays', {
       workerId: 'ana',
       clientActionId,
       mode: 'hold',
+      timeoutMs: 120000,
     });
     const disconnected = testContext.upload(clientActionId).then(
       (response) => ({ response }),

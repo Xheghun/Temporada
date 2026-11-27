@@ -28,7 +28,7 @@ export async function runScenarioThree(context) {
           workerId: 'ana',
           clientActionId: original.clientActionId,
           mode: 'hold',
-          timeoutMs: 12000,
+          timeoutMs: 120000,
         });
       await device.online();
       const committed = await waitForObservation(

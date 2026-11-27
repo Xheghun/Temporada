@@ -523,6 +523,26 @@ try {
   result.error = String(error);
   process.exitCode = 1;
   console.error(error);
+  if (backend && backend.exitCode === null && backend.signalCode === null) {
+    for (const control of ['state', 'trace', 'replays']) {
+      try {
+        const response = await fetch(`http://127.0.0.1:3101/__dev/${control}`, {
+          signal: AbortSignal.timeout(1000),
+        });
+        assert.equal(response.status, 200);
+        await writeFile(
+          path.join(output, `failure-${control}.json`),
+          JSON.stringify(await response.json(), null, 2),
+        );
+      } catch (diagnosticError) {
+        result.steps.push({
+          name: `collect-failure-${control}`,
+          status: 'FAIL',
+          error: String(diagnosticError),
+        });
+      }
+    }
+  }
 } finally {
   isCleaningUp = true;
   for (const [name, cleanup] of [
