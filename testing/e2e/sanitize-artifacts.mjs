@@ -13,11 +13,13 @@ async function visit(directory) {
   for (const entry of entries) {
     const filename = path.join(directory, entry.name);
     if (entry.isDirectory()) await visit(filename);
-    else if (entry.name === 'device-logcat.txt') {
+    else if (
+      ['device-logcat.txt', 'device-simulator.log'].includes(entry.name)
+    ) {
       const lines = (await readFile(filename, 'utf8')).split('\n');
       const filtered = lines
         .filter((line) =>
-          /AndroidRuntime|FATAL EXCEPTION|ANR in com\.cremedigital\.seasonalworker\.e2e/.test(
+          /AndroidRuntime|FATAL EXCEPTION|ANR in com\.cremedigital\.seasonalworker\.e2e|TemporadaE2E|com\.cremedigital\.seasonalworker\.e2e|securityd.*(?:34018|entitlements)/.test(
             line,
           ),
         )
@@ -28,7 +30,7 @@ async function visit(directory) {
           .join('\n')
           .replace(/Bearer\s+\S+/gi, 'Bearer [redacted]')
           .replace(
-            /(?:file:\/\/|\/data\/user\/|\/data\/data\/)\S+/g,
+            /(?:file:\/\/|\/data\/user\/|\/data\/data\/|\/Users\/[^\s]+\/CoreSimulator\/Devices\/)\S+/g,
             '[private path]',
           ),
       );

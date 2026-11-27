@@ -9,7 +9,11 @@ name: Bundled E2E sign-in and cached Home
 - tapOn:
     id: auth-phone
 - inputText: '+525510000001'
-- hideKeyboard
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
 - scrollUntilVisible:
     element:
       id: auth-request-code
@@ -19,7 +23,11 @@ name: Bundled E2E sign-in and cached Home
 - tapOn:
     id: auth-otp
 - inputText: '123456'
-- hideKeyboard
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
 - scrollUntilVisible:
     element:
       id: auth-verify

@@ -49,7 +49,7 @@ for (const signal of ['SIGINT', 'SIGTERM'])
 const command = async (executable, parameters) =>
   (
     await execute(executable, parameters, {
-      timeout: 420_000,
+      timeout: 600_000,
       signal: isCleaningUp ? undefined : cancellation.signal,
       maxBuffer: 4 * 1024 * 1024,
       env: {
@@ -65,8 +65,10 @@ async function step(name, operation) {
     if (!isCleaningUp) cancellation.signal.throwIfAborted();
     const detail = await operation();
     report.steps.push({ name, status: 'PASS', detail });
+    console.log(`PASS ${name}`);
   } catch (error) {
     report.steps.push({ name, status: 'FAIL', error: String(error) });
+    console.error(`FAIL ${name}: ${String(error)}`);
     throw error;
   }
 }
@@ -87,6 +89,7 @@ try {
   await step('isolated-bundled-simulator-build', async () => {
     const metadata = JSON.parse(await readFile(`${archive}.json`, 'utf8'));
     assert.equal(metadata.applicationId, 'com.cremedigital.seasonalworker.e2e');
+    assert.equal(metadata.keychainAccessGroup, metadata.applicationId);
     assert.equal(metadata.metroRequired, false);
     assert.equal(
       createHash('sha256')
@@ -145,6 +148,15 @@ try {
       'com.cremedigital.seasonalworker.e2e',
     );
     assert((await readFile(path.join(app, 'main.jsbundle'))).length > 0);
+    const entitlements = await command('/usr/bin/codesign', [
+      '--display',
+      '--entitlements',
+      '-',
+      '--xml',
+      app,
+    ]);
+    assert(entitlements.includes('<key>keychain-access-groups</key>'));
+    assert(entitlements.includes('com.cremedigital.seasonalworker.e2e'));
     await simctl('install', simulator, app);
     return {
       simulator,

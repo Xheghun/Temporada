@@ -83,7 +83,7 @@ node testing/e2e/install-maestro.mjs
 MAESTRO_BINARY=/path/printed/by/installer node testing/e2e/ios-smoke.mjs
 ```
 
-CI selects Xcode 26.6 on macOS 26, matching the successful local build. The builder generates an isolated Release simulator app with bundled JavaScript and no signing credentials. The runner creates and deletes its own simulator and temporary mock data. Its exact subset is Ana sign-in, Spanish default, English navigation, locale persistence after termination, shared-phone selection and switching. It records Xcode, runtime, device type, architecture, archive digest and source/build identity. Android airplane-mode, upload/failure journeys and spoken VoiceOver listening are outside the iOS pass count.
+CI selects Xcode 26.6 on macOS 26, matching the successful local build. The builder generates an isolated Release simulator app with bundled JavaScript. A simulator-only ad-hoc signature supplies the application and Keychain access-group entitlements required by SecureStore, without developer certificates or provisioning profiles. The runner creates and deletes its own simulator and temporary mock data. Its exact subset is Ana sign-in, Spanish default, English navigation, locale persistence after termination, shared-phone selection and switching. It records Xcode, runtime, device type, architecture, archive digest and source/build identity. Android airplane-mode, upload/failure journeys and spoken VoiceOver listening are outside the iOS pass count.
 
 The workflow runs on main/manual dispatch and PR changes to its own smoke/build definitions. The local simulator build succeeded with Xcode 26.6; local smoke did not run because the pinned driver download timed out. CI smoke remains pending.
 

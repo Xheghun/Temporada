@@ -11,6 +11,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: ios-e2e-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
 jobs:
   smoke:
     runs-on: macos-26
@@ -39,6 +42,11 @@ jobs:
         env:
           E2E_OUTPUT: e2e-results/ios-smoke
         run: node testing/e2e/ios-smoke.mjs
+      - name: Filter simulator diagnostic logs
+        if: always()
+        env:
+          E2E_OUTPUT: e2e-results/ios-smoke
+        run: node testing/e2e/sanitize-artifacts.mjs
       - name: Upload iOS smoke evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -47,5 +55,6 @@ jobs:
           path: |
             e2e-results/ios-smoke/
             e2e-results/temporada-e2e-ios.tar.gz.json
+            e2e-results/temporada-e2e-ios.tar.gz
           retention-days: 14
           if-no-files-found: warn

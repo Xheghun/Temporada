@@ -9,7 +9,11 @@ name: Sign in to the shared fictional phone
 - tapOn:
     id: auth-phone
 - inputText: '+525510000002'
-- hideKeyboard
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
 - scrollUntilVisible:
     element:
       id: auth-request-code
@@ -19,7 +23,11 @@ name: Sign in to the shared fictional phone
 - tapOn:
     id: auth-otp
 - inputText: '123456'
-- hideKeyboard
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
 - scrollUntilVisible:
     element:
       id: auth-verify

@@ -12,7 +12,7 @@ Scope SDD-035. Implement only `automate-brief-e2e-scenarios`. Check tasks only a
 - [x] 2.1 Add the local E2E command with suite/scenario selection, temporary mock directories, fixture seeding, package-scoped app resets and bounded readiness waits. Verify two isolated runs produce the same starting state and do not touch the normal app or mock data. Document the runnable commands beside the harness.
 - [x] 2.2 Add stable selectors to the exercised controls, fictional media fixtures and API-specific camera/gallery helpers. Verify Spanish and English selectors, native virtual-camera capture, real preview/compression, app-created original cleanup and gallery selection on API 34 and API 28. Keep failed or unavailable capture steps visible.
 - [x] 2.3 Reuse native inspection and `/__dev/state` for worker/action/submission identity, retry metadata, review state and private-file integrity. Add mock-only 422/replay timing/allowlisted attempt tracing where needed. Verify snapshot consistency, disabled non-test controls and redaction of tokens, image contents and private paths.
-- [ ] 2.4 Implement device-level offline/online, force-stop, relaunch and reboot helpers plus cleanup. Verify airplane mode also disables Wi-Fi, the app observes Offline, no sends occur offline, storage survives restart and cleanup restores settings after an intentionally failed flow.
+- [x] 2.4 Implement device-level offline/online, force-stop, relaunch and reboot helpers plus cleanup. Verify airplane mode also disables Wi-Fi, the app observes Offline, no sends occur offline, storage survives restart and cleanup restores settings after an intentionally failed flow.
 
 ## 3. Initial device journeys
 

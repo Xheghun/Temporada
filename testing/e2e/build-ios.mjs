@@ -125,6 +125,38 @@ try {
     (await readFile(path.join(app, 'main.jsbundle'))).length > 0,
     'Simulator app must bundle JavaScript',
   );
+  // Simulator Keychain still requires application identity entitlements.
+  // Ad-hoc signing uses no developer certificate or provisioning profile.
+  const entitlementsPath = path.join(workspace, 'simulator.entitlements');
+  await writeFile(
+    entitlementsPath,
+    `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>application-identifier</key><string>${identifier}</string>
+<key>keychain-access-groups</key><array><string>${identifier}</string></array>
+</dict></plist>`,
+  );
+  await run('/usr/bin/codesign', [
+    '--force',
+    '--sign',
+    '-',
+    '--entitlements',
+    entitlementsPath,
+    app,
+  ]);
+  const signedEntitlements = (
+    await execute('/usr/bin/codesign', [
+      '--display',
+      '--entitlements',
+      '-',
+      '--xml',
+      app,
+    ])
+  ).stdout;
+  assert(signedEntitlements.includes('<key>application-identifier</key>'));
+  assert(signedEntitlements.includes('<key>keychain-access-groups</key>'));
+  assert(signedEntitlements.includes(identifier));
   await mkdir(path.dirname(output), { recursive: true });
   await run('tar', ['-czf', output, '-C', products, applications[0]]);
   await writeFile(
@@ -137,7 +169,8 @@ try {
         hostArchitecture: process.arch,
         metroRequired: false,
         inspectionEnabled: true,
-        signing: 'disabled for simulator',
+        signing: 'ad-hoc simulator signature; no developer credentials',
+        keychainAccessGroup: identifier,
         sha256: createHash('sha256')
           .update(await readFile(output))
           .digest('hex'),
