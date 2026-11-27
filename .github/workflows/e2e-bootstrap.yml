@@ -23,7 +23,15 @@ on:
       suite:
         type: choice
         options:
-          [smoke, full, foundation, acceptance, scenario, intentional-failure]
+          [
+            smoke,
+            full,
+            foundation,
+            acceptance,
+            layouts,
+            scenario,
+            intentional-failure,
+          ]
         default: smoke
       scenario:
         description: 'Individual scenario or regression ID'
@@ -140,7 +148,7 @@ jobs:
           ram-size: 2048M
           avd-name: temporada-bootstrap-${{ matrix.api }}
           emulator-build: ${{ matrix.api == 28 && '13610412' || '16428233' }}
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 2048 ${{ matrix.api == 34 && '-lowram' || '' }} -camera-back ${{ matrix.api == 28 && 'emulated' || format('imagefile:{0}/e2e-results/camera-feed.png', github.workspace) }} -camera-front none
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 2048 ${{ matrix.api == 34 && '-lowram' || '' }} ${{ (matrix.acceptanceGroup == 'layouts' || inputs.suite == 'layouts') && '-skin 360x720' || '' }} -camera-back ${{ matrix.api == 28 && 'emulated' || format('imagefile:{0}/e2e-results/camera-feed.png', github.workspace) }} -camera-front none
           pre-emulator-launch-script: node testing/e2e/prepare-emulator.mjs
           script: |
             adb install e2e-results/isolation-fixture.apk

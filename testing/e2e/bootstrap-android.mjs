@@ -30,6 +30,7 @@ import { runScenarioTwo } from './scenario-two.mjs';
 import { androidDevice } from './android-device.mjs';
 import { verifyDeviceDurability } from './device-journey.mjs';
 import { runMediaJourney } from './media-journey.mjs';
+import { require360DpDisplay } from './display-geometry.mts';
 
 const executeFile = promisify(execFile);
 const scenario = process.env.E2E_SCENARIO ?? 'bootstrap';
@@ -315,12 +316,19 @@ try {
     originalDisplay = await adb('shell', 'wm', 'size');
     originalDensity = await adb('shell', 'wm', 'density');
     await step('layout-360dp-130-percent', async () => {
-      await adb('shell', 'wm', 'size', '1080x2160');
-      await adb('shell', 'wm', 'density', '480');
+      const widthDp = require360DpDisplay(originalDisplay, originalDensity);
       await adb('shell', 'settings', 'put', 'system', 'font_scale', '1.3');
+      const fontScale = await adb(
+        'shell',
+        'settings',
+        'get',
+        'system',
+        'font_scale',
+      );
+      assert.equal(Number(fontScale), 1.3);
       return {
-        widthDp: 360,
-        fontScale: 1.3,
+        widthDp,
+        fontScale: Number(fontScale),
         display: await adb('shell', 'wm', 'size'),
         density: await adb('shell', 'wm', 'density'),
       };

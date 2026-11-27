@@ -20,6 +20,10 @@ name: Sign in to the shared fictional phone
     direction: DOWN
 - tapOn:
     id: auth-request-code
+- scrollUntilVisible:
+    element:
+      id: auth-otp
+    direction: DOWN
 - tapOn:
     id: auth-otp
 - inputText: '123456'

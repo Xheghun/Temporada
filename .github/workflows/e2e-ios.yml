@@ -1,18 +1,12 @@
 name: iOS smoke
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/e2e-ios.yml'
-      - 'testing/e2e/build-ios.mjs'
-      - 'testing/e2e/ios-smoke.mjs'
-      - '.maestro/ios-*.yaml'
   push:
     branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: ios-e2e-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  group: ios-e2e-${{ github.event_name == 'push' && github.ref || github.run_id }}
   cancel-in-progress: true
 jobs:
   smoke:

@@ -31,7 +31,7 @@ Scope SDD-035. Implement only `automate-brief-e2e-scenarios`. Check tasks only a
 
 ## 5. CI and device evidence
 
-- [ ] 5.1 Add Android PR smoke and main/nightly full workflows with manual dispatch, pinned tools, isolated local backend and bundled test APK. Upload JUnit, per-scenario results and sanitized failure artifacts even on failure. Verify a passing run and an intentionally failing assertion produce the expected CI status, cleanup and downloadable artifacts. Keep existing validation required.
+- [x] 5.1 Add Android PR smoke and main/nightly full workflows with manual dispatch, pinned tools, isolated local backend and bundled test APK. Upload JUnit, per-scenario results and sanitized failure artifacts even on failure. Verify a passing run and an intentionally failing assertion produce the expected CI status, cleanup and downloadable artifacts. Keep existing validation required.
 - [ ] 5.2 Add the API 28 / 2,048 MiB weekly/manual lane. Verify OS/RAM and build identity, run all eight scenarios, collect five process-cold launches and sampled PSS through capture/restart, and publish raw values plus summary. Fail wrong-target or missing-data runs. Record build overhead and avoid an invented performance threshold.
 - [ ] 5.3 Add iOS smoke on main/manual dispatch for sign-in, locale persistence, shared-phone selection and navigation. Verify its simulator/build metadata and publish its exact subset. Keep unsupported airplane-mode checks outside its pass count and describe the remaining iOS journeys.
 

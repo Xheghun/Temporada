@@ -63,7 +63,7 @@ The device probe compares real actions and file integrity through force-stop and
 
 ## CI suites
 
-PRs run Android API 34 smoke (brief 1 and 2). Main and nightly runs select all eight plus regressions; the weekly lane uses API 28 with 2,048 MiB RAM. Manual inputs select the API and suite: `smoke`, `full`, `foundation`, `acceptance`, `scenario` or `intentional-failure`. `acceptance` shares one fresh APK across independent emulator jobs: individual journeys in reverse order, two full suites in brief order, supplemental cases, layouts and API 28 measurements. This keeps the same coverage while avoiding a single long serial job. `foundation` exercises media, repeated bootstrap, reboot and expected-failure cleanup. These workflow changes await executed CI verification.
+PRs run Android API 34 smoke (brief 1 and 2). Main and nightly runs select all eight plus regressions; the weekly lane uses API 28 with 2,048 MiB RAM. Manual inputs select the API and suite: `smoke`, `full`, `foundation`, `acceptance`, `layouts`, `scenario` or `intentional-failure`. `acceptance` shares one fresh APK across independent emulator jobs: individual journeys in reverse order, two full suites in brief order, supplemental cases, layouts and API 28 measurements. This keeps the same coverage while avoiding a single long serial job. `foundation` exercises media, repeated bootstrap, reboot and expected-failure cleanup. These workflow changes await executed CI verification.
 
 `npm run e2e:android -- --suite regressions` selects `2-reboot`, `3-restart`, `5-422`, `6-latency`, `8-logout`, `replay-approved` and `replay-correction`. Each also accepts `--scenario <id>`. Backend restart retains the same owned data directory; replay barriers preserve the original receipt. The backoff journey records its seed, failure controls, actual deadlines and an ADB clock-correlation interval. The latency case uses a separate 2,000 ms setting.
 
@@ -73,7 +73,7 @@ Every native journey validates API, image, ABI, configured/guest RAM and pinned 
 
 `npm run e2e:android -- --scenario measurements` requires API 28 with the pinned image and 2,048 MiB allocation. It samples `dumpsys meminfo` once per second after each completed sample during idle, native capture/compression, five process-cold launches and reconnect. Raw timestamps/PSS values and every `am start -W` result are retained. Home readiness includes Maestro startup and polling overhead; sampled maximum PSS is a baseline, not a profiler peak or SLA. Missing samples, wrong targets, app crashes/ANRs or lost actions fail the run. Measurement execution remains pending.
 
-The full API 28 lane includes measurements. Acceptance also runs both media languages at 360dp width and font scale 1.3, preserving screenshots and restoring prior display settings afterward.
+The full API 28 lane includes measurements. Acceptance and the separate `layouts` dispatch run both media languages at 360dp width and font scale 1.3. The emulator boots with `-skin 360x720` at 160dpi; the harness verifies the observed geometry before starting and restores font settings afterward. Resizing a running API 28 emulator can clamp the requested resolution and must not be counted as 360dp evidence.
 
 ## iOS smoke
 
@@ -85,7 +85,7 @@ MAESTRO_BINARY=/path/printed/by/installer node testing/e2e/ios-smoke.mjs
 
 CI selects Xcode 26.6 on macOS 26, matching the successful local build. The builder generates an isolated Release simulator app with bundled JavaScript. A simulator-only ad-hoc signature supplies the application and Keychain access-group entitlements required by SecureStore, without developer certificates or provisioning profiles. The runner creates and deletes its own simulator and temporary mock data. Its exact subset is Ana sign-in, Spanish default, English navigation, locale persistence after termination, shared-phone selection and switching. It records Xcode, runtime, device type, architecture, archive digest and source/build identity. Android airplane-mode, upload/failure journeys and spoken VoiceOver listening are outside the iOS pass count.
 
-The workflow runs on main/manual dispatch and PR changes to its own smoke/build definitions. The local simulator build succeeded with Xcode 26.6; local smoke did not run because the pinned driver download timed out. CI smoke remains pending.
+The workflow runs on main and manual dispatch. The local simulator build succeeded with Xcode 26.6; local smoke did not run because the pinned driver download timed out. CI smoke remains pending.
 
 Suite JSON and Markdown reports map passing and failing journeys to their brief numbers, M1–M10 and TEST-01–06/03R. Probe results have no brief scenario number. Independent fixture hashes are compared across groups, and existing output directories are rejected to preserve earlier evidence. The latency regression correlates actual driver tap timestamps with the injected request window.
 

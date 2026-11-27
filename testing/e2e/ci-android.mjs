@@ -31,6 +31,7 @@ assert(
     'smoke',
     'full',
     'acceptance',
+    'layouts',
     'scenario',
     'intentional-failure',
   ].includes(mode),
@@ -83,6 +84,10 @@ try {
       assert.equal(process.env.E2E_API, '28');
       await suite('measurements', ['--scenario', 'measurements']);
     }
+  } else if (mode === 'layouts') {
+    await suite('layout-media', ['--suite', 'media'], {
+      E2E_LAYOUT_VARIANT: '1',
+    });
   } else if (mode === 'foundation') {
     await suite('media', ['--suite', 'media']);
     await suite('bootstrap', ['--suite', 'bootstrap', '--repeat', '2']);
