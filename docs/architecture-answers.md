@@ -18,9 +18,11 @@ Send minimal opaque identifiers, not passport details or correction text on lock
 
 My main risks are camera/photo permissions and privacy disclosures for store review, plus memory pressure during image decoding and compression on low-end Android. The local mock also needs a production backend before release.
 
-I completed manual end-to-end UI checks on iOS and Android, including a lower-end Android emulator and TalkBack. The saved results omit the low-end emulator’s Android version, RAM setting, startup timing and peak memory, so the specific Android 9 / 2 GB result is still missing.
+I completed manual end-to-end UI checks on iOS and Android, including a lower-end Android emulator and TalkBack. The automated [Android 9 measurement run](https://github.com/Xheghun/Temporada/actions/runs/46013210373/job/140560650798) now records API 28, 2,048 MiB configured RAM and 2,046,996 KiB guest memory.
 
-For release validation, I would record those details on an Android 9/API 28 device or emulator with 2 GB RAM, then check large-image capture, low storage, process restart, poor connectivity and queued-file retention. The dependency’s API 24 minimum addresses installation compatibility. Measured behaviour on the target configuration is the performance evidence.
+Five process-cold activity starts took 244, 359, 208, 294 and 248 ms. Home was observed after 9.0–9.4 seconds, including driver startup and polling. Maximum sampled app PSS was 143,270 KiB (139.9 MiB) through capture/compression, restart and reconnect; the measurement journey recorded no app crash or ANR and retained the original pending actions/files. Samples were collected one second after each completed `dumpsys`, so this is a sampled baseline, not a profiler peak or production-build SLA.
+
+These results use the bundled E2E release on a Linux-hosted emulator with inspection enabled. The repeated acceptance matrix still has driver/camera failures; its status remains explicit in the [automation checklist](../openspec/changes/automate-brief-e2e-scenarios/tasks.md). Signed production-build profiling and real-device release validation remain separate work. The dependency’s API 24 minimum addresses installation compatibility; measured behaviour on the target configuration supplies the performance evidence.
 
 ## 4. Device binding and device loss
 
