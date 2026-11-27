@@ -69,6 +69,12 @@ try {
     ]);
     if (mode !== 'smoke')
       await suite('regressions', ['--suite', 'regressions']);
+    if (mode !== 'smoke' && process.env.E2E_API === '28')
+      await suite('measurements', ['--scenario', 'measurements']);
+    if (mode === 'acceptance')
+      await suite('layout-media', ['--suite', 'media'], {
+        E2E_LAYOUT_VARIANT: '1',
+      });
   }
 } finally {
   const status =

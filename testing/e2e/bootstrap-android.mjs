@@ -15,6 +15,8 @@ import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { readHealthBaseline, verifyNativeHealth } from './native-health.mjs';
+import { runMeasurements } from './measurements.mjs';
 import { readAndroidMetadata } from './android-metadata.mjs';
 import { runReplayJourney } from './replay-journey.mjs';
 import { runScenarioOne } from './scenario-one.mjs';
@@ -37,6 +39,7 @@ assert(
     'media-es',
     'media-en',
     'device',
+    'measurements',
     '1',
     '2',
     '3',
@@ -89,6 +92,9 @@ let originalWifi;
 let hasReverse = false;
 let protectedBefore;
 let originalFontScale;
+let originalDisplay;
+let originalDensity;
+let healthBaseline;
 let isCleaningUp = false;
 const cancellation = new AbortController();
 for (const signal of ['SIGINT', 'SIGTERM'])
@@ -303,9 +309,25 @@ try {
     'system',
     'font_scale',
   );
+  if (process.env.E2E_LAYOUT_VARIANT === '1') {
+    originalDisplay = await adb('shell', 'wm', 'size');
+    originalDensity = await adb('shell', 'wm', 'density');
+    await step('layout-360dp-130-percent', async () => {
+      await adb('shell', 'wm', 'size', '1080x2160');
+      await adb('shell', 'wm', 'density', '480');
+      await adb('shell', 'settings', 'put', 'system', 'font_scale', '1.3');
+      return {
+        widthDp: 360,
+        fontScale: 1.3,
+        display: await adb('shell', 'wm', 'size'),
+        density: await adb('shell', 'wm', 'density'),
+      };
+    });
+  }
   await step('device-and-toolchain-identity', () =>
     readAndroidMetadata({ adb, command, sdk }),
   );
+  healthBaseline = await readHealthBaseline(adb);
   await step('protected-normal-data-baseline', async () => {
     protectedBefore = await protectedDataSnapshot();
     return {
@@ -386,7 +408,11 @@ try {
   await step('authenticate-and-cache-home', () =>
     flow(briefScenario === '7' ? 'shared-sign-in' : 'bootstrap-sign-in'),
   );
-  if (scenario.startsWith('replay-')) {
+  if (scenario === 'measurements') {
+    await step('Android-9-cold-launch-and-PSS-measurements', () =>
+      runMeasurements({ adb, flow, output, temporaryDirectory: dataDirectory }),
+    );
+  } else if (scenario.startsWith('replay-')) {
     await step('TEST-03R-newer-review-before-old-receipt', () =>
       runReplayJourney(
         { adb, flow, output, temporaryDirectory: dataDirectory },
@@ -471,6 +497,9 @@ try {
       );
       return flow('bootstrap-offline');
     });
+  await step('no-unexpected-application-crash-or-ANR', () =>
+    verifyNativeHealth(adb, healthBaseline),
+  );
   result.status = 'PASS';
 } catch (error) {
   result.error = String(error);
@@ -480,6 +509,30 @@ try {
   isCleaningUp = true;
   for (const [name, cleanup] of [
     ['stop-owned-backend', stopBackend],
+    [
+      'restore-display-size',
+      async () => {
+        if (originalDisplay !== undefined)
+          await adb(
+            'shell',
+            'wm',
+            'size',
+            /Override size: (\d+x\d+)/.exec(originalDisplay)?.[1] ?? 'reset',
+          );
+      },
+    ],
+    [
+      'restore-display-density',
+      async () => {
+        if (originalDensity !== undefined)
+          await adb(
+            'shell',
+            'wm',
+            'density',
+            /Override density: (\d+)/.exec(originalDensity)?.[1] ?? 'reset',
+          );
+      },
+    ],
     [
       'restore-device-settings',
       async () => {

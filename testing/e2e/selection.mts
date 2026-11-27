@@ -22,7 +22,7 @@ export function selectScenarios(argumentsList: string[]): Selection {
       suite = value as Suite;
     else if (
       flag === '--scenario' &&
-      /^(bootstrap|media-es|media-en|device|[1-8]|2-reboot|3-restart|5-422|6-latency|8-logout|replay-approved|replay-correction)$/.test(
+      /^(bootstrap|media-es|media-en|device|measurements|[1-8]|2-reboot|3-restart|5-422|6-latency|8-logout|replay-approved|replay-correction)$/.test(
         value,
       )
     )

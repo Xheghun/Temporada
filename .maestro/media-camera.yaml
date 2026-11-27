@@ -9,7 +9,7 @@ name: Capture through the native virtual camera
     id: capture-camera
 - extendedWaitUntil:
     visible:
-      id: 'com.android.packageinstaller:id/permission_allow_button|com.android.camera2:id/shutter_button'
+      id: 'com.android.packageinstaller:id/permission_allow_button|com.android.camera2:id/shutter_button|com.android.camera2:id/check_box'
     timeout: 20000
 - runFlow:
     when:
@@ -17,6 +17,15 @@ name: Capture through the native virtual camera
     commands:
       - tapOn:
           id: 'com.android.packageinstaller:id/permission_deny_button'
+- runFlow:
+    when:
+      visible:
+        id: 'com.android.camera2:id/check_box'
+    commands:
+      - tapOn:
+          id: 'com.android.camera2:id/check_box'
+      - tapOn:
+          id: 'com.android.camera2:id/confirm_button'
 - extendedWaitUntil:
     visible:
       id: 'com.android.camera2:id/shutter_button'

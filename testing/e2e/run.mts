@@ -19,6 +19,7 @@ const implementedScenarios = new Map([
   ['media-es', 'testing/e2e/bootstrap-android.mjs'],
   ['media-en', 'testing/e2e/bootstrap-android.mjs'],
   ['device', 'testing/e2e/bootstrap-android.mjs'],
+  ['measurements', 'testing/e2e/bootstrap-android.mjs'],
   ['1', 'testing/e2e/bootstrap-android.mjs'],
   ['2', 'testing/e2e/bootstrap-android.mjs'],
   ['3', 'testing/e2e/bootstrap-android.mjs'],
@@ -102,3 +103,20 @@ await writeFile(
   ].join('\n'),
 );
 console.log(`E2E ${report.status}: ${path.join(output, 'suite.json')}`);
+
+const xmlEscape = (value: string) =>
+  value.replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&apos;',
+      })[character] ?? character,
+  );
+await writeFile(
+  path.join(output, 'suite.xml'),
+  `<testsuite name="brief-native-journeys" tests="${report.outcomes.length}" failures="${report.outcomes.filter((outcome) => outcome.status === 'FAIL').length}" skipped="${report.outcomes.filter((outcome) => outcome.status === 'NOT RUN').length}">${report.outcomes.map((outcome) => `<testcase name="${xmlEscape(outcome.scenario)} repetition ${outcome.repetition}">${outcome.status === 'PASS' ? '' : outcome.status === 'NOT RUN' ? '<skipped/>' : `<failure message="${xmlEscape(outcome.error ?? 'Native journey failed')}"/>`}</testcase>`).join('')}</testsuite>`,
+);

@@ -88,19 +88,7 @@ jobs:
           name: e2e-apk
           path: e2e-results/
       - name: Install pinned Maestro
-        run: |
-          node --input-type=module <<'JS'
-          import { readFileSync, writeFileSync } from 'node:fs';
-          import { createHash } from 'node:crypto';
-          const { maestro } = JSON.parse(readFileSync('testing/e2e/toolchain.json', 'utf8'));
-          const response = await fetch(maestro.url);
-          if (!response.ok) throw new Error(`Download failed: ${response.status}`);
-          const archive = Buffer.from(await response.arrayBuffer());
-          if (createHash('sha256').update(archive).digest('hex') !== maestro.sha256) throw new Error('Maestro checksum mismatch');
-          writeFileSync(`${process.env.RUNNER_TEMP}/maestro.zip`, archive);
-          JS
-          unzip -q "$RUNNER_TEMP/maestro.zip" -d "$RUNNER_TEMP/maestro-cli"
-          echo "$RUNNER_TEMP/maestro-cli/maestro/bin" >> "$GITHUB_PATH"
+        run: node testing/e2e/install-maestro.mjs
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules

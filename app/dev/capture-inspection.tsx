@@ -42,7 +42,12 @@ export default function CaptureInspection() {
         }}
       />
       {report?.workerId === workerId && report.generation === generation ? (
-        <Text testID="capture-inspection-report" selectable>
+        <Text
+          testID="capture-inspection-report"
+          accessible
+          accessibilityLabel={report.text}
+          selectable
+        >
           {report.text}
         </Text>
       ) : null}

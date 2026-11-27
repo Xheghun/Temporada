@@ -66,3 +66,21 @@ PRs run Android API 34 smoke (brief 1 and 2). Main and nightly runs select all e
 `npm run e2e:android -- --suite regressions` selects `2-reboot`, `3-restart`, `5-422`, `6-latency`, `8-logout`, `replay-approved` and `replay-correction`. Each also accepts `--scenario <id>`. Backend restart retains the same owned data directory; replay barriers preserve the original receipt. The backoff journey records its seed, failure controls, actual deadlines and an ADB clock-correlation interval. The latency case uses a separate 2,000 ms setting.
 
 Every native journey validates API, image, ABI, configured/guest RAM and pinned tools, then records the installed APK hash and source/build identity. Reports retain the first failure, JUnit files and screenshots. Uploaded logcat is filtered to fatal/ANR diagnostics and redacts private paths and bearer values. `intentional-failure` deliberately returns a failing workflow status; its artifacts must remain available. Native acceptance, low-end measurements and iOS smoke remain incomplete until their required runs pass.
+
+## Low-end measurements and layouts
+
+`npm run e2e:android -- --scenario measurements` requires API 28 with the pinned image and 2,048 MiB allocation. It samples `dumpsys meminfo` once per second after each completed sample during idle, native capture/compression, five process-cold launches and reconnect. Raw timestamps/PSS values and every `am start -W` result are retained. Home readiness includes Maestro startup and polling overhead; sampled maximum PSS is a baseline, not a profiler peak or SLA. Missing samples, wrong targets, app crashes/ANRs or lost actions fail the run. Measurement execution remains pending.
+
+The full API 28 lane includes measurements. Acceptance also runs both media languages at 360dp width and font scale 1.3, preserving screenshots and restoring prior display settings afterward.
+
+## iOS smoke
+
+```sh
+node testing/e2e/build-ios.mjs
+node testing/e2e/install-maestro.mjs
+MAESTRO_BINARY=/path/printed/by/installer node testing/e2e/ios-smoke.mjs
+```
+
+The builder generates an isolated Release simulator app with bundled JavaScript and no signing credentials. The runner creates and deletes its own simulator and temporary mock data. Its exact subset is Ana sign-in, Spanish default, English navigation, locale persistence after termination, shared-phone selection and switching. It records Xcode, runtime, device type, architecture, archive digest and source/build identity. Android airplane-mode, upload/failure journeys and spoken VoiceOver listening are outside the iOS pass count.
+
+The workflow runs on main/manual dispatch and PR changes to its own smoke/build definitions. The local simulator build succeeded with Xcode 26.6; local smoke did not run because the pinned driver download timed out. CI smoke remains pending.

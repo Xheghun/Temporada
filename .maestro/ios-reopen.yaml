@@ -1,0 +1,11 @@
+appId: com.cremedigital.seasonalworker.e2e
+name: Restore English after iOS process termination
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: home-assignment
+    timeout: 20000
+- assertVisible: 'Hello, Ana López'
+- assertVisible: 'Change language'
+- takeScreenshot: ios-restored-english
