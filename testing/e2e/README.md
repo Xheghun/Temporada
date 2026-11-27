@@ -51,7 +51,7 @@ Set `E2E_OUTPUT` to choose a fresh report directory. Existing run directories ar
 
 [Runner isolation run 45980872233](https://github.com/Xheghun/Temporada/actions/runs/45980872233) passed two independent bootstrap repetitions on each API. Initial backend fixture hashes matched, and both the unrelated mock-data digest and normal-namespace private-file digest remained unchanged through every repetition.
 
-API 34 uses `-camera-back imagefile:/absolute/path/to/camera-feed.png -camera-front none`; API 28 uses its legacy emulated camera. `prepare-emulator.mjs` creates the synthetic feed and the isolation fixture before CI boots the emulator. It generates a reproducible 1920 × 2560 PNG containing only colored noise (14,752,728 bytes), then uses the native camera, retake, preview and gallery paths. Assertions inspect the saved private uploads and confirm that the gallery original remains intact. Generated images stay outside Git and are removed after the journey. API-specific native picker failures remain failed runs with screenshots; task 2.2 stays pending until both platforms and languages pass.
+API 34 uses `-camera-back imagefile:/absolute/path/to/camera-feed.png -camera-front none`; API 28 uses the legacy virtual-scene camera. `prepare-emulator.mjs` creates the synthetic feed and the isolation fixture before CI boots the emulator. It generates a reproducible 1920 × 2560 PNG containing only colored noise (14,752,728 bytes), then uses the native camera, retake, preview and gallery paths. Assertions inspect the saved private uploads and confirm that the gallery original remains intact. Generated images stay outside Git and are removed after the journey. API-specific native picker failures remain failed runs with screenshots; task 2.2 stays pending until both platforms and languages pass.
 
 ## Inspection and fixture controls
 
@@ -91,4 +91,4 @@ Suite JSON and Markdown reports map passing and failing journeys to their brief 
 
 For isolated driver debugging, manual `scenario` or `foundation` dispatch can reuse an existing E2E APK via `apk_run_id`. Reports retain the original APK build identity and mark the reused run. Smoke/full acceptance requires a fresh build; APK reuse cannot satisfy the final acceptance run.
 
-Manual compatibility checks can select `camera_backend` to compare synthetic image-file and legacy emulated feeds. Reports record the selected backend. `build_diagnostics` enables Gradle dependency-resolution logs for failed builds.
+Manual compatibility checks can select `camera_backend` to compare synthetic image-file, virtual-scene and legacy emulated feeds. Reports record the selected backend. `build_diagnostics` enables Gradle dependency-resolution logs for failed builds.
