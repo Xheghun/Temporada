@@ -13,6 +13,7 @@ import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { readSimulatorEntitlements } from './ios-entitlements.mjs';
 
 assert.equal(process.platform, 'darwin');
 const execute = promisify(execFile);
@@ -148,13 +149,7 @@ try {
       'com.cremedigital.seasonalworker.e2e',
     );
     assert((await readFile(path.join(app, 'main.jsbundle'))).length > 0);
-    const entitlements = await command('/usr/bin/codesign', [
-      '--display',
-      '--entitlements',
-      '-',
-      '--xml',
-      app,
-    ]);
+    const entitlements = await readSimulatorEntitlements(app);
     assert(entitlements.includes('<key>keychain-access-groups</key>'));
     assert(entitlements.includes('com.cremedigital.seasonalworker.e2e'));
     await simctl('install', simulator, app);

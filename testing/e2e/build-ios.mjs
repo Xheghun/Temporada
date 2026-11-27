@@ -15,6 +15,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
+import { readSimulatorEntitlements } from './ios-entitlements.mjs';
 
 assert.equal(process.platform, 'darwin', 'iOS simulator builds require macOS');
 const execute = promisify(execFile);
@@ -113,6 +114,9 @@ try {
     scheme,
     '-configuration',
     'Release',
+    '-arch',
+    process.arch === 'arm64' ? 'arm64' : 'x86_64',
+    'ONLY_ACTIVE_ARCH=YES',
     '-sdk',
     'iphonesimulator',
     '-destination',
@@ -146,15 +150,7 @@ try {
     (await readFile(path.join(app, 'main.jsbundle'))).length > 0,
     'Simulator app must bundle JavaScript',
   );
-  const signedEntitlements = (
-    await execute('/usr/bin/codesign', [
-      '--display',
-      '--entitlements',
-      '-',
-      '--xml',
-      app,
-    ])
-  ).stdout;
+  const signedEntitlements = await readSimulatorEntitlements(app);
   assert(signedEntitlements.includes('<key>application-identifier</key>'));
   assert(signedEntitlements.includes('<key>keychain-access-groups</key>'));
   assert(signedEntitlements.includes(identifier));
